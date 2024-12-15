@@ -1,0 +1,56 @@
+This tool extracts the city and country from a user's message. The message either contains a well-known city or it doesn't.
+If it does, the tool extracts the city and country (ISO 3166-1 alpha-3). If it doesn't, the tool returns an error message.
+
+The following are complete examples of the input and output:
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "I am in New York"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "city": "New York",
+        "country": "USA"
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "I am in the city"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "error": "No city found in the message"
+    }
+    ```
+</Example>
+
+<Input>
+```json
+{
+    "message": "I live in Brussels"
+}
+```
+</Input>
+
+<Output>
+```json
+{
+    "city": "Brussels",
+    "country": "BE"
+}
+```
+</Output>
