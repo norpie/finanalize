@@ -7,7 +7,7 @@
 ├── example.prompt.json
 ├── example.prompt.out
 ├── example.prompt.struct
-├── example.prompt.templ
+├── example.prompt.hbs
 └── README.md
 ```
 
@@ -19,7 +19,7 @@
 
 ## Files
 
-### example.prompt.templ
+### example.prompt.hbs
 
 The process starts with a template file. This file contains the text that will be used to generate the prompt. The template file is a regular text file with placeholders that will be replaced with some input when rendered.
 
@@ -47,6 +47,6 @@ This is the resulting file after the LLM has been prompted with `example.prompt`
 
 Not all of these files are written by a dev. The only files that need to be written are:
 
-- `example.prompt.templ`
+- `example.prompt.hbs`
 - `example.prompt.json` (this is only an example which the dev can use to write the rust struct)
 - `example.prompt.struct`
