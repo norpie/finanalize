@@ -5,6 +5,7 @@ mod search;
 mod db;
 mod prelude;
 mod api;
+mod models;
 
 #[tokio::main]
 async fn main() -> Result<()> {
