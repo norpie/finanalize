@@ -26,5 +26,7 @@ pub enum FinanalizeError {
 pub enum AuthError {
     InvalidToken,
     ExpiredToken,
+    MissingCredentials,
     InvalidCredentials,
+    EmailAlreadyExists,
 }

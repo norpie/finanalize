@@ -5,8 +5,9 @@ use surrealdb::{
 };
 
 use crate::prelude::*;
+pub type SurrealDb = Surreal<Client>;
 
-pub async fn connect() -> Result<Surreal<Client>> {
+pub async fn connect() -> Result<SurrealDb> {
     let db = Surreal::new::<Ws>("localhost:8000").await?;
 
     // Signin as a namespace, database, or root user
