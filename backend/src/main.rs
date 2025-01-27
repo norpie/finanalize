@@ -8,7 +8,7 @@ mod api;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    db::connect().await?;
+    let db = db::connect().await?;
     let mut app = tide::new();
     app.at("/api/v1/auth/login").post(login);
     app.at("/api/v1/auth/register").post(register);
