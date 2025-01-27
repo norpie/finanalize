@@ -4,6 +4,10 @@
     import { Input } from "$lib/components/ui/input/index.js";
     import { Label } from "$lib/components/ui/label/index.js";
     import { toast } from "svelte-sonner";
+    
+    function register() {
+        toast("Hello world!");
+    }
 </script>
 
 <div class="flex h-screen w-full items-center justify-center px-4">
@@ -31,12 +35,12 @@
                 <Label for="password2">Confirm Password</Label>
                 <Input id="password2" type="password" required />
             </div>
-            <!-- <Button class="w-full" onclick={register}>Register</Button> -->
+            <Button class="w-full" onclick={register}>Register</Button>
             <!-- <Button variant="outline" class="w-full">Login with Google</Button> -->
         </div>
         <div class="mt-4 text-center text-sm">
             Already have an account?
-            <a href="##" class="underline" onclick={() => (current = "login")}>
+            <a href="/login" class="underline">
                 Sign in
             </a>
         </div>
