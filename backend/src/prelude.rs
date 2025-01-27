@@ -1,14 +1,14 @@
 use derive_more::derive::Display;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use tide::{Response};
+use tide::Response;
 
 pub type Result<T> = std::result::Result<T, FinanalizeError>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum ApiResult<T> {
     Ok(T),
-    Err(UserError)
+    Err(UserError),
 }
 
 static DEFAULT_ERROR: &str = "{ \"error\": \"Internal server error\" }";
@@ -63,7 +63,9 @@ impl From<FinanalizeError> for UserError {
         match e {
             FinanalizeError::Unauthorized(AuthError::InvalidToken) => UserError::InvalidToken,
             FinanalizeError::Unauthorized(AuthError::ExpiredToken) => UserError::ExpiredToken,
-            FinanalizeError::Unauthorized(AuthError::InvalidCredentials) => UserError::InvalidCredentials,
+            FinanalizeError::Unauthorized(AuthError::InvalidCredentials) => {
+                UserError::InvalidCredentials
+            }
             _ => UserError::InternalServerError,
         }
     }
