@@ -1,4 +1,8 @@
-use surrealdb::{engine::remote::ws::{Client, Ws}, opt::auth::Root, Surreal};
+use surrealdb::{
+    engine::remote::ws::{Client, Ws},
+    opt::auth::Root,
+    Surreal,
+};
 
 use crate::prelude::*;
 
@@ -9,10 +13,11 @@ pub async fn connect() -> Result<Surreal<Client>> {
     db.signin(Root {
         username: "root",
         password: "root",
-    }).await?;
+    })
+    .await?;
 
     // Select a specific namespace / database
-    db.use_ns("namespace").use_db("database").await?;
+    db.use_ns("finanalize").use_db("db").await?;
 
     Ok(db)
 }
