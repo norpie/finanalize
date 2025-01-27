@@ -1,11 +1,12 @@
 use crate::prelude::*;
-use api::v1::auth::{login, register, refresh, logout, me};
+use api::v1::auth::{login, logout, me, refresh, register};
 
-mod search;
-mod db;
-mod prelude;
 mod api;
+mod db;
+mod jwt;
 mod models;
+mod prelude;
+mod search;
 
 #[tokio::main]
 async fn main() -> Result<()> {
