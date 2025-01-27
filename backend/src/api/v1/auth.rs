@@ -1,33 +1,65 @@
-use actix_web::{get, post, Responder};
+use crate::{api::ApiResponse, db::SurrealDb, models::SurrealDBUser, prelude::*};
 
-use crate::{api::ApiResult, FinanalizeError};
+use crate::{models::ChangesetUser, FinanalizeError};
+use actix_web::{
+    get, post,
+    web::{Data, Json},
+};
 
 #[post("/refresh")]
-pub async fn refresh() -> impl Responder {
+pub async fn refresh() -> Result<ApiResponse<()>> {
     // TODO: Implement refresh
-    ApiResult::<()>::error(FinanalizeError::NotImplemented)
+    Ok(ApiResponse::error(
+        501,
+        FinanalizeError::NotImplemented.to_string(),
+    ))
 }
 
 #[post("/login")]
-pub async fn login() -> impl Responder {
+pub async fn login() -> Result<ApiResponse<()>> {
     // TODO: Implement login
-    ApiResult::<()>::error(FinanalizeError::NotImplemented)
+    Ok(ApiResponse::error(
+        501,
+        FinanalizeError::NotImplemented.to_string(),
+    ))
 }
 
 #[post("/register")]
-pub async fn register() -> impl Responder {
-    // TODO: Implement register
-    ApiResult::<()>::error(FinanalizeError::NotImplemented)
+pub async fn register(
+    db: Data<SurrealDb>,
+    user: Json<ChangesetUser>,
+) -> Result<ApiResponse<SurrealDBUser>> {
+    if user.email.is_none() || user.password.is_none() {
+        return Err(FinanalizeError::Unauthorized(AuthError::MissingCredentials));
+    }
+    let mut response = db
+        .query("SELECT * FROM user WHERE email = $email")
+        .bind(("email", user.email.clone()))
+        .await?;
+
+    if response.take::<Option<SurrealDBUser>>(0)?.is_some() {
+        return Err(FinanalizeError::Unauthorized(AuthError::EmailAlreadyExists));
+    }
+
+    Ok(ApiResponse::new(
+        db.create("user").content(user).await?.unwrap(),
+    ))
 }
 
 #[post("/logout")]
-pub async fn logout() -> impl Responder {
+pub async fn logout() -> Result<ApiResponse<()>> {
     // TODO: Implement logout
-    ApiResult::<()>::error(FinanalizeError::NotImplemented)
+    Ok(ApiResponse::error(
+        501,
+        FinanalizeError::NotImplemented.to_string(),
+    ))
 }
 
 #[get("/me")]
-pub async fn me() -> impl Responder {
+pub async fn me() -> Result<ApiResponse<()>> {
     // TODO: Implement me
-    ApiResult::<()>::error(FinanalizeError::NotImplemented)
+    Ok(ApiResponse::error(
+        501,
+        FinanalizeError::NotImplemented.to_string(),
+    ))
 }

@@ -6,7 +6,7 @@ use actix_web::{
 };
 use api::{
     v1::auth::{login, logout, me, refresh, register},
-    ApiResult,
+    ApiResponse,
 };
 use jwt::TokenFactory;
 
@@ -50,5 +50,5 @@ async fn main() -> Result<()> {
 }
 
 async fn not_found() -> impl Responder {
-    ApiResult::<()>::error(FinanalizeError::NotFound)
+    ApiResponse::<()>::error(404, FinanalizeError::NotFound.to_string())
 }
