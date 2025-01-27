@@ -1,29 +1,33 @@
-use tide::{Request, Result};
+use actix_web::{get, post, Responder};
 
-use crate::prelude::ApiResult;
+use crate::{api::ApiResult, FinanalizeError};
 
-
-pub async fn refresh(mut req: Request<()>) -> Result {
+#[post("/refresh")]
+pub async fn refresh() -> impl Responder {
     // TODO: Implement refresh
-    ApiResult::Ok("Hello, world!".to_string()).into()
+    ApiResult::<()>::error(FinanalizeError::NotImplemented)
 }
 
-pub async fn login(mut req: Request<()>) -> Result {
+#[post("/login")]
+pub async fn login() -> impl Responder {
     // TODO: Implement login
-    ApiResult::Ok("Hello, world!".to_string()).into()
+    ApiResult::<()>::error(FinanalizeError::NotImplemented)
 }
 
-pub async fn register(mut req: Request<()>) -> Result {
+#[post("/register")]
+pub async fn register() -> impl Responder {
     // TODO: Implement register
-    ApiResult::Ok("Hello, world!".to_string()).into()
+    ApiResult::<()>::error(FinanalizeError::NotImplemented)
 }
 
-pub async fn logout(mut req: Request<()>) -> Result {
+#[post("/logout")]
+pub async fn logout() -> impl Responder {
     // TODO: Implement logout
-    ApiResult::Ok("Hello, world!".to_string()).into()
+    ApiResult::<()>::error(FinanalizeError::NotImplemented)
 }
 
-pub async fn me(mut req: Request<()>) -> Result {
+#[get("/me")]
+pub async fn me() -> impl Responder {
     // TODO: Implement me
-    ApiResult::Ok("Hello, world!".to_string()).into()
+    ApiResult::<()>::error(FinanalizeError::NotImplemented)
 }
