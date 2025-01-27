@@ -1,6 +1,7 @@
 use derive_more::derive::Display;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use tide::{Response, ResponseBuilder};
 
 pub type Result<T> = std::result::Result<T, FinanalizeError>;
 
@@ -8,6 +9,24 @@ pub type Result<T> = std::result::Result<T, FinanalizeError>;
 pub enum ApiResult<T> {
     Ok(T),
     Err(UserError)
+}
+
+static DEFAULT_ERROR: &str = "{ \"error\": \"Internal server error\" }";
+
+impl<T: Serialize> From<ApiResult<T>> for tide::Result<Response> {
+    fn from(value: ApiResult<T>) -> Self {
+        let ser_result = serde_json::to_string(&value);
+        match ser_result {
+            Ok(json) => {
+                let builder = Response::builder(200).body(json);
+                Ok(builder.build())
+            }
+            Err(_) => {
+                let builder = Response::builder(500).body(DEFAULT_ERROR);
+                Ok(builder.build())
+            }
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
