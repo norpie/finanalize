@@ -1,5 +1,7 @@
 use crate::prelude::*;
+use actix_cors::Cors;
 use actix_web::{
+    http,
     web::{self, Data},
     App, HttpServer, Responder,
 };
@@ -17,8 +19,16 @@ mod search;
 #[tokio::main]
 async fn main() -> Result<()> {
     let db = db::connect().await?;
+
     HttpServer::new(move || {
+        let cors = Cors::default()
+            .allowed_origin_fn(|_, _| true)
+            .allow_any_method()
+            .allow_any_header()
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .app_data(Data::new(db.clone()))
             .default_service(web::route().to(not_found))
             .service(
