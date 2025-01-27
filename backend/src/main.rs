@@ -1,14 +1,14 @@
+use crate::prelude::*;
+use api::v1::auth::{login, register, refresh, logout, me};
 
 mod search;
+mod db;
 mod prelude;
-
-
-use api::v1::auth::{login, register, refresh, logout, me};
 mod api;
 
-
 #[tokio::main]
-async fn main() -> tide::Result<()> {
+async fn main() -> Result<()> {
+    db::connect().await?;
     let mut app = tide::new();
     app.at("/api/v1/auth/login").post(login);
     app.at("/api/v1/auth/register").post(register);

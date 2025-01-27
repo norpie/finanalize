@@ -1,7 +1,7 @@
 use derive_more::derive::Display;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use tide::{Response, ResponseBuilder};
+use tide::{Response};
 
 pub type Result<T> = std::result::Result<T, FinanalizeError>;
 
@@ -43,6 +43,12 @@ pub enum FinanalizeError {
     NotFound,
     #[error("Authorization error: {0}")]
     Unauthorized(AuthError),
+
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("SurrealDB error: {0}")]
+    SurrealDB(#[from] surrealdb::Error),
 }
 
 #[derive(Debug, Display)]
