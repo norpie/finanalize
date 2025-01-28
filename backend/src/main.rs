@@ -11,6 +11,7 @@ use api::{
 use jwt::TokenFactory;
 
 mod api;
+mod auth_middleware;
 mod db;
 mod jwt;
 mod models;
