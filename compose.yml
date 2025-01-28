@@ -13,7 +13,7 @@ services:
     ports:
       - 8000:8000
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:4.0-management
     ports:
       - 5672:5672
       - 15672:15672
