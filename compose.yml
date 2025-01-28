@@ -12,3 +12,8 @@ services:
     image: surrealdb/surrealdb:latest
     ports:
       - 8000:8000
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
