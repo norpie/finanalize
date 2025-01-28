@@ -3749,18 +3749,21 @@ dependencies = [
 
 [[package]]
 name = "surrealize"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "984a3dfaab3dc81725589cbab6e1bdc5df32d126ffab9e7b09a59577a92d7eec"
+checksum = "c6c1f4759673174310e920392dd6399423a302bf10754e56583f1f48bdd61b8b"
 dependencies = [
+ "serde",
+ "surrealdb",
  "surrealize_derive",
+ "uuid",
 ]
 
 [[package]]
 name = "surrealize_derive"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cd059d36aa6a623d55c45ee8bdb61ff09e169a0f83b04d6b59aa2be2d1a99c0"
+checksum = "b1dfc2865a93736abc2287a34d8296d1b7222440aadd07484343e12011d49381"
 dependencies = [
  "quote",
  "syn 2.0.96",
