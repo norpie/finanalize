@@ -4,7 +4,7 @@ use chrono::{Duration, Utc};
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct TokenFactory {
     encoding: EncodingKey,
     decoding: DecodingKey,
