@@ -18,12 +18,17 @@ services:
       - 5672:5672
       - 15672:15672
   frontend:
+    depends_on:
+      - backend
     build:
       context: ./frontend
       dockerfile: Dockerfile
     ports:
       - 5173:5173
   backend:
+    depends_on:
+      - surrealdb
+      - rabbitmq
     build:
       context: ./backend
       dockerfile: Dockerfile
