@@ -541,6 +541,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "derive_more 1.0.0",
+ "futures-util",
  "jsonwebtoken",
  "serde",
  "serde_json",
