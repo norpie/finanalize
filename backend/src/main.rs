@@ -1,7 +1,6 @@
 use crate::prelude::*;
 use actix_cors::Cors;
 use actix_web::{
-    http,
     web::{self, Data},
     App, HttpServer, Responder,
 };
@@ -9,6 +8,7 @@ use api::{
     v1::auth::{login, logout, me, refresh, register},
     ApiResult,
 };
+use jwt::TokenFactory;
 
 mod api;
 mod db;
@@ -20,6 +20,7 @@ mod search;
 #[tokio::main]
 async fn main() -> Result<()> {
     let db = db::connect().await?;
+    let token_factory: TokenFactory = "secret".into();
 
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -30,6 +31,7 @@ async fn main() -> Result<()> {
 
         App::new()
             .wrap(cors)
+            .app_data(Data::new(token_factory.clone()))
             .app_data(Data::new(db.clone()))
             .default_service(web::route().to(not_found))
             .service(
