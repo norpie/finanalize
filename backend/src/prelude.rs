@@ -18,10 +18,10 @@ pub enum FinanalizeError {
     #[error("JWT error: {0}")]
     Jwt(#[from] jsonwebtoken::errors::Error),
     #[error("Argon2 error: {0}")]
-    Argon2(#[from] argon2::password_hash::Error), 
+    Argon2(#[from] argon2::password_hash::Error),
     #[error("Serde error: {0}")]
     Serde(#[from] serde_json::Error),
-    
+
     #[error("Not implemented")]
     NotImplemented,
 }
@@ -33,4 +33,5 @@ pub enum AuthError {
     MissingCredentials,
     InvalidCredentials,
     EmailAlreadyExists,
+    MissingToken,
 }
