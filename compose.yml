@@ -23,3 +23,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - 5173:5173
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
