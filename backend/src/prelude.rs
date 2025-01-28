@@ -15,6 +15,8 @@ pub enum FinanalizeError {
 
     #[error("SurrealDB error: {0}")]
     SurrealDB(#[from] surrealdb::Error),
+    #[error("JWT error: {0}")]
+    Jwt(#[from] jsonwebtoken::errors::Error),
 
     #[error("Not implemented")]
     NotImplemented,
