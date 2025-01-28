@@ -1,10 +1,13 @@
 use std::future::{ready, Ready};
 
 use actix_web::{
+    body::{BoxBody, EitherBody},
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
-    Error,
+    Error, HttpResponse,
 };
-use futures_util::future::LocalBoxFuture;
+use futures_util::{future::LocalBoxFuture, FutureExt};
+
+use crate::jwt::TokenFactory;
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -21,7 +24,7 @@ where
     S::Future: 'static,
     B: 'static,
 {
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
     type InitError = ();
     type Transform = SayHiMiddleware<S>;
@@ -42,22 +45,26 @@ where
     S::Future: 'static,
     B: 'static,
 {
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
     type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
 
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        println!("Hi from start. You requested: {}", req.path());
+        let auth_header = req.headers().get("Authorization") else {
+            let http_res = HttpResponse::Unauthorized().finish();
+            let (http_req, _) = req.into_parts();
+            let res = ServiceResponse::new(http_req, http_res);
+            return (async move { Ok(res.map_into_right_body()) }).boxed_local();
+        };
+
+        let token_factory = req.app_data::<TokenFactory>().unwrap();
 
         let fut = self.service.call(req);
-
         Box::pin(async move {
             let res = fut.await?;
-
-            println!("Hi from response");
-            Ok(res)
+            Ok(res.map_into_left_body())
         })
     }
 }
