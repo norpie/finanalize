@@ -5,6 +5,9 @@ use actix_web::{
     get, post,
     web::{Data, Json},
 };
+use argon2::password_hash::rand_core::OsRng;
+use argon2::password_hash::SaltString;
+use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
 
 #[post("/refresh")]
 pub async fn refresh() -> Result<ApiResponse<()>> {
@@ -22,6 +25,9 @@ pub async fn login() -> Result<ApiResponse<()>> {
         501,
         FinanalizeError::NotImplemented.to_string(),
     ))
+    // verify password against PHC string
+    // let parsed_hash = PasswordHash::new(&hash)?;
+    // assert!(argon2.verify_password(password.as_bytes(), &parsed_hash).is_ok());
 }
 
 #[post("/register")]
@@ -41,6 +47,11 @@ pub async fn register(
         return Err(FinanalizeError::Unauthorized(AuthError::EmailAlreadyExists));
     }
 
+    let password = user.password.clone().unwrap();
+    let salt = SaltString::generate(&mut OsRng);
+    let argon2 = Argon2::default();
+    let hash = argon2.hash_password(password.as_bytes(), &salt)?.to_string();
+    user.password = Some(hash);
     Ok(ApiResponse::new(
         db.create("user").content(user).await?.unwrap(),
     ))
