@@ -12,6 +12,7 @@ use api::{
 
 mod api;
 mod db;
+mod jwt;
 mod models;
 mod prelude;
 mod search;
