@@ -9,6 +9,10 @@ pub enum FinanalizeError {
     NotFound,
     #[error("Authorization error: {0}")]
     Unauthorized(AuthError),
+    #[error("Not implemented")]
+    NotImplemented,
+    #[error("Internal server error")]
+    InternalServerError,
 
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
@@ -22,8 +26,6 @@ pub enum FinanalizeError {
     #[error("Serde error: {0}")]
     Serde(#[from] serde_json::Error),
 
-    #[error("Not implemented")]
-    NotImplemented,
 }
 
 #[derive(Debug, Display)]
