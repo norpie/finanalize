@@ -39,13 +39,17 @@ async fn main() -> Result<()> {
             .app_data(Data::new(token_factory.clone()))
             .app_data(Data::new(db.clone()))
             .default_service(web::route().to(not_found))
-            .service(web::scope("/api/v1/auth").service(login).service(register))
+            .service(
+                web::scope("/api/v1/auth")
+                    .service(login)
+                    .service(register)
+                    .service(refresh),
+            )
             .service(
                 web::scope("/api/v1/protected")
                     .wrap(auth_middleware)
                     .service(logout)
-                    .service(me)
-                    .service(refresh),
+                    .service(me),
             )
     })
     .bind(("127.0.0.1", 8080))?
