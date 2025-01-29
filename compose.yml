@@ -9,7 +9,7 @@ services:
       - $DB_USER
       - --pass
       - $DB_PASSWORD
-    image: surrealdb/surrealdb:latest
+    image: surrealdb/surrealdb:v2.1.4
     ports:
       - 8000:8000
   rabbitmq:
