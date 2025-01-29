@@ -53,6 +53,7 @@ impl ResponseError for FinanalizeError {
             .body(json)
     }
 }
+
 /// Wrapper for every response made by the backend
 #[derive(Debug, Clone, Serialize)]
 pub struct ApiResponse<T> {
@@ -61,7 +62,9 @@ pub struct ApiResponse<T> {
     #[serde(skip_serializing_if = "Option::is_none")]
     error: Option<String>,
     #[serde(skip_serializing)]
-    status: u16,
+    status: StatusCode,
+    #[serde(skip_serializing)]
+    cookie: Option<String>,
 }
 
 impl<T: Serialize> ApiResponse<T> {
@@ -69,18 +72,25 @@ impl<T: Serialize> ApiResponse<T> {
     pub fn new(object: T) -> Self {
         ApiResponse {
             result: Some(object),
-            status: 200,
+            status: StatusCode::OK,
             error: None,
+            cookie: None,
         }
     }
 
     /// Wrap error in ApiResponse
-    pub fn error(status: u16, error: String) -> Self {
+    pub fn error(status: StatusCode, error: String) -> Self {
         ApiResponse {
             error: Some(error),
             status,
             result: None,
+            cookie: None,
         }
+    }
+
+    pub fn with_cookie(mut self, cookie: String) -> Self {
+        self.cookie = Some(cookie);
+        self
     }
 }
 
@@ -89,9 +99,14 @@ impl<T: Serialize> Responder for ApiResponse<T> {
     fn respond_to(self, _req: &actix_web::HttpRequest) -> actix_web::HttpResponse<Self::Body> {
         let result = serde_json::to_string(&self);
         match result {
-            Ok(json) => HttpResponseBuilder::new(StatusCode::from_u16(self.status).unwrap())
-                .content_type(ContentType::json())
-                .body(json),
+            Ok(json) => {
+                let mut builder = HttpResponseBuilder::new(self.status);
+                builder.content_type(ContentType::json());
+                if let Some(cookie) = &self.cookie {
+                    builder.insert_header(("Set-Cookie", cookie.as_str()));
+                }
+                builder.body(json)
+            }
             Err(_e) => HttpResponse::InternalServerError().body(""),
         }
     }
