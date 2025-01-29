@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use actix_cors::Cors;
 use actix_web::{
+    http::StatusCode,
     web::{self, Data},
     App, HttpServer, Responder,
 };
@@ -54,5 +55,5 @@ async fn main() -> Result<()> {
 }
 
 async fn not_found() -> impl Responder {
-    ApiResponse::<()>::error(404, FinanalizeError::NotFound.to_string())
+    ApiResponse::<()>::error(StatusCode::NOT_FOUND, FinanalizeError::NotFound.to_string())
 }
