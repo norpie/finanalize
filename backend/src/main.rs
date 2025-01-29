@@ -8,6 +8,7 @@ use api::{
     v1::auth::{login, logout, me, refresh, register},
     ApiResponse,
 };
+use auth_middleware::Auth;
 use jwt::TokenFactory;
 
 mod api;
@@ -30,18 +31,20 @@ async fn main() -> Result<()> {
             .allow_any_header()
             .max_age(3600);
 
+        let auth_middleware = Auth::new(token_factory.clone());
+
         App::new()
             .wrap(cors)
             .app_data(Data::new(token_factory.clone()))
             .app_data(Data::new(db.clone()))
             .default_service(web::route().to(not_found))
+            .service(web::scope("/api/v1/auth").service(login).service(register))
             .service(
-                web::scope("/api/v1/auth")
-                    .service(login)
+                web::scope("/api/v1/protected")
+                    .wrap(auth_middleware)
                     .service(logout)
                     .service(me)
-                    .service(refresh)
-                    .service(register),
+                    .service(refresh),
             )
     })
     .bind(("127.0.0.1", 8080))?
