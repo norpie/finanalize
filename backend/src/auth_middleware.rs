@@ -1,14 +1,13 @@
 use std::future::{ready, Ready};
 
 use actix_web::{
-    body::{BoxBody, EitherBody},
+    body::EitherBody,
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
     Error, HttpMessage, HttpResponse,
 };
-use futures_util::{future::LocalBoxFuture, FutureExt, TryFutureExt};
-use surrealdb::{engine::remote::ws::Client, Surreal};
+use futures_util::future::LocalBoxFuture;
 
-use crate::{jwt::TokenFactory, models::SurrealDBUser};
+use crate::jwt::TokenFactory;
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
