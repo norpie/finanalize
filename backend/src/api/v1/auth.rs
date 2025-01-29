@@ -1,3 +1,6 @@
+use std::future::Future;
+use std::pin::Pin;
+
 use crate::models::SurrealDBUser;
 use crate::{db::SurrealDb, prelude::*};
 
@@ -9,6 +12,7 @@ use actix_web::{
     web::{Data, Json},
     HttpRequest, HttpResponseBuilder, Responder,
 };
+use actix_web::{FromRequest, HttpMessage};
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
@@ -18,6 +22,32 @@ use serde::Serialize;
 struct AccessToken {
     access_token: String,
 }
+
+impl FromRequest for SurrealDBUser {
+    type Error = FinanalizeError;
+
+    type Future = Pin<Box<dyn Future<Output = Result<Self>>>>;
+
+    fn from_request(req: &HttpRequest, _payload: &mut actix_web::dev::Payload) -> Self::Future {
+        let id_opt = req.extensions().get::<String>().cloned();
+        let db_opt = req.app_data::<Data<SurrealDb>>().cloned();
+
+        Box::pin(async move {
+            let id = id_opt.ok_or(FinanalizeError::Unauthorized(AuthError::InvalidToken))?;
+            let db = db_opt.ok_or(FinanalizeError::InternalServerError)?;
+
+            let user = db
+                .query("SELECT * FROM user WHERE id = $id")
+                .bind(("id", id))
+                .await?
+                .take::<Option<SurrealDBUser>>(0)?
+                .ok_or(FinanalizeError::Unauthorized(AuthError::InvalidToken))?;
+
+            Ok(user)
+        })
+    }
+}
+
 #[post("/refresh")]
 pub async fn refresh(token_factory: Data<TokenFactory>, req: HttpRequest) -> impl Responder {
     let refresh_token = match req.cookie("refresh_token") {
