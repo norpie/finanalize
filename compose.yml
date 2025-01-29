@@ -1,5 +1,13 @@
 services:
+  init-data:
+    image: busybox
+    command: chmod -R 777 /data
+    volumes:
+      - surrealdb-data:/data
+
   surrealdb:
+    depends_on:
+      - init-data
     env_file:
       - .env
     entrypoint:
@@ -9,14 +17,19 @@ services:
       - $DB_USER
       - --pass
       - $DB_PASSWORD
+      - rocksdb:/data/finanalize.db
     image: surrealdb/surrealdb:v2.1.4
     ports:
       - 8000:8000
+    volumes:
+      - surrealdb-data:/data
+
   rabbitmq:
     image: rabbitmq:4.0-management
     ports:
       - 5672:5672
       - 15672:15672
+
   frontend:
     depends_on:
       - backend
@@ -25,6 +38,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - 5173:5173
+
   backend:
     depends_on:
       - surrealdb
@@ -34,3 +48,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8080:8080
+
+volumes:
+  surrealdb-data:
