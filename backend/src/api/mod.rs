@@ -5,33 +5,22 @@ use actix_web::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{AuthError, FinanalizeError};
+use crate::FinanalizeError;
 
 pub mod v1;
 
 static DEFAULT_ERROR: &str = "{ \"error\": \"Internal server error\" }";
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum UserError {
-    InvalidToken,
-    ExpiredToken,
-    InvalidCredentials,
-    InternalServerError,
-    NotImplemented,
-    NotFound,
-}
+pub struct UserError(String);
 
 impl From<&FinanalizeError> for UserError {
     fn from(e: &FinanalizeError) -> Self {
         match e {
-            FinanalizeError::Unauthorized(AuthError::InvalidToken) => UserError::InvalidToken,
-            FinanalizeError::Unauthorized(AuthError::ExpiredToken) => UserError::ExpiredToken,
-            FinanalizeError::Unauthorized(AuthError::InvalidCredentials) => {
-                UserError::InvalidCredentials
-            }
-            FinanalizeError::NotImplemented => UserError::NotImplemented,
-            FinanalizeError::NotFound => UserError::NotFound,
-            _ => UserError::InternalServerError,
+            FinanalizeError::Unauthorized(e) => UserError(e.to_string()),
+            FinanalizeError::NotFound => UserError("Not found".to_string()),
+            FinanalizeError::InternalServerError => UserError("Internal server error".to_string()),
+            _ => UserError("Internal server error".to_string()),
         }
     }
 }
@@ -47,7 +36,9 @@ impl ResponseError for FinanalizeError {
 
     fn error_response(&self) -> actix_web::HttpResponse<BoxBody> {
         let user_error: UserError = self.into();
-        let json = serde_json::to_string(&user_error).unwrap_or_else(|_| DEFAULT_ERROR.to_string());
+        let api_response: ApiResponse<()> = ApiResponse::error(self.status_code(), user_error.0);
+        let json =
+            serde_json::to_string(&api_response).unwrap_or_else(|_| DEFAULT_ERROR.to_string());
         HttpResponseBuilder::new(self.status_code())
             .content_type(ContentType::json())
             .body(json)
