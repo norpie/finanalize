@@ -30,6 +30,7 @@ async fn main() -> Result<()> {
             .allowed_origin_fn(|_, _| true)
             .allow_any_method()
             .allow_any_header()
+            .supports_credentials()
             .max_age(3600);
 
         let auth_middleware = Auth::new(token_factory.clone());
