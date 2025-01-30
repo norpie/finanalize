@@ -6,7 +6,11 @@
 
     import type User from '../../models/user';
 
-    let { user = $bindable(), children }: { user: User; children: any } = $props();
+    let {
+        user = $bindable(),
+        location,
+        children
+    }: { user: User; location: string; children: any } = $props();
 </script>
 
 <Sidebar.Provider>
@@ -18,12 +22,8 @@
                 <Separator orientation="vertical" class="mr-2 h-4" />
                 <Breadcrumb.Root>
                     <Breadcrumb.List>
-                        <Breadcrumb.Item class="hidden md:block">
-                            <Breadcrumb.Link href="#">Building Your Application</Breadcrumb.Link>
-                        </Breadcrumb.Item>
-                        <Breadcrumb.Separator class="hidden md:block" />
                         <Breadcrumb.Item>
-                            <Breadcrumb.Page>Data Fetching</Breadcrumb.Page>
+                            <Breadcrumb.Page>{location}</Breadcrumb.Page>
                         </Breadcrumb.Item>
                     </Breadcrumb.List>
                 </Breadcrumb.Root>
