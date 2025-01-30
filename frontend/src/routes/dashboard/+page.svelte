@@ -41,5 +41,7 @@
         </div>
     </Sidebar>
 {:else}
-    <div>Loading...</div>
+    <div class="flex h-screen w-full items-center justify-center">
+        <!-- <Spinner /> -->
+    </div>
 {/if}
