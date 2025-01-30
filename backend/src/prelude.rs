@@ -25,15 +25,20 @@ pub enum FinanalizeError {
     Argon2(#[from] argon2::password_hash::Error),
     #[error("Serde error: {0}")]
     Serde(#[from] serde_json::Error),
-
 }
 
 #[derive(Debug, Display)]
 pub enum AuthError {
+    #[display("Invalid token")]
     InvalidToken,
+    #[display("Expired token")]
     ExpiredToken,
+    #[display("Invalid refresh token")]
     MissingCredentials,
+    #[display("Invalid credentials")]
     InvalidCredentials,
+    #[display("Email already exists")]
     EmailAlreadyExists,
+    #[display("Missing token")]
     MissingToken,
 }
