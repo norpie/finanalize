@@ -11,12 +11,22 @@
     import * as Sidebar from '$lib/components/ui/sidebar/index.js';
     import { useSidebar } from '$lib/components/ui/sidebar/index.js';
     import type User from '../../models/user';
+    import { post } from '$lib/request';
+    import { toast } from 'svelte-sonner';
+    import { goto } from '$app/navigation';
 
     let {
         user
     }: {
         user: User;
     } = $props();
+
+    async function logout() {
+        await post('v1/protected/logout', {});
+        localStorage.removeItem('accessToken');
+        toast.success('Logged out');
+        goto('/login');
+    }
 
     const sidebar = useSidebar();
 </script>
@@ -36,7 +46,7 @@
                             <Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
                         </Avatar.Root>
                         <div class="grid flex-1 text-left text-sm leading-tight">
-                            <span class="truncate text-semibold">{user.email}</span>
+                            <span class="text-semibold truncate">{user.email}</span>
                         </div>
                         <ChevronsUpDown class="ml-auto size-4" />
                     </Sidebar.MenuButton>
@@ -55,19 +65,12 @@
                             <Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
                         </Avatar.Root>
                         <div class="grid flex-1 text-left text-sm leading-tight">
-                            <span class="truncate text-semibold">{user.email}</span>
+                            <span class="text-semibold truncate">{user.email}</span>
                         </div>
                     </div>
                 </DropdownMenu.Label>
                 <DropdownMenu.Separator />
-                <DropdownMenu.Group>
-                    <DropdownMenu.Item>
-                        <BadgeCheck />
-                        Account
-                    </DropdownMenu.Item>
-                </DropdownMenu.Group>
-                <DropdownMenu.Separator />
-                <DropdownMenu.Item>
+                <DropdownMenu.Item onclick={logout}>
                     <LogOut />
                     Log out
                 </DropdownMenu.Item>

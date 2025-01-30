@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { Button } from '$lib/components/ui/button/index.js';
     import * as Card from '$lib/components/ui/card/index.js';
     import { Input } from '$lib/components/ui/input/index.js';
     import { Label } from '$lib/components/ui/label/index.js';
@@ -7,25 +6,15 @@
     import Sidebar from '$lib/components/sidebar.svelte';
 
     import type User from '../../models/user';
-    import { get, post } from '$lib/request';
+    import { get } from '$lib/request';
 
     import { onMount } from 'svelte';
-    import { toast } from 'svelte-sonner';
-
-    import { goto } from '$app/navigation';
 
     let user: User | undefined = $state<User>();
 
     onMount(async () => {
         user = (await get<User>('v1/protected/me')).result;
     });
-
-    async function logout() {
-        await post('v1/protected/logout', {});
-        localStorage.removeItem('accessToken');
-        toast.success('Logged out');
-        goto('/login');
-    }
 </script>
 
 {#if user}
@@ -46,9 +35,8 @@
                             <Label for="email">Email</Label>
                             <Input id="email" type="email" bind:value={user.email} required disabled />
                         </div>
-                        <Button class="w-full" onclick={logout}>Logout</Button>
-                    </div>
-                </Card.Content>
+                    </div></Card.Content
+                >
             </Card.Root>
         </div>
     </Sidebar>
