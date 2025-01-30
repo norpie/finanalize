@@ -18,7 +18,7 @@
 </script>
 
 {#if user}
-    <Sidebar bind:user>
+    <Sidebar bind:user location="Dashboard">
         <div class="flex h-[100%] w-full items-center justify-center px-4">
             <Card.Root class="mx-auto max-w-sm">
                 <Card.Header>
