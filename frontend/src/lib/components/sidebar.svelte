@@ -10,7 +10,7 @@
 </script>
 
 <Sidebar.Provider>
-    <AppSidebar />
+    <AppSidebar bind:user />
     <Sidebar.Inset>
         <header class="flex h-16 shrink-0 items-center gap-2">
             <div class="flex items-center gap-2 px-4">
