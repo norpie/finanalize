@@ -33,7 +33,7 @@
 
         localStorage.setItem('accessToken', response.result.access_token);
         toast.success('Logged in successfully');
-        goto('/');
+        goto('/dashboard');
     }
 
     let email = $state();
