@@ -43,11 +43,21 @@ services:
     depends_on:
       - surrealdb
       - rabbitmq
+      - searxng
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
       - 8080:8080
 
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    environment:
+      - BASE_URL=http://localhost:8081/
+    ports:
+      - 8081:8080
+
 volumes:
   surrealdb-data:
+  searxng-data:
