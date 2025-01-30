@@ -1,0 +1,133 @@
+This tool generates 5-7 first-level headings for a financial analysis based on the given query. It identifies the financial instrument mentioned (e.g., stock, cryptocurrency, bond) and tailors the headings to match the context of the request. These generated headings provide a structured framework to financially analyse key aspects such as market performance, risk assessment, trends, comparisons and future outlook. Additionally, a dedicated section for data visualization ensures that insights are supported by charts, graphs, or other visual elements. The tool is designed to handle a wide range of financial queries, including general investment insights, specific stock performance analysis and broader economic assessments. The headings should dynamically adapt based on the type of financial analysis requested. The goal is to provide a clear, organized framework that helps users interpret financial data effectively. Headings should be concise and relevant, avoiding quotation marks or unnecessary special formatting.
+
+The following are complete examples of the input and output:
+
+<Example>
+    <Input>
+    ```json
+    {
+
+        "message": "Analyse Tesla stock performance"
+        "title": "Tesla stock Analysis"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "headings": [
+            "Overview of Tesla Stock",
+            "Recent Market Performance",
+            "Financial Metrics and Valuation",
+            "Risk and Volatility Analysis",
+            "Competitor Comparison",
+            "Future Outlook and Predictions",
+            "Stock Performance Visualization"]
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Tell me about bitcoin"
+        "title": "Bitcoin insights"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "headings": [
+            "Introduction to Bitcoin",
+            "Recent Price Trends",
+            "Market Adoption and Regulation",
+            "Risk Factors and Volatility",
+            "Comparison with Other Cryptocurrencies",
+            "Future Outlook and Expert Predictions",
+            "Bitcoin Price Visualization"]
+    }
+    ```
+</Example>
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Compare Apple and Microsoft stocks"
+        "title": "Apple vs Microsoft Stock Comparison"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "headings": [
+            "Introduction to Apple and Microsoft",
+            "Recent Stock Performance Comparison",
+            "Key Financial Metrics: Revenue, P/E Ratio, EPS",
+            "Risk and Volatility Analysis",
+            "Industry Trends and Market Position",
+            "Future Growth Potential",
+            "Stock Performance Comparison Charts"]
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Is it a good time to invest in gold?"
+        "title": "Gold investment strategy"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "headings": [
+            "Introduction to Gold as an Investment",
+            "Historical Performance of Gold",
+            "Market Trends and Current Price Movements",
+            "Risk Factors and Potential Returns",
+            "Gold vs Stocks and Bonds",
+            "Expert Recommendations and Timing Strategies",
+            "Investment Outlook Visualization"]
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "I study finance"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "error": "No recognizable financial topic found in the message"
+    }
+    ```
+</Example>
+
+<Input>
+```json
+{
+    "message": " Give me an analysis of Apple stock performance."
+    "title": "Apple stock analysis"
+}
+```
+</Input>
+
+<Output>
+```json
+{
