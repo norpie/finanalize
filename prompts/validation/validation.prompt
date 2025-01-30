@@ -1,0 +1,68 @@
+This tool extracts the company name from a user's message and validates whether the company meets the criteria for financial analysis. The company must be publicly traded, listed on either the NASDAQ or NYSE, and be a Fortune 500 company. If the company meets all three conditions, the tool returns a true value. If the company fails to meet any of the conditions, the tool returns a false value along with an error message specifying which condition was not met.
+
+
+The following are complete examples of the input and output:
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Analyse Tesla stock performance"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "valid": true
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Tell me about bitcoin"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "valid": "true"
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Analyse Giga LLC for me"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "valid": "false"
+        "error": "Giga LLC is not listed on the Nasdaq or NYSE."
+    }
+    ```
+</Example>
+
+<Input>
+```json
+{
+    "message": "Give me an analysis of Apple stock performance."
+}
+```
+</Input>
+
+<Output>
+```json
+{
