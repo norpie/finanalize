@@ -1,0 +1,191 @@
+This tool generates relevant search queries based on first-level headings from a financial analysis. The goal is to create search terms that users might enter into a search engine to find information on each topic. The tool should produce concise, effective queries that match the intent of the heading while incorporating commonly used financial terminology.
+
+If a heading is too broad, the tool should refine it into more specific search phrases. The generated queries should avoid unnecessary words and be formatted as natural search engine queries.
+The following are complete examples of the input and output:
+
+<Example>
+    <Input>
+    ```json
+    {
+    "currentDate": "30-01-2025",
+    "headings": [
+        "Overview of Tesla Stock",
+        "Recent Market Performance",
+        "Financial Metrics and Valuation",
+        "Risk and Volatility Analysis",
+        "Competitor Comparison",
+        "Future Outlook and Predictions",
+        "Stock Performance Visualization"
+    ]
+}
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+    "search_queries": {
+        "Overview of Tesla Stock": [
+            "Tesla stock overview and history",
+            "How has Tesla stock evolved over time?",
+            "Tesla stock profile and key details",
+            "Is Tesla a good investment in 2020?",
+            "Tesla stock fundamentals explained",
+            "What influences Tesla’s stock price?"
+        ],
+        "Recent Market Performance": [
+            "Tesla stock price movement today",
+            "How did Tesla stock perform this week?",
+            "Tesla stock performance vs S&P 500",
+            "Recent news affecting Tesla stock",
+            "Tesla share price analysis 2011",
+            "Tesla stock trading volume trends"
+        ],
+        "Financial Metrics and Valuation": [
+            "Tesla PE ratio and valuation metrics",
+            "How is Tesla stock valued in 2024?",
+            "Tesla revenue and profit analysis",
+            "Tesla financial ratios compared to industry",
+            "Tesla earnings per share (EPS) trends",
+            "Is Tesla overvalued or undervalued?"
+        ],
+        "Risk and Volatility Analysis": [
+            "How volatile is Tesla stock?",
+            "Tesla stock risk factors explained",
+            "Tesla stock beta and volatility trends",
+            "Impact of market crashes on Tesla stock",
+            "How does Tesla handle economic downturns?",
+            "Tesla stock risk vs reward potential"
+        ],
+        "Competitor Comparison": [
+            "Tesla vs Rivian stock performance",
+            "How does Tesla compare to Ford stock?",
+            "Tesla vs Nio: Which EV stock is better?",
+            "Tesla vs traditional car manufacturers in the stock market",
+            "Tesla stock vs Apple: Which is a better buy?",
+            "How does Tesla’s market cap compare to its competitors?"
+        ],
+        "Future Outlook and Predictions": [
+            "Tesla stock price forecast for 2027",
+            "Will Tesla stock go up or down?",
+            "What analysts predict for Tesla stock",
+            "Tesla’s future growth potential",
+            "Impact of new Tesla models on stock price",
+            "Long-term Tesla stock investment strategy"
+        ],
+        "Stock Performance Visualization": [
+            "Best charts to track Tesla stock performance",
+            "Tesla stock historical price chart",
+            "Tesla stock price movement interactive graphs",
+            "How to visualize Tesla stock trends",
+            "Tesla stock performance over the last 5 years",
+            "Tesla stock price seasonality trends"
+        ]
+    }
+}
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+    "currentDate": "30-01-2025",
+    "headings": [
+        "Introduction to Bitcoin",
+        "Recent Price Trends",
+        "Market Adoption and Regulation",
+        "Risk Factors and Volatility",
+        "Comparison with Other Cryptocurrencies",
+        "Future Outlook and Expert Predictions",
+        "Bitcoin Price Visualization"
+    ]
+}
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+    "search_queries": {
+        "Introduction to Bitcoin": [
+            "What is Bitcoin and how does it work?",
+            "Beginner’s guide to Bitcoin investing",
+            "History of Bitcoin and its evolution",
+            "Bitcoin vs traditional currency",
+            "How to buy Bitcoin safely",
+            "Key features that make Bitcoin unique"
+        ],
+        "Recent Price Trends": [
+            "Bitcoin price trend analysis 2024",
+            "Why is Bitcoin’s price rising or falling?",
+            "Bitcoin price movements this month",
+            "Impact of market events on Bitcoin’s price",
+            "Historical Bitcoin price trends and cycles",
+            "Bitcoin price volatility explained"
+        ],
+        "Market Adoption and Regulation": [
+            "How governments regulate Bitcoin",
+            "Countries where Bitcoin is legal or banned",
+            "Bitcoin adoption trends in 2025",
+            "How institutions are investing in Bitcoin",
+            "Bitcoin’s role in global finance",
+            "Impact of SEC decisions on Bitcoin"
+        ],
+        "Risk Factors and Volatility": [
+            "Why is Bitcoin so volatile?",
+            "Biggest risks of investing in Bitcoin",
+            "Bitcoin price crashes: Lessons from history",
+            "How secure is Bitcoin as an investment?",
+            "Bitcoin vs gold: Which is safer?",
+            "Can Bitcoin survive a market downturn?"
+        ],
+        "Comparison with Other Cryptocurrencies": [
+            "Bitcoin vs Ethereum: Which is better?",
+            "Bitcoin vs altcoins: Key differences",
+            "How Bitcoin compares to stablecoins",
+            "Bitcoin vs XRP: Which is more promising?",
+            "Bitcoin vs Cardano: Investment potential",
+            "Bitcoin vs Litecoin: Which is faster?"
+        ],
+        "Future Outlook and Expert Predictions": [
+            "Bitcoin price prediction for 2020",
+            "What experts say about Bitcoin’s future",
+            "Will Bitcoin reach $100K?",
+            "Future of Bitcoin mining profitability",
+            "How Bitcoin adoption could grow",
+            "Long-term Bitcoin investment strategies"
+        ],
+        "Bitcoin Price Visualization": [
+            "Best charts to track Bitcoin price",
+            "Bitcoin historical price trends in graphs",
+            "Interactive Bitcoin price movement analysis",
+            "Bitcoin price seasonality trends",
+            "How to visualize Bitcoin market data",
+            "Live Bitcoin price chart analysis"
+        ]
+    }
+}
+    ```
+</Example>
+
+<Input>
+```json
+{
+    "currentDate": "30-01-2025",
+    "headings": [
+        "Overview of Apple Stock",
+        "Recent Market Performance",
+        "Financial Metrics and Valuation",
+        "Risk and Volatility Analysis",
+        "Competitor Comparison",
+        "Future Outlook and Predictions",
+        "Stock Performance Visualization"
+    ]
+}
+```
+</Input>
+
+<Output>
+```json
+{
