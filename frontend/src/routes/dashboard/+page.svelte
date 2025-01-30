@@ -35,8 +35,8 @@
                             <Label for="email">Email</Label>
                             <Input id="email" type="email" bind:value={user.email} required disabled />
                         </div>
-                    </div></Card.Content
-                >
+                    </div>
+                </Card.Content>
             </Card.Root>
         </div>
     </Sidebar>
