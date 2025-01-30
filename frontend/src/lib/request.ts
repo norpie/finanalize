@@ -8,8 +8,8 @@ function formatEndpoint(path: string): string {
     return `${url}/${path}`;
 }
 
-async function request<T>(method: string, endpoint: string, body?: any): Promise<Result<T>> {
-    const response = await fetch(endpoint, {
+async function request<T>(method: string, endpoint: string, dontRedirect?: boolean, body?: any): Promise<Result<T>> {
+    const response = await fetch(formatEndpoint(endpoint), {
         method,
         headers: {
             "Content-Type": "application/json",
@@ -22,7 +22,9 @@ async function request<T>(method: string, endpoint: string, body?: any): Promise
         const tokenResult = await refresh();
 
         if (tokenResult === null || tokenResult === undefined || tokenResult.error || !tokenResult.result) {
-            goto("/login");
+            if (!dontRedirect) {
+                goto("/login");
+            }
             return {
                 error: "Token expired",
             };
@@ -36,19 +38,19 @@ async function request<T>(method: string, endpoint: string, body?: any): Promise
 }
 
 async function get<T>(path: string): Promise<Result<T>> {
-    return request("GET", formatEndpoint(path));
+    return request("GET", path);
 }
 
 async function post<T>(path: string, body: any): Promise<Result<T>> {
-    return request("POST", formatEndpoint(path), body);
+    return request("POST", path, false, body);
 }
 
 async function put<T>(path: string, body: any): Promise<Result<T>> {
-    return request("PUT", formatEndpoint(path), body);
+    return request("PUT", path, false, body);
 }
 
 async function del<T>(path: string): Promise<Result<T>> {
-    return request("DELETE", formatEndpoint(path));
+    return request("DELETE", path, false);
 }
 
 async function refresh(): Promise<Result<{ access_token: string }> | null> {
@@ -67,4 +69,4 @@ async function refresh(): Promise<Result<{ access_token: string }> | null> {
     return await response.json();
 }
 
-export { get, post, put, del };
+export { request, get, post, put, del };
