@@ -23,6 +23,8 @@ pub enum FinanalizeError {
     Jwt(#[from] jsonwebtoken::errors::Error),
     #[error("Argon2 error: {0}")]
     Argon2(#[from] argon2::password_hash::Error),
+    #[error("RabbitMQ error: {0}")]
+    RabbitMQ(#[from] lapin::Error),
     #[error("Serde error: {0}")]
     Serde(#[from] serde_json::Error),
 
