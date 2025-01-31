@@ -27,6 +27,8 @@ pub enum FinanalizeError {
     RabbitMQ(#[from] lapin::Error),
     #[error("Serde error: {0}")]
     Serde(#[from] serde_json::Error),
+    #[error("Reqwest error: {0}")]
+    Reqwest(#[from] reqwest::Error),
 }
 
 #[derive(Debug, Display)]
