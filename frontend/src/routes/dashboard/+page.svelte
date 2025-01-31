@@ -1,8 +1,4 @@
 <script lang="ts">
-    import * as Card from '$lib/components/ui/card/index.js';
-    import { Input } from '$lib/components/ui/input/index.js';
-    import { Label } from '$lib/components/ui/label/index.js';
-
     import Sidebar from '$lib/components/sidebar.svelte';
 
     import type User from '../../models/user';
@@ -20,25 +16,13 @@
 
 {#if user}
     <Sidebar bind:user location="Dashboard">
-        <div class="flex h-[100%] w-full items-center justify-center px-4">
-            <Card.Root class="mx-auto max-w-sm">
-                <Card.Header>
-                    <Card.Title class="text-2xl">Profile</Card.Title>
-                    <Card.Description>This is you.</Card.Description>
-                </Card.Header>
-                <Card.Content>
-                    <div class="grid gap-4">
-                        <div class="grid gap-2">
-                            <Label for="email">Id</Label>
-                            <Input id="email" type="text" bind:value={user.id} required disabled />
-                        </div>
-                        <div class="grid gap-2">
-                            <Label for="email">Email</Label>
-                            <Input id="email" type="email" bind:value={user.email} required disabled />
-                        </div>
-                    </div>
-                </Card.Content>
-            </Card.Root>
+        <div class="flex flex-1 flex-col gap-4 p-4">
+            <div class="grid auto-rows-min gap-4 md:grid-cols-3">
+                <div class="aspect-video rounded-xl bg-muted/50"></div>
+                <div class="aspect-video rounded-xl bg-muted/50"></div>
+                <div class="aspect-video rounded-xl bg-muted/50"></div>
+            </div>
+            <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min"></div>
         </div>
     </Sidebar>
 {:else}
