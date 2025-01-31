@@ -1,5 +1,6 @@
 <script lang="ts">
     import { Button } from '$lib/components/ui/button/index.js';
+    import Spinner from '$lib/components/spinner.svelte';
 
     import { request } from '$lib/request';
 
@@ -19,5 +20,5 @@
 {:else if user === null}
     <Button onclick={() => goto('/login')}>Login</Button>
 {:else if user === undefined}
-    <Button disabled>Loading...</Button>
+    <Button><Spinner color="purple" /></Button>
 {/if}
