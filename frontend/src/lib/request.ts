@@ -1,4 +1,5 @@
 import { goto } from "$app/navigation";
+import { token } from "$lib/store";
 import type Result from "../models/result";
 
 // TODO: Get the URL from the environment
@@ -13,7 +14,7 @@ async function request<T>(method: string, endpoint: string, dontRedirect?: boole
         method,
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+            "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify(body)
     });
@@ -30,7 +31,7 @@ async function request<T>(method: string, endpoint: string, dontRedirect?: boole
             };
         }
 
-        localStorage.setItem("accessToken", tokenResult.result.access_token);
+        token.set(tokenResult.result.access_token);
         return request(method, endpoint, body);
     }
 
