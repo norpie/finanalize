@@ -9,6 +9,7 @@
     import { get } from '$lib/request';
 
     import { onMount } from 'svelte';
+    import Spinner from '$lib/components/spinner.svelte';
 
     let user: User | undefined = $state<User>();
 
@@ -42,6 +43,6 @@
     </Sidebar>
 {:else}
     <div class="flex h-screen w-full items-center justify-center">
-        <!-- <Spinner /> -->
+        <Spinner />
     </div>
 {/if}
