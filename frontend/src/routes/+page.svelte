@@ -12,6 +12,9 @@
 
     onMount(async () => {
         user = (await request<User>('GET', 'v1/protected/me', true)).result;
+        if (user === undefined) {
+            user = null;
+        }
     });
 </script>
 
