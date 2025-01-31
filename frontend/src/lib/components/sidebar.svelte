@@ -4,17 +4,11 @@
     import { Separator } from '$lib/components/ui/separator/index.js';
     import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
-    import type User from '../../models/user';
-
-    let {
-        user = $bindable(),
-        location,
-        children
-    }: { user: User; location: string; children: any } = $props();
+    let { location, children }: { location: string; children: any } = $props();
 </script>
 
 <Sidebar.Provider>
-    <AppSidebar bind:user />
+    <AppSidebar />
     <Sidebar.Inset>
         <header class="flex h-16 shrink-0 items-center gap-2">
             <div class="flex items-center gap-2 px-4">
