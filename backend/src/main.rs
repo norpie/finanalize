@@ -19,6 +19,7 @@ mod jwt;
 mod models;
 mod prelude;
 mod search;
+mod rabbitmq;
 
 #[tokio::main]
 async fn main() -> Result<()> {
