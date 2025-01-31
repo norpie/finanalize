@@ -54,17 +54,15 @@
     function nameFromEmail(email: string) {
         return email.split('@')[0];
     }
-
-    let impliedName = $derived(nameFromEmail($user.email));
 </script>
 
-{#if user}
+{#if $user}
     <div class="flex flex-1 flex-col gap-4 p-4">
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
             <div class="aspect-video rounded-xl bg-muted/50">
                 <p class="text-2xl">
                     👋Hi,
-                    <span class="text-2xl font-bold">{impliedName}</span>
+                    <span class="text-2xl font-bold">{nameFromEmail($user.email)}</span>
                     !
                 </p>
             </div>
