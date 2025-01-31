@@ -57,7 +57,28 @@
                             <div
                                 class="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground"
                             >
-                                <TrendingUp class="size-4" />
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="512"
+                                    height="512"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width=""
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    class="lucide lucide-trending-up"
+                                >
+                                    <rect width="100%" height="100%" rx="6" stroke="none" fill="#9333ea" />
+                                    <g transform="scale(0.70)" transform-origin="center">
+                                        <polyline
+                                            points="22 7 13.5 15.5 8.5 10.5 2 17"
+                                            stroke="white"
+                                            stroke-width="2.5"
+                                        />
+                                        <polyline points="16 7 22 7 22 13" stroke="white" stroke-width="2.5" />
+                                    </g>
+                                </svg>
                             </div>
                             <div class="grid flex-1 text-left text-sm leading-tight">
                                 <span class="truncate font-semibold">Finanalize</span>
