@@ -6,9 +6,11 @@
     import { toast } from 'svelte-sonner';
     import { onMount } from 'svelte';
 
+    import { token } from '$lib/store';
+
     async function logout() {
         await post('v1/protected/logout', {});
-        localStorage.removeItem('accessToken');
+        token.set(undefined);
         toast.success('Logged out');
         goto('/login');
     }
