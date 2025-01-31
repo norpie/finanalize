@@ -25,7 +25,7 @@ impl SearxNG {
 }
 
  #[derive(Debug, Deserialize)]
-struct SearxNGResultParent {
+struct SearxNGResult {
     results: Vec<SearxNGItem>,
 }
 
