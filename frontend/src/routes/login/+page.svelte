@@ -26,7 +26,7 @@
             return;
         }
 
-        localStorage.setItem('accessToken', response.result.access_token);
+        localStorage.setItem('token', response.result.access_token);
         toast.success('Logged in successfully');
         goto('/dashboard');
     }

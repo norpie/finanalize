@@ -1,5 +1,4 @@
 import { goto } from "$app/navigation";
-import { token } from "$lib/store";
 import type Result from "../models/result";
 
 // TODO: Get the URL from the environment
@@ -14,7 +13,7 @@ async function request<T>(method: string, endpoint: string, dontRedirect?: boole
         method,
         headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+            "Authorization": `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(body)
     });
@@ -26,12 +25,13 @@ async function request<T>(method: string, endpoint: string, dontRedirect?: boole
             if (!dontRedirect) {
                 goto("/login");
             }
+            console.log("Token expired");
             return {
                 error: "Token expired",
             };
         }
 
-        token.set(tokenResult.result.access_token);
+        localStorage.setItem('token', tokenResult.result.access_token);
         return request(method, endpoint, body);
     }
 
