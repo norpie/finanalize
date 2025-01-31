@@ -4,7 +4,23 @@
     import { Separator } from '$lib/components/ui/separator/index.js';
     import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
-    let { location, children }: { location: string; children: any } = $props();
+    import { page } from '$app/state';
+
+    let { children }: { children: any } = $props();
+
+    function capitalize(pageName: string): string {
+        if (pageName.length === 0) return 'Home';
+        return pageName.charAt(0).toUpperCase() + pageName.slice(1);
+    }
+
+    function lastSegment(path: string): string {
+        let split = path.split('/');
+        let popped = split.pop();
+        if (!popped) return 'Home';
+        return popped;
+    }
+
+    let pageName = $derived(capitalize(lastSegment(page.url.pathname)));
 </script>
 
 <Sidebar.Provider>
@@ -17,7 +33,7 @@
                 <Breadcrumb.Root>
                     <Breadcrumb.List>
                         <Breadcrumb.Item>
-                            <Breadcrumb.Page>{location}</Breadcrumb.Page>
+                            <Breadcrumb.Page>{pageName}</Breadcrumb.Page>
                         </Breadcrumb.Item>
                     </Breadcrumb.List>
                 </Breadcrumb.Root>

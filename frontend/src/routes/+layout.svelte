@@ -30,7 +30,7 @@
 <Toaster />
 {#if user}
     {#if !hideSidebarRoutes.includes(page.url.pathname)}
-        <Sidebar location="Dashboard">
+        <Sidebar>
             {@render children()}
         </Sidebar>
     {:else}
