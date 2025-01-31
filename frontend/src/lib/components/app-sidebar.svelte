@@ -4,8 +4,6 @@
 
     import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 
-    import TrendingUp from 'lucide-svelte/icons/trending-up';
-
     import LayoutDashboard from 'lucide-svelte/icons/layout-dashboard';
     import FileStack from 'lucide-svelte/icons/file-stack';
 
@@ -13,7 +11,7 @@
     import User from 'lucide-svelte/icons/user';
     import LogOut from 'lucide-svelte/icons/log-out';
 
-    let { ref = $bindable(null), user = $bindable(), ...restProps } = $props();
+    let { ref = $bindable(null), ...restProps } = $props();
 
     const pages = [
         {
@@ -95,6 +93,6 @@
     </Sidebar.Content>
     <Sidebar.Footer>
         <NavProjects name={'Account'} items={account} />
-        <NavUser bind:user />
+        <NavUser />
     </Sidebar.Footer>
 </Sidebar.Root>
