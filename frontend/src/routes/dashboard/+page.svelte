@@ -108,5 +108,7 @@
         </div>
     </div>
 {:else}
-    <Spinner />
+    <div class="flex h-screen w-full items-center justify-center">
+        <Spinner />
+    </div>
 {/if}
