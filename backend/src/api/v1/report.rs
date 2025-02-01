@@ -3,8 +3,9 @@ use crate::db::SurrealDb;
 use crate::models::{Report, ReportCreation, ReportStatus, ReportStatusEvent, SurrealDBReport};
 use crate::prelude::FinanalizeError;
 use crate::rabbitmq::RabbitMQPublisher;
-use actix_web::web::{Data, Json, Path, Query};
+use actix_web::web::{Data, Json, Path};
 use actix_web::{get, post, Responder};
+use serde::{Deserialize, Serialize};
 
 #[post("/reports")]
 pub async fn create_report(
@@ -16,43 +17,46 @@ pub async fn create_report(
         .content(report_creation)
         .await?
         .ok_or(FinanalizeError::InternalServerError)?;
-    let created_report: Report = Report::from(new_report.clone());
+    let mut created_report: Report = Report::from(new_report.clone());
+    let status = ReportStatus::Pending;
+    created_report.status = status;
     let report_status_event: ReportStatusEvent = ReportStatusEvent::from(created_report.clone());
     let publisher = RabbitMQPublisher::new().await?;
     publisher.publish_report_status(report_status_event).await?;
-    Ok(ApiResponse::new(ReportStatus::Pending))
+    Ok(ApiResponse::new(created_report.id))
 }
 
 #[get("/reports/{report_id}")]
-pub async fn report_status(
+pub async fn get_report(
     db: Data<SurrealDb>,
     report_id: Path<String>,
 ) -> Result<impl Responder, FinanalizeError> {
-    let mut response = db
-        .query("SELECT * FROM report WHERE id = $id")
-        .bind(("id", report_id.to_string()))
-        .await?;
-    let report = response
-        .take::<Option<Report>>(0)?
+    let report: SurrealDBReport = db
+        .select(("report", report_id.to_string()))
+        .await?
         .ok_or(FinanalizeError::NotFound)?;
+    Ok(ApiResponse::new(Report::from(report)))
+}
 
-    Ok(ApiResponse::new(report))
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct UserReportPage {
+    id: String,
+    page: u32,
+    #[serde(rename = "perPage")]
+    per_page: u32,
 }
 
 #[get("/reports")]
 pub async fn get_reports(
     db: Data<SurrealDb>,
-    user_id: Query<String>,
+    page: Json<UserReportPage>,
 ) -> Result<impl Responder, FinanalizeError> {
     let mut response = db
-        .query("SELECT * FROM reports WHERE id = $id")
-        .bind(("id", user_id.to_string()))
+        .query("SELECT ->has_report->report FROM user:$id LIMIT $perPage OFFSET $offset")
+        .bind(("id", page.id.to_string()))
+        .bind(("perPage", page.per_page))
+        .bind(("offset", page.page * page.per_page))
         .await?;
-    let mut reports = Vec::new();
-    let mut index = 0;
-    while let Some(report) = response.take::<Option<Report>>(index)? {
-        reports.push(report);
-        index += 1;
-    }
+    let reports = response.take::<Vec<Report>>(0)?;
     Ok(ApiResponse::new(reports))
 }
