@@ -60,6 +60,17 @@ services:
     volumes:
       - searxng-data:/etc/searxng
 
+  ullm:
+    build: https://github.com/norpie/uLLM-API.git
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    security_opt:
+      - seccomp=unconfined
+    volumes:
+      - "${MODELS_DIR}:/data/models"
+
+
 volumes:
   surrealdb-data:
   searxng-data:
