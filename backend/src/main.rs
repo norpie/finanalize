@@ -7,6 +7,7 @@ use actix_web::{
 };
 use api::{
     v1::auth::{login, logout, me, refresh, register},
+    v1::report::{create_report, get_report, get_reports},
     ApiResponse,
 };
 use auth_middleware::Auth;
@@ -18,14 +19,21 @@ mod db;
 mod jwt;
 mod models;
 mod prelude;
-mod search;
 mod rabbitmq;
+mod search;
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let db = db::connect().await?;
     let token_factory: TokenFactory = "secret".into();
+    dbg!("he2re");
 
+    // Initialize the RabbitMQ consumer background task
+    tokio::spawn(async move {
+        let consumer = rabbitmq::RabbitMQConsumer::new().await?;
+        consumer.consume_report_status().await
+    });
+    dbg!("here");
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin_fn(|_, _| true)
@@ -52,6 +60,12 @@ async fn main() -> Result<()> {
                     .wrap(auth_middleware)
                     .service(logout)
                     .service(me),
+            )
+            .service(
+                web::scope("/api/v1")
+                    .service(create_report)
+                    .service(get_report)
+                    .service(get_reports),
             )
     })
     .bind(("127.0.0.1", 8080))?
