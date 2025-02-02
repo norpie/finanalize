@@ -13,6 +13,7 @@ use crate::jwt::TokenFactory;
 // 1. Middleware initialization, middleware factory gets called with
 //    next service in chain as parameter.
 // 2. Middleware's call method gets called with normal request.
+#[derive(Clone)]
 pub struct Auth {
     token_factory: TokenFactory,
 }
@@ -46,6 +47,7 @@ where
     }
 }
 
+#[derive(Clone)]
 pub struct AuthMiddleware<S> {
     service: S,
     token_factory: TokenFactory,
