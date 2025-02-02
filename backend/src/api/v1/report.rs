@@ -1,6 +1,8 @@
 use crate::api::ApiResponse;
 use crate::db::SurrealDb;
-use crate::models::{Report, ReportCreation, ReportStatus, ReportStatusEvent, SurrealDBReport};
+use crate::models::{
+    Report, ReportCreation, ReportStatus, ReportStatusEvent, SurrealDBReport, SurrealDBUser, User,
+};
 use crate::prelude::FinanalizeError;
 use crate::rabbitmq::RabbitMQPublisher;
 use actix_web::web::{Data, Json, Path};
@@ -9,21 +11,30 @@ use serde::{Deserialize, Serialize};
 
 #[post("/reports")]
 pub async fn create_report(
+    user: SurrealDBUser,
     db: Data<SurrealDb>,
     report_creation: Json<ReportCreation>,
 ) -> Result<impl Responder, FinanalizeError> {
-    let new_report: SurrealDBReport = db
+    dbg!("here 1");
+    let report: SurrealDBReport = db
         .create("report")
         .content(report_creation)
         .await?
         .ok_or(FinanalizeError::InternalServerError)?;
-    let mut created_report: Report = Report::from(new_report.clone());
-    let status = ReportStatus::Pending;
-    created_report.status = status;
+    dbg!("here 2");
+    let relation = db
+        .query("$user->has->$report")
+        .bind(("$user", user.id.clone()))
+        .bind(("$report", report.id.clone()))
+        .await?;
+    dbg!(relation);
+    let created_report: Report = Report::from(report.clone());
     let report_status_event: ReportStatusEvent = ReportStatusEvent::from(created_report.clone());
     let publisher = RabbitMQPublisher::new().await?;
+    dbg!("here 3");
     publisher.publish_report_status(report_status_event).await?;
-    Ok(ApiResponse::new(created_report.id))
+    dbg!("here 4");
+    Ok(ApiResponse::new(created_report))
 }
 
 #[get("/reports/{report_id}")]
