@@ -78,7 +78,7 @@ pub struct ReportStatusEvent{
     pub status: ReportStatus,
 }
 
-impl From<Report> for ReportStatusEvent { // ReportStatusEvent::from(report)
+impl From<Report> for ReportStatusEvent {
     fn from(report: Report) -> Self {
         ReportStatusEvent {
             report_id: report.id,
@@ -100,6 +100,5 @@ pub struct Report {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportCreation {
-    pub user_id: String,
     pub user_input: String,
 }
