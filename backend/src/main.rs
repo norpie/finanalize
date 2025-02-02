@@ -26,14 +26,12 @@ mod search;
 async fn main() -> Result<()> {
     let db = db::connect().await?;
     let token_factory: TokenFactory = "secret".into();
-    dbg!("he2re");
 
     // Initialize the RabbitMQ consumer background task
     tokio::spawn(async move {
         let consumer = rabbitmq::RabbitMQConsumer::new().await?;
         consumer.consume_report_status().await
     });
-    dbg!("here");
     HttpServer::new(move || {
         let cors = Cors::default()
             .allowed_origin_fn(|_, _| true)
@@ -59,11 +57,7 @@ async fn main() -> Result<()> {
                 web::scope("/api/v1/protected")
                     .wrap(auth_middleware.clone())
                     .service(logout)
-                    .service(me),
-            )
-            .service(
-                web::scope("/api/v1/report")
-                    .wrap(auth_middleware)
+                    .service(me)
                     .service(create_report)
                     .service(get_report)
                     .service(get_reports),
