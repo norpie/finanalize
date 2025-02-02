@@ -1,37 +1,106 @@
 OPTION IMPORT;
 
-DEFINE TABLE has TYPE RELATION IN user OUT report SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE api TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD name ON api TYPE string PERMISSIONS FULL;
+DEFINE FIELD model ON api TYPE string PERMISSIONS FULL;
+
+DEFINE TABLE column TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD description ON column TYPE string PERMISSIONS FULL;
+DEFINE FIELD name ON column TYPE string PERMISSIONS FULL;
+DEFINE FIELD values ON column TYPE array<string> PERMISSIONS FULL;
+
+DEFINE TABLE data_source TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD description ON data_source TYPE string PERMISSIONS FULL;
+DEFINE FIELD title ON data_source TYPE string PERMISSIONS FULL;
+
+DEFINE TABLE has TYPE RELATION IN user OUT report ENFORCED SCHEMALESS PERMISSIONS NONE;
 DEFINE FIELD in ON has TYPE record<user> PERMISSIONS FULL;
 DEFINE FIELD out ON has TYPE record<report> PERMISSIONS FULL;
 
-DEFINE TABLE has_accepted_date TYPE RELATION IN report_source OUT report_source_date SCHEMAFULL PERMISSIONS NONE;
+DEFINE TABLE has_accepted_date TYPE RELATION IN report_source OUT source_date ENFORCED SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD in ON has_accepted_date TYPE record<report_source> PERMISSIONS FULL;
-DEFINE FIELD out ON has_accepted_date TYPE record<report_source_date> PERMISSIONS FULL;
+DEFINE FIELD out ON has_accepted_date TYPE record<source_date> PERMISSIONS FULL;
 
-DEFINE TABLE has_chunk TYPE RELATION IN report_source OUT source_chunk SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD in ON has_chunk TYPE record<report_source> PERMISSIONS FULL;
-DEFINE FIELD out ON has_chunk TYPE record<source_chunk> PERMISSIONS FULL;
+DEFINE TABLE has_call TYPE RELATION IN report OUT llm_call ENFORCED SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD in ON has_call TYPE record<report> PERMISSIONS FULL;
+DEFINE FIELD out ON has_call TYPE record<llm_call> PERMISSIONS FULL;
 
-DEFINE TABLE has_heading TYPE RELATION IN report OUT report_heading SCHEMAFULL PERMISSIONS NONE;
+DEFINE TABLE has_column TYPE RELATION IN data_source OUT column ENFORCED SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD in ON has_column TYPE record<data_source> PERMISSIONS FULL;
+DEFINE FIELD out ON has_column TYPE record<column> PERMISSIONS FULL;
+
+DEFINE TABLE has_content_chunk TYPE RELATION IN report_source OUT source_chunk ENFORCED SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD in ON has_content_chunk TYPE record<report_source> PERMISSIONS FULL;
+DEFINE FIELD out ON has_content_chunk TYPE record<source_chunk> PERMISSIONS FULL;
+
+DEFINE TABLE has_cost TYPE RELATION IN api | local_api OUT model_cost ENFORCED SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD in ON has_cost TYPE record<api | local_api> PERMISSIONS FULL;
+DEFINE FIELD out ON has_cost TYPE record<model_cost> PERMISSIONS FULL;
+
+DEFINE TABLE has_data_source TYPE RELATION IN report_source OUT data_source ENFORCED SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD in ON has_data_source TYPE record<report_source> PERMISSIONS FULL;
+DEFINE FIELD out ON has_data_source TYPE record<data_source> PERMISSIONS FULL;
+
+DEFINE TABLE has_final_cost TYPE RELATION IN report OUT ledger_entry ENFORCED SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD in ON has_final_cost TYPE record<report> PERMISSIONS FULL;
+DEFINE FIELD out ON has_final_cost TYPE record<ledger_entry> PERMISSIONS FULL;
+
+DEFINE TABLE has_generated TYPE RELATION IN llm_call OUT llm_result ENFORCED SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD in ON has_generated TYPE record<llm_call> PERMISSIONS FULL;
+DEFINE FIELD out ON has_generated TYPE record<llm_result> PERMISSIONS FULL;
+
+DEFINE TABLE has_heading TYPE RELATION IN report OUT report_heading ENFORCED SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD in ON has_heading TYPE record<report> PERMISSIONS FULL;
 DEFINE FIELD out ON has_heading TYPE record<report_heading> PERMISSIONS FULL;
 
-DEFINE TABLE has_research TYPE RELATION IN report OUT report_source SCHEMAFULL PERMISSIONS NONE;
+DEFINE TABLE has_provider TYPE RELATION IN llm_call OUT api | local_api ENFORCED SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD in ON has_provider TYPE record<llm_call> PERMISSIONS FULL;
+DEFINE FIELD out ON has_provider TYPE record<api | local_api> PERMISSIONS FULL;
+
+DEFINE TABLE has_research TYPE RELATION IN report OUT report_source ENFORCED SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD in ON has_research TYPE record<report> PERMISSIONS FULL;
 DEFINE FIELD out ON has_research TYPE record<report_source> PERMISSIONS FULL;
 
-DEFINE TABLE has_subject TYPE RELATION IN report OUT report_subject SCHEMAFULL PERMISSIONS NONE;
+DEFINE TABLE has_subject TYPE RELATION IN report OUT report_subject ENFORCED SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD in ON has_subject TYPE record<report> PERMISSIONS FULL;
 DEFINE FIELD out ON has_subject TYPE record<report_subject> PERMISSIONS FULL;
 
-DEFINE TABLE has_suspected_date TYPE RELATION IN report_source OUT report_source_date SCHEMAFULL PERMISSIONS NONE;
+DEFINE TABLE has_suspected_date TYPE RELATION IN report_source OUT source_date ENFORCED SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD in ON has_suspected_date TYPE record<report_source> PERMISSIONS FULL;
 DEFINE FIELD justification ON has_suspected_date TYPE string PERMISSIONS FULL;
-DEFINE FIELD out ON has_suspected_date TYPE record<report_source_date> PERMISSIONS FULL;
+DEFINE FIELD out ON has_suspected_date TYPE record<source_date> PERMISSIONS FULL;
 
-DEFINE TABLE has_verdict TYPE RELATION IN report OUT report_verdict SCHEMALESS PERMISSIONS NONE;
+DEFINE TABLE has_verdict TYPE RELATION IN report OUT report_verdict ENFORCED SCHEMALESS PERMISSIONS NONE;
 DEFINE FIELD in ON has_verdict TYPE record<report> PERMISSIONS FULL;
 DEFINE FIELD out ON has_verdict TYPE record<report_verdict> PERMISSIONS FULL;
+
+DEFINE TABLE ledger_entry TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD amount ON ledger_entry TYPE int PERMISSIONS FULL;
+DEFINE FIELD description ON ledger_entry TYPE string PERMISSIONS FULL;
+DEFINE FIELD incoming ON ledger_entry TYPE bool PERMISSIONS FULL;
+DEFINE FIELD timestamp ON ledger_entry TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD url ON ledger_entry TYPE string PERMISSIONS FULL;
+
+DEFINE TABLE llm_call TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD prompt ON llm_call TYPE string PERMISSIONS FULL;
+DEFINE FIELD requested_at ON llm_call TYPE datetime PERMISSIONS FULL;
+
+DEFINE TABLE llm_result TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD completed_at ON llm_result TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD generated_amount ON llm_result TYPE int PERMISSIONS FULL;
+DEFINE FIELD started_at ON llm_result TYPE datetime PERMISSIONS FULL;
+DEFINE FIELD tokens ON llm_result TYPE string PERMISSIONS FULL;
+DEFINE FIELD used_context ON llm_result TYPE int PERMISSIONS FULL;
+
+DEFINE TABLE local_api TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD engine ON local_api TYPE string PERMISSIONS FULL;
+DEFINE FIELD model ON local_api TYPE string PERMISSIONS FULL;
+
+DEFINE TABLE model_cost TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD input_MTok ON model_cost TYPE int PERMISSIONS FULL;
+DEFINE FIELD output_MTok ON model_cost TYPE int PERMISSIONS FULL;
+DEFINE FIELD prompt_caching_read_MTok ON model_cost TYPE int PERMISSIONS FULL;
+DEFINE FIELD prompt_caching_write_MTok ON model_cost TYPE int PERMISSIONS FULL;
 
 DEFINE TABLE report TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD created_at ON report TYPE datetime PERMISSIONS FULL;
@@ -46,13 +115,14 @@ DEFINE FIELD title ON report_heading TYPE string PERMISSIONS FULL;
 
 DEFINE TABLE report_source TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD description ON report_source TYPE string PERMISSIONS FULL;
+DEFINE FIELD file_path ON report_source TYPE string PERMISSIONS FULL;
 DEFINE FIELD title ON report_source TYPE string PERMISSIONS FULL;
 DEFINE FIELD type ON report_source TYPE string PERMISSIONS FULL;
 DEFINE FIELD url ON report_source TYPE string PERMISSIONS FULL;
 
-DEFINE TABLE report_source_date TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
-DEFINE FIELD context ON report_source_date TYPE string PERMISSIONS FULL;
-DEFINE FIELD date ON report_source_date TYPE datetime PERMISSIONS FULL;
+DEFINE TABLE source_date TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
+DEFINE FIELD context ON source_date TYPE string PERMISSIONS FULL;
+DEFINE FIELD date ON source_date TYPE datetime PERMISSIONS FULL;
 
 DEFINE TABLE report_subject TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD ticker ON report_subject TYPE string PERMISSIONS FULL;
