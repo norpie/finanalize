@@ -57,12 +57,13 @@ async fn main() -> Result<()> {
             )
             .service(
                 web::scope("/api/v1/protected")
-                    .wrap(auth_middleware)
+                    .wrap(auth_middleware.clone())
                     .service(logout)
                     .service(me),
             )
             .service(
-                web::scope("/api/v1")
+                web::scope("/api/v1/report")
+                    .wrap(auth_middleware)
                     .service(create_report)
                     .service(get_report)
                     .service(get_reports),
