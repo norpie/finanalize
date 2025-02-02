@@ -35,6 +35,7 @@ impl ResponseError for FinanalizeError {
     }
 
     fn error_response(&self) -> actix_web::HttpResponse<BoxBody> {
+        dbg!(self);
         let user_error: UserError = self.into();
         let api_response: ApiResponse<()> = ApiResponse::error(self.status_code(), user_error.0);
         let json =

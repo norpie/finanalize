@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -43,24 +44,20 @@ impl From<SurrealDBUser> for FrontendUser {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SurrealDBReport {
     pub id: Thing,
-    pub user_id: Thing,
     pub user_input: String,
     pub status: ReportStatus,
-    pub created_at: String,
-    pub updated_at: String,
-    pub has_verdict: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 impl From<SurrealDBReport> for Report {
     fn from(report: SurrealDBReport) -> Self {
         Report {
             id: report.id.id.to_string(),
-            user_id: report.user_id.id.to_string(),
             user_input: report.user_input,
             status: report.status,
             created_at: report.created_at,
             updated_at: report.updated_at,
-            has_verdict: report.has_verdict,
         }
     }
 }
@@ -78,6 +75,8 @@ pub struct ReportStatusEvent{
     pub status: ReportStatus,
 }
 
+
+
 impl From<Report> for ReportStatusEvent {
     fn from(report: Report) -> Self {
         ReportStatusEvent {
@@ -90,12 +89,10 @@ impl From<Report> for ReportStatusEvent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Report {
     pub id: String,
-    pub user_id: String,
     pub user_input: String,
     pub status: ReportStatus,
-    pub created_at: String,
-    pub updated_at: String,
-    pub has_verdict: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
