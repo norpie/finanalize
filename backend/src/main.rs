@@ -28,6 +28,7 @@ mod search;
 mod tasks;
 mod scraper;
 mod extractors;
+mod extract;
 
 #[tokio::main]
 async fn main() -> Result<()> {

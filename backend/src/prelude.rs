@@ -36,6 +36,8 @@ pub enum FinanalizeError {
     Handlebars(#[from] handlebars::RenderError),
     #[error("CdpError error: {0}")]
     CdpError(#[from] chromiumoxide::error::CdpError),
+    #[error("Polars error: {0}")]
+    Polars(#[from] polars::prelude::PolarsError),
 }
 
 #[derive(Debug, Display)]
