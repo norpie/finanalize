@@ -27,6 +27,7 @@ mod rabbitmq;
 mod search;
 mod tasks;
 mod scraper;
+mod extractors;
 
 #[tokio::main]
 async fn main() -> Result<()> {
