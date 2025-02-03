@@ -48,7 +48,7 @@ The following are complete examples of the input and output:
 "paragraphs": [
         {
             "heading": "Overview of Tesla Stock",
-            "description": [
+            "paragraph": [
                 "Introduce Tesla as a publicly traded company, focusing on its stock ticker (TSLA), industry, and market positioning.",
                 "Highlight Tesla’s significance in the electric vehicle (EV) industry and its role in disrupting traditional automotive markets.",
                 "Mention Tesla’s innovation in energy solutions and autonomous driving, and how these have contributed to its popularity and stock performance.",
@@ -57,7 +57,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Recent Market Performance",
-            "description": [
+            "paragraph": [
                 "Analyze Tesla’s stock performance over the past weeks or months, noting significant price movements and trading volume changes.",
                 "Highlight major events, such as earnings reports, product announcements, and market conditions, that influenced Tesla’s stock price.",
                 "Discuss the volatility of Tesla’s stock price, including notable spikes or declines and their correlation with broader market trends or company-specific news.",
@@ -66,7 +66,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Financial Metrics and Valuation",
-            "description": [
+            "paragraph": [
                 "Provide an in-depth look at Tesla’s financial health, including its revenue growth over recent quarters and annual periods.",
                 "Discuss Tesla’s earnings per share (EPS) and how it compares to analysts’ expectations and industry peers.",
                 "Explore Tesla’s price-to-earnings (P/E) ratio and how it indicates the market's expectation of the company's future earnings growth.",
@@ -75,7 +75,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Risk and Volatility Analysis",
-            "description": [
+            "paragraph": [
                 "Assess the risk factors that could affect Tesla’s stock, including market volatility and macroeconomic trends such as interest rates and inflation.",
                 "Discuss the impact of competition in the EV market and how it could affect Tesla’s market share and profitability.",
                 "Examine Tesla’s exposure to supply chain disruptions, regulatory changes, and raw material costs, and how these factors could affect its future stock performance.",
@@ -84,7 +84,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Competitor Comparison",
-            "description": [
+            "paragraph": [
                 "Compare Tesla’s stock performance and market position with traditional automakers like Ford and General Motors, which are investing heavily in EVs.",
                 "Highlight new entrants into the EV space, such as Rivian and Lucid Motors, and how they compete with Tesla in terms of innovation, technology, and production capacity.",
                 "Examine Tesla’s competitive advantage, including its superior battery technology, software capabilities (e.g., Autopilot), and global manufacturing footprint.",
@@ -93,7 +93,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Future Outlook and Predictions",
-            "description": [
+            "paragraph": [
                 "Discuss expert predictions for Tesla’s stock performance, with a focus on expected revenue growth and profit margins over the next few years.",
                 "Analyze potential growth drivers such as new product releases, expansion into emerging markets, and strategic partnerships with other industries.",
                 "Examine risks that could affect Tesla’s future growth, including regulatory hurdles, technological challenges, and competition from established automakers and startups.",
@@ -102,7 +102,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Stock Performance Visualization",
-            "description": [
+            "paragraph": [
                 "Discuss how stock charts can help investors visualize Tesla’s price trends and identify patterns in its price movements over time.",
                 "Highlight the importance of trading volume in understanding investor sentiment and how spikes or drops in volume can indicate a change in market behavior.",
                 "Explain the role of key technical indicators such as moving averages, Relative Strength Index (RSI), and Bollinger Bands in assessing Tesla’s stock performance.",
@@ -160,7 +160,7 @@ The following are complete examples of the input and output:
     "paragraphs": [
         {
             "heading": "Introduction to Bitcoin",
-            "description": [
+            "paragraph": [
                 "Introduce Bitcoin as the first decentralized cryptocurrency, launched in 2009 by an anonymous figure known as Satoshi Nakamoto.",
                 "Explain Bitcoin’s role in the digital currency ecosystem, being the most well-known and widely adopted cryptocurrency.",
                 "Discuss its foundational technology, blockchain, which ensures transparency and security in financial transactions without the need for intermediaries.",
@@ -169,7 +169,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Recent Price Trends",
-            "description": [
+            "paragraph": [
                 "Analyze Bitcoin’s price movements over the last few months, focusing on key price spikes and drops in response to market events and global developments.",
                 "Highlight the factors driving Bitcoin’s price fluctuations, such as institutional adoption, media coverage, and macroeconomic trends like inflation fears or global economic uncertainty.",
                 "Examine the correlation between Bitcoin’s price trends and other financial markets, including its behavior during periods of stock market volatility or global financial crises.",
@@ -178,7 +178,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Market Adoption and Regulation",
-            "description": [
+            "paragraph": [
                 "Discuss how Bitcoin is being increasingly adopted across the globe, from individual users to institutional investors and corporations looking to diversify their holdings.",
                 "Examine how different countries are handling Bitcoin’s adoption, from favorable regulatory environments in countries like El Salvador to more cautious or restrictive approaches in nations like China.",
                 "Analyze the role of governmental regulations in shaping Bitcoin’s market, especially regarding anti-money laundering (AML) and know-your-customer (KYC) laws.",
@@ -187,7 +187,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Risk Factors and Volatility",
-            "description": [
+            "paragraph": [
                 "Assess the volatility of Bitcoin’s price and its historical price swings, noting periods of significant rises and falls, which can be a risk for investors.",
                 "Identify the factors contributing to Bitcoin’s high volatility, such as speculative trading, market manipulation, and macroeconomic events.",
                 "Discuss the regulatory uncertainty surrounding Bitcoin and how potential government crackdowns or regulatory measures could cause price fluctuations.",
@@ -196,7 +196,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Comparison with Other Cryptocurrencies",
-            "description": [
+            "paragraph": [
                 "Compare Bitcoin’s market position with that of other leading cryptocurrencies, such as Ethereum, Litecoin, and newer entrants like Solana and Cardano.",
                 "Examine how Bitcoin’s role as a store of value contrasts with Ethereum’s utility as a platform for decentralized applications (dApps) and smart contracts.",
                 "Discuss the adoption rates and market capitalization of Bitcoin versus other cryptocurrencies and how Bitcoin maintains its dominance in the space.",
@@ -205,7 +205,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Future Outlook and Expert Predictions",
-            "description": [
+            "paragraph": [
                 "Provide insights from experts regarding Bitcoin’s future value, with many predicting a continued increase in adoption as a hedge against inflation and financial instability.",
                 "Discuss Bitcoin’s potential to become a more widely accepted global currency and its possible integration into the mainstream financial system.",
                 "Consider the risks and challenges Bitcoin faces, such as regulatory hurdles, scalability issues, and competition from central bank digital currencies (CBDCs).",
@@ -214,7 +214,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Bitcoin Price Visualization",
-            "description": [
+            "paragraph": [
                 "Introduce the role of price charts and data visualizations in understanding Bitcoin’s market trends and volatility.",
                 "Discuss how historical price charts can show patterns of Bitcoin’s performance over different time periods and help predict future price movements.",
                 "Highlight specific price indicators such as moving averages, RSI (Relative Strength Index), and Bollinger Bands, and how they are used by traders to assess Bitcoin’s market behavior.",
@@ -272,7 +272,7 @@ The following are complete examples of the input and output:
     "paragraphs": [
         {
             "heading": "Introduction to Apple and Microsoft",
-            "description": [
+            "paragraph": [
                 "Provide a brief history of Apple and Microsoft, focusing on their founding, major milestones, and current market presence.",
                 "Discuss the industries both companies operate in: Apple in consumer electronics and technology, Microsoft in software and cloud services.",
                 "Examine their market share in their respective sectors, highlighting Apple's dominance in the smartphone market and Microsoft's leadership in the software industry.",
@@ -281,7 +281,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Recent Stock Performance Comparison",
-            "description": [
+            "paragraph": [
                 "Analyze the recent stock performance of Apple and Microsoft, including key price movements over the past few months.",
                 "Discuss factors driving stock price fluctuations for both companies, such as product launches, earnings reports, and economic conditions.",
                 "Examine trends in their stock charts, noting key rises or dips and potential correlations with broader market movements or sector-specific events.",
@@ -290,7 +290,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Key Financial Metrics: Revenue, P/E Ratio, EPS",
-            "description": [
+            "paragraph": [
                 "Break down the financial health of Apple and Microsoft, focusing on their latest revenue figures and how they compare against each other.",
                 "Compare the companies’ price-to-earnings (P/E) ratios, explaining what this metric reveals about investor expectations and stock valuation.",
                 "Examine earnings per share (EPS) for both companies, discussing how their earnings are trending and the implications for investors.",
@@ -299,7 +299,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Risk and Volatility Analysis",
-            "description": [
+            "paragraph": [
                 "Assess the risk levels associated with investing in Apple and Microsoft, considering both macroeconomic and company-specific factors.",
                 "Discuss the volatility of each company’s stock price and the external events that can trigger significant price changes, such as economic downturns or new regulatory policies.",
                 "Consider the influence of competition in the tech industry and how market sentiment affects stock performance for both companies.",
@@ -308,7 +308,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Industry Trends and Market Position",
-            "description": [
+            "paragraph": [
                 "Analyze the current trends in the tech industry, such as cloud computing, artificial intelligence, and smartphone innovation, and their impact on both Apple and Microsoft.",
                 "Examine how Apple and Microsoft are adapting to new technological advancements and positioning themselves within these growing sectors.",
                 "Compare their market positions in terms of product offerings, market share, and future outlook for each company in their respective industries.",
@@ -317,7 +317,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Future Growth Potential",
-            "description": [
+            "paragraph": [
                 "Explore the future growth prospects for Apple and Microsoft, focusing on product innovation, new market opportunities, and their ability to maintain their market leadership.",
                 "Consider their strategies for expanding into new areas, such as Microsoft’s growth in the cloud computing space and Apple’s ventures into wearables and services.",
                 "Examine long-term financial projections and analyst predictions regarding their growth trajectories and potential market share increases.",
@@ -326,7 +326,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Stock Performance Comparison Charts",
-            "description": [
+            "paragraph": [
                 "Introduce the use of stock performance comparison charts to visualize the trends in Apple and Microsoft’s stock prices over time.",
                 "Explain how to interpret stock charts, such as tracking moving averages, relative strength index (RSI), and volume spikes to understand stock performance.",
                 "Provide examples of chart patterns that reveal important insights into market sentiment, volatility, and potential price movements.",
@@ -385,7 +385,7 @@ The following are complete examples of the input and output:
     "paragraphs": [
         {
             "heading": "Introduction to Gold as an Investment",
-            "description": [
+            "paragraph": [
                 "Introduce gold as an asset class, focusing on its historical significance in the global economy as a store of value.",
                 "Explain why investors often consider gold a 'safe haven' investment, particularly during periods of economic uncertainty or market volatility.",
                 "Discuss gold's intrinsic value and how its value remains relatively stable compared to other financial assets, making it a preferred choice during inflationary times.",
@@ -394,7 +394,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Historical Performance of Gold",
-            "description": [
+            "paragraph": [
                 "Review key periods of growth and decline in gold’s historical performance, such as during times of financial crises like the 2008 recession and the COVID-19 pandemic.",
                 "Examine how gold has historically responded to changes in global economic conditions, such as inflation, deflation, and interest rate changes.",
                 "Discuss the long-term trend of gold’s price appreciation and its ability to maintain value over time, making it an attractive investment during periods of market uncertainty.",
@@ -403,7 +403,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Market Trends and Current Price Movements",
-            "description": [
+            "paragraph": [
                 "Provide an overview of the current trends in the gold market, highlighting recent price movements, particularly in the last year or few months.",
                 "Discuss factors influencing the supply and demand for gold, including mining output, geopolitical stability, and central bank policies on gold reserves.",
                 "Examine the impact of economic factors such as inflation, interest rates, and currency fluctuations on gold prices.",
@@ -412,7 +412,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Risk Factors and Potential Returns",
-            "description": [
+            "paragraph": [
                 "Evaluate the risks associated with investing in gold, including market volatility, sudden price fluctuations, and the lack of income generation from gold itself.",
                 "Discuss how inflation and currency fluctuations can impact the real value of gold investments, particularly during periods of deflation or rising interest rates.",
                 "Examine the potential returns for investors, comparing gold’s historical performance with other asset classes like stocks, bonds, and real estate.",
@@ -421,7 +421,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Gold vs Stocks and Bonds",
-            "description": [
+            "paragraph": [
                 "Compare the investment characteristics of gold with traditional assets like stocks and bonds, focusing on their respective risks and returns.",
                 "Highlight the advantages of diversifying into gold, particularly in times of stock market volatility or when interest rates on bonds are low.",
                 "Discuss the role of gold in a balanced investment portfolio and how it can offer protection against risks that stocks and bonds are more susceptible to.",
@@ -430,7 +430,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Expert Recommendations and Timing Strategies",
-            "description": [
+            "paragraph": [
                 "Provide insights from financial experts on the best times to invest in gold, such as during periods of economic uncertainty or rising inflation expectations.",
                 "Discuss strategies for incorporating gold into an investment portfolio, whether through direct purchases, gold ETFs, or other gold-backed securities.",
                 "Highlight the role of dollar-cost averaging (DCA) and long-term holding strategies in mitigating short-term market fluctuations and benefiting from gold’s long-term appreciation.",
@@ -439,7 +439,7 @@ The following are complete examples of the input and output:
         },
         {
             "heading": "Investment Outlook Visualization",
-            "description": [
+            "paragraph": [
                 "Introduce the use of charts and graphs to represent trends in gold investment, showcasing price movements, returns, and volatility over different time periods.",
                 "Use visual tools to compare the historical performance of gold with other asset classes, highlighting the stability of gold in comparison to equities and bonds.",
                 "Provide a visual representation of gold’s potential returns in a diversified investment portfolio, illustrating the impact of market conditions on overall portfolio performance.",
