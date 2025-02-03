@@ -32,7 +32,24 @@ The following are complete examples of the input and output:
     <Output>
     ```json
     {
-        "valid": "true"
+        "valid": "false"
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Is it a good time to invest in gold?"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "valid": "false"
     }
     ```
 </Example>
