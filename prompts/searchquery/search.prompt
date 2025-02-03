@@ -29,7 +29,7 @@ The following are complete examples of the input and output:
             "Tesla stock overview and history",
             "How has Tesla stock evolved over time?",
             "Tesla stock profile and key details",
-            "Is Tesla a good investment in 2020?",
+            "Is Tesla a good investment in 2025?",
             "Tesla stock fundamentals explained",
             "What influences Tesla’s stock price?"
         ],
@@ -38,12 +38,12 @@ The following are complete examples of the input and output:
             "How did Tesla stock perform this week?",
             "Tesla stock performance vs S&P 500",
             "Recent news affecting Tesla stock",
-            "Tesla share price analysis 2011",
+            "Tesla share price analysis 2025",
             "Tesla stock trading volume trends"
         ],
         "Financial Metrics and Valuation": [
             "Tesla PE ratio and valuation metrics",
-            "How is Tesla stock valued in 2024?",
+            "How is Tesla stock valued in 2025?",
             "Tesla revenue and profit analysis",
             "Tesla financial ratios compared to industry",
             "Tesla earnings per share (EPS) trends",
@@ -90,7 +90,7 @@ The following are complete examples of the input and output:
     <Input>
     ```json
     {
-    "currentDate": "30-01-2025",
+    "currentDate": "09-08-2029",
     "headings": [
         "Introduction to Bitcoin",
         "Recent Price Trends",
@@ -117,7 +117,7 @@ The following are complete examples of the input and output:
             "Key features that make Bitcoin unique"
         ],
         "Recent Price Trends": [
-            "Bitcoin price trend analysis 2024",
+            "Bitcoin price trend analysis 2029",
             "Why is Bitcoin’s price rising or falling?",
             "Bitcoin price movements this month",
             "Impact of market events on Bitcoin’s price",
@@ -127,7 +127,7 @@ The following are complete examples of the input and output:
         "Market Adoption and Regulation": [
             "How governments regulate Bitcoin",
             "Countries where Bitcoin is legal or banned",
-            "Bitcoin adoption trends in 2025",
+            "Bitcoin adoption trends in 2029",
             "How institutions are investing in Bitcoin",
             "Bitcoin’s role in global finance",
             "Impact of SEC decisions on Bitcoin"
@@ -149,7 +149,7 @@ The following are complete examples of the input and output:
             "Bitcoin vs Litecoin: Which is faster?"
         ],
         "Future Outlook and Expert Predictions": [
-            "Bitcoin price prediction for 2020",
+            "Bitcoin price prediction for 2034",
             "What experts say about Bitcoin’s future",
             "Will Bitcoin reach $100K?",
             "Future of Bitcoin mining profitability",
@@ -172,7 +172,7 @@ The following are complete examples of the input and output:
 <Input>
 ```json
 {
-    "currentDate": "30-01-2025",
+    "currentDate": "25-11-2030",
     "headings": [
         "Overview of Apple Stock",
         "Recent Market Performance",
