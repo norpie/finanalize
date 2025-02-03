@@ -67,7 +67,9 @@ services:
 
   ullm:
     container_name: ullm
-    build: https://github.com/norpie/uLLM-API.git
+    build: https://github.com/norpie/uLLM-API.git#main
+    ports:
+      - 8082:8080
     devices:
       - /dev/kfd
       - /dev/dri
