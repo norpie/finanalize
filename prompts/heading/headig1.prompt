@@ -1,4 +1,4 @@
-This tool generates 5-7 first-level headings for a financial analysis based on the given query. It identifies the financial instrument mentioned (e.g., stock, cryptocurrency, bond) and tailors the headings to match the context of the request. These generated headings provide a structured framework to financially analyse key aspects such as market performance, risk assessment, trends, comparisons and future outlook. Additionally, a dedicated section for data visualization ensures that insights are supported by charts, graphs, or other visual elements. The tool is designed to handle a wide range of financial queries, including general investment insights, specific stock performance analysis and broader economic assessments. The headings should dynamically adapt based on the type of financial analysis requested. The goal is to provide a clear, organized framework that helps users interpret financial data effectively. Headings should be concise and relevant, avoiding quotation marks or unnecessary special formatting.
+This tool generates 5-7 first-level headings, each accompanied by a 3-4 line description, for a financial analysis based on the given query. It identifies the financial instrument mentioned (e.g., stock, cryptocurrency, bond) and tailors the headings and descriptions to match the context of the request. Each heading provides a structured framework for analyzing key financial aspects such as market performance, risk assessment, trends, comparisons, and future outlook. The descriptions explain what kind of insights, data, or analysis should be generated under each heading. Additionally, a dedicated section for data visualization ensures that insights are supported by charts, graphs, or other visual elements. The tool dynamically adapts to a wide range of financial queries, including general investment insights, specific stock performance analysis, and broader economic assessments. The headings and descriptions should be clear, concise, and informative, avoiding quotation marks or unnecessary special formatting. The goal is to provide a well-structured, intuitive framework that helps users interpret financial data effectively.
 
 The following are complete examples of the input and output:
 
@@ -15,16 +15,38 @@ The following are complete examples of the input and output:
 
     <Output>
     ```json
-    {
-        "headings": [
-            "Overview of Tesla Stock",
-            "Recent Market Performance",
-            "Financial Metrics and Valuation",
-            "Risk and Volatility Analysis",
-            "Competitor Comparison",
-            "Future Outlook and Predictions",
-            "Stock Performance Visualization"]
-    }
+{
+    "headings": [
+        {
+            "heading": "Overview of Tesla Stock",
+            "description": "A brief introduction to Tesla as a publicly traded company, including its stock ticker, industry, and historical significance in the market."
+        },
+        {
+            "heading": "Recent Market Performance",
+            "description": "An analysis of Tesla’s recent stock movements, trading volume, and key events that have influenced its price over the past weeks or months."
+        },
+        {
+            "heading": "Financial Metrics and Valuation",
+            "description": "A deep dive into Tesla’s financial health, covering revenue, earnings per share (EPS), price-to-earnings (P/E) ratio, and other key valuation metrics."
+        },
+        {
+            "heading": "Risk and Volatility Analysis",
+            "description": "An assessment of the risks associated with investing in Tesla, including stock price volatility, external market factors, and industry-specific challenges."
+        },
+        {
+            "heading": "Competitor Comparison",
+            "description": "A comparison of Tesla’s performance against competitors such as traditional automakers and other EV manufacturers, highlighting market share and key differentiators."
+        },
+        {
+            "heading": "Future Outlook and Predictions",
+            "description": "Predictions on Tesla’s stock performance based on expert opinions, upcoming company developments, and broader market trends."
+        },
+        {
+            "heading": "Stock Performance Visualization",
+            "description": "Graphical representations of Tesla’s stock price trends, trading volumes, and financial metrics to provide a clearer picture of its performance."
+        }
+    ]
+}
     ```
 </Example>
 
@@ -40,16 +62,38 @@ The following are complete examples of the input and output:
 
     <Output>
     ```json
-    {
-        "headings": [
-            "Introduction to Bitcoin",
-            "Recent Price Trends",
-            "Market Adoption and Regulation",
-            "Risk Factors and Volatility",
-            "Comparison with Other Cryptocurrencies",
-            "Future Outlook and Expert Predictions",
-            "Bitcoin Price Visualization"]
-    }
+{
+    "headings": [
+        {
+            "heading": "Introduction to Bitcoin",
+            "description": "An overview of Bitcoin as the first decentralized cryptocurrency, its origins, and its role in the digital currency ecosystem."
+        },
+        {
+            "heading": "Recent Price Trends",
+            "description": "Analysis of Bitcoin’s price movements over the past months, highlighting key spikes, drops, and factors driving these changes."
+        },
+        {
+            "heading": "Market Adoption and Regulation",
+            "description": "A look at how Bitcoin is being adopted globally, including the impact of governmental regulations, institutional investment, and public sentiment."
+        },
+        {
+            "heading": "Risk Factors and Volatility",
+            "description": "An examination of the high volatility in Bitcoin’s price, including the factors that contribute to its significant price fluctuations and market risk."
+        },
+        {
+            "heading": "Comparison with Other Cryptocurrencies",
+            "description": "A comparison of Bitcoin’s performance, adoption, and market position relative to other leading cryptocurrencies like Ethereum, Litecoin, and newer entrants."
+        },
+        {
+            "heading": "Future Outlook and Expert Predictions",
+            "description": "Expert opinions and predictions about Bitcoin’s long-term value, its potential as a store of value, and its role in future global financial systems."
+        },
+        {
+            "heading": "Bitcoin Price Visualization",
+            "description": "Graphs and charts that visualize Bitcoin’s price trends, trading volumes, and volatility over different periods to provide a clearer understanding of its market movements."
+        }
+    ]
+}
     ```
 </Example>
 <Example>
@@ -64,16 +108,38 @@ The following are complete examples of the input and output:
 
     <Output>
     ```json
-    {
-        "headings": [
-            "Introduction to Apple and Microsoft",
-            "Recent Stock Performance Comparison",
-            "Key Financial Metrics: Revenue, P/E Ratio, EPS",
-            "Risk and Volatility Analysis",
-            "Industry Trends and Market Position",
-            "Future Growth Potential",
-            "Stock Performance Comparison Charts"]
-    }
+{
+    "headings": [
+        {
+            "heading": "Introduction to Apple and Microsoft",
+            "description": "An overview of both companies, including their history, industry, market share, and importance in the tech sector."
+        },
+        {
+            "heading": "Recent Stock Performance Comparison",
+            "description": "A comparative analysis of the recent stock performance of Apple and Microsoft, highlighting key price movements and trends over the past few months."
+        },
+        {
+            "heading": "Key Financial Metrics: Revenue, P/E Ratio, EPS",
+            "description": "A breakdown of the financial health of both companies, focusing on their revenue, price-to-earnings (P/E) ratio, earnings per share (EPS), and other key financial metrics."
+        },
+        {
+            "heading": "Risk and Volatility Analysis",
+            "description": "An assessment of the risk levels associated with investing in Apple and Microsoft, including their stock volatility, market fluctuations, and external risks."
+        },
+        {
+            "heading": "Industry Trends and Market Position",
+            "description": "An analysis of the industry trends affecting Apple and Microsoft, such as technological advancements, competition, and their positioning in the global tech market."
+        },
+        {
+            "heading": "Future Growth Potential",
+            "description": "An exploration of the future growth prospects for both companies, including product innovation, market expansion, and long-term financial projections."
+        },
+        {
+            "heading": "Stock Performance Comparison Charts",
+            "description": "Visual representations comparing the stock price trends, volatility, and financial performance of Apple and Microsoft over time."
+        }
+    ]
+}
     ```
 </Example>
 
@@ -89,16 +155,39 @@ The following are complete examples of the input and output:
 
     <Output>
     ```json
-    {
-        "headings": [
-            "Introduction to Gold as an Investment",
-            "Historical Performance of Gold",
-            "Market Trends and Current Price Movements",
-            "Risk Factors and Potential Returns",
-            "Gold vs Stocks and Bonds",
-            "Expert Recommendations and Timing Strategies",
-            "Investment Outlook Visualization"]
-    }
+{
+    "headings": [
+        {
+            "heading": "Introduction to Gold as an Investment",
+            "description": "An introduction to gold as an asset class, its historical role as a store of value, and why investors consider it a safe haven investment."
+        },
+        {
+            "heading": "Historical Performance of Gold",
+            "description": "A review of gold’s performance over the years, including key periods of growth and decline, and how it has responded to economic conditions."
+        },
+        {
+            "heading": "Market Trends and Current Price Movements",
+            "description": "An analysis of the current trends in the gold market, focusing on recent price movements, factors influencing supply and demand, and geopolitical impacts."
+        },
+        {
+            "heading": "Risk Factors and Potential Returns",
+            "description": "An evaluation of the risks associated with investing in gold, such as market volatility, inflation, and currency fluctuations, alongside the potential returns for investors."
+        },
+        {
+            "heading": "Gold vs Stocks and Bonds",
+            "description": "A comparison of gold with other traditional investments like stocks and bonds, assessing the pros and cons of diversifying into gold in an investment portfolio."
+        },
+        {
+            "heading": "Expert Recommendations and Timing Strategies",
+            "description": "Insights from financial experts about the ideal times to invest in gold, and strategies for incorporating it into an investment portfolio based on market conditions."
+        },
+        {
+            "heading": "Investment Outlook Visualization",
+            "description": "Charts and graphs to visually represent the outlook for gold investment, showing trends, potential returns, and comparisons with other asset classes."
+        }
+    ]
+}
+
     ```
 </Example>
 
