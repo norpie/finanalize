@@ -14,6 +14,9 @@ pub enum FinanalizeError {
     #[error("Internal server error")]
     InternalServerError,
 
+    #[error("LLM API error: {0}")]
+    LlmApi(String),
+
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 
