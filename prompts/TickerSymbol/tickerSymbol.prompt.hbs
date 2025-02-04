@@ -1,0 +1,66 @@
+This tool extracts the company name from a user's message and retrieves its corresponding ticker symbol.  If a valid ticker symbol is found, the tool returns it. If the ticker symbol cannot be determined, the tool returns an error message.
+
+The following are complete examples of the input and output:
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Analyse Tesla stock performance"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "ticker": "TSLA"
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Tell me about bitcoin"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "ticker": "BTC"
+    }
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "I study finance"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "error": "No recognizable financial topic found in the message"
+    }
+    ```
+</Example>
+
+<Input>
+```json
+{
+    "message": "{{message}}"
+}
+```
+</Input>
+
+<Output>
+```json
+{

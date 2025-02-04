@@ -1,0 +1,722 @@
+This tool generates relevant search queries based on the first-level headings, current date, and the detailed paragraphs from each section of a financial analysis. The aim is to create search terms that users are likely to enter into a search engine when looking for information on the topic of each heading. The tool will produce three concise, effective queries per paragraph, ensuring that they match the user's search intent and incorporate commonly used financial terminology. These search queries will help users quickly find relevant information in a manner aligned with typical search patterns.
+
+If a heading is too broad, the tool should refine it into more specific search phrases. The generated queries should avoid unnecessary words and be formatted as natural search engine queries.
+The following are complete examples of the input and output:
+
+<Example>
+    <Input>
+    ```json
+    {
+    "currentDate": "30-01-2025",
+    "headings": [
+        "Overview of Tesla Stock",
+        "Recent Market Performance",
+        "Financial Metrics and Valuation",
+        "Risk and Volatility Analysis",
+        "Competitor Comparison",
+        "Future Outlook and Predictions",
+        "Stock Performance Visualization"
+    ]
+    "paragraphs": [
+        {
+            "heading": "Overview of Tesla Stock",
+            "paragraph": [
+                "Introduce Tesla as a publicly traded company, focusing on its stock ticker (TSLA), industry, and market positioning.",
+                "Highlight Tesla’s significance in the electric vehicle (EV) industry and its role in disrupting traditional automotive markets.",
+                "Mention Tesla’s innovation in energy solutions and autonomous driving, and how these have contributed to its popularity and stock performance.",
+                "Provide a brief history of Tesla's IPO and its growth trajectory within the stock market."
+            ]
+        },
+        {
+            "heading": "Recent Market Performance",
+            "paragraph": [
+                "Analyze Tesla’s stock performance over the past weeks or months, noting significant price movements and trading volume changes.",
+                "Highlight major events, such as earnings reports, product announcements, and market conditions, that influenced Tesla’s stock price.",
+                "Discuss the volatility of Tesla’s stock price, including notable spikes or declines and their correlation with broader market trends or company-specific news.",
+                "Consider the influence of investor sentiment, including retail vs. institutional interest and their impact on Tesla’s stock price."
+            ]
+        },
+        {
+            "heading": "Financial Metrics and Valuation",
+            "paragraph": [
+                "Provide an in-depth look at Tesla’s financial health, including its revenue growth over recent quarters and annual periods.",
+                "Discuss Tesla’s earnings per share (EPS) and how it compares to analysts’ expectations and industry peers.",
+                "Explore Tesla’s price-to-earnings (P/E) ratio and how it indicates the market's expectation of the company's future earnings growth.",
+                "Consider other key financial metrics like gross margin, operating income, and cash flow, providing insight into Tesla’s overall valuation."
+            ]
+        },
+        {
+            "heading": "Risk and Volatility Analysis",
+            "paragraph": [
+                "Assess the risk factors that could affect Tesla’s stock, including market volatility and macroeconomic trends such as interest rates and inflation.",
+                "Discuss the impact of competition in the EV market and how it could affect Tesla’s market share and profitability.",
+                "Examine Tesla’s exposure to supply chain disruptions, regulatory changes, and raw material costs, and how these factors could affect its future stock performance.",
+                "Consider Tesla’s reliance on its leadership and CEO Elon Musk, and how his actions and statements may influence investor confidence and stock volatility."
+            ]
+        },
+        {
+            "heading": "Competitor Comparison",
+            "paragraph": [
+                "Compare Tesla’s stock performance and market position with traditional automakers like Ford and General Motors, which are investing heavily in EVs.",
+                "Highlight new entrants into the EV space, such as Rivian and Lucid Motors, and how they compete with Tesla in terms of innovation, technology, and production capacity.",
+                "Examine Tesla’s competitive advantage, including its superior battery technology, software capabilities (e.g., Autopilot), and global manufacturing footprint.",
+                "Evaluate Tesla's market share in relation to its competitors and how its future growth is influenced by innovation and the expansion of the EV market."
+            ]
+        },
+        {
+            "heading": "Future Outlook and Predictions",
+            "paragraph": [
+                "Discuss expert predictions for Tesla’s stock performance, with a focus on expected revenue growth and profit margins over the next few years.",
+                "Analyze potential growth drivers such as new product releases, expansion into emerging markets, and strategic partnerships with other industries.",
+                "Examine risks that could affect Tesla’s future growth, including regulatory hurdles, technological challenges, and competition from established automakers and startups.",
+                "Consider broader market trends, including the global shift to sustainable energy and how this could benefit Tesla’s long-term prospects."
+            ]
+        },
+        {
+            "heading": "Stock Performance Visualization",
+            "paragraph": [
+                "Discuss how stock charts can help investors visualize Tesla’s price trends and identify patterns in its price movements over time.",
+                "Highlight the importance of trading volume in understanding investor sentiment and how spikes or drops in volume can indicate a change in market behavior.",
+                "Explain the role of key technical indicators such as moving averages, Relative Strength Index (RSI), and Bollinger Bands in assessing Tesla’s stock performance.",
+                "Provide examples of how stock performance data visualizations can help investors make informed decisions about when to buy or sell Tesla stock."
+            ]
+        }
+    ]
+}
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+    "queries": [
+        {
+            "heading": "Overview of Tesla Stock",
+            "queries": [
+                {
+                    "bullet": "Introduce Tesla as a publicly traded company, focusing on its stock ticker (TSLA), industry, and market positioning.",
+                    "queries": [
+                        "What is Tesla’s stock ticker and in which industry does it operate?",
+                        "How did Tesla become a publicly traded company and what is its market position?",
+                        "What are the key factors contributing to Tesla's success in the automotive and energy sectors?"
+                    ]
+                },
+                {
+                    "bullet": "Highlight Tesla’s significance in the electric vehicle (EV) industry and its role in disrupting traditional automotive markets.",
+                    "queries": [
+                        "How has Tesla disrupted the traditional automotive market with its electric vehicles?",
+                        "Why is Tesla considered a leader in the electric vehicle industry?",
+                        "What impact has Tesla had on the global EV market and traditional automakers?"
+                    ]
+                },
+                {
+                    "bullet": "Mention Tesla’s innovation in energy solutions and autonomous driving, and how these have contributed to its popularity and stock performance.",
+                    "queries": [
+                        "What innovations has Tesla made in energy solutions and autonomous driving?",
+                        "How has Tesla’s autonomous driving technology impacted its stock price?",
+                        "What role do Tesla’s energy solutions play in its growth and stock performance?"
+                    ]
+                },
+                {
+                    "bullet": "Provide a brief history of Tesla's IPO and its growth trajectory within the stock market.",
+                    "queries": [
+                        "What was the history of Tesla’s IPO and how did it affect the company's growth?",
+                        "How has Tesla’s stock performed since its IPO?",
+                        "What factors contributed to Tesla’s impressive growth trajectory after its IPO?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Recent Market Performance",
+            "queries": [
+                {
+                    "bullet": "Analyze Tesla’s stock performance over the past weeks or months, noting significant price movements and trading volume changes.",
+                    "queries": [
+                        "What were the recent price movements of Tesla stock?",
+                        "How has Tesla’s trading volume changed in recent months?",
+                        "What significant price fluctuations have occurred in Tesla stock recently?"
+                    ]
+                },
+                {
+                    "bullet": "Highlight major events, such as earnings reports, product announcements, and market conditions, that influenced Tesla’s stock price.",
+                    "queries": [
+                        "How did Tesla’s earnings reports influence its stock price?",
+                        "What product announcements have impacted Tesla's stock price recently?",
+                        "How have broader market conditions affected Tesla’s stock performance?"
+                    ]
+                },
+                {
+                    "bullet": "Discuss the volatility of Tesla’s stock price, including notable spikes or declines and their correlation with broader market trends or company-specific news.",
+                    "queries": [
+                        "Why is Tesla stock so volatile and how does it compare to other tech stocks?",
+                        "What events led to the recent spikes and declines in Tesla’s stock price?",
+                        "How do company-specific events influence Tesla's stock price volatility?"
+                    ]
+                },
+                {
+                    "bullet": "Consider the influence of investor sentiment, including retail vs. institutional interest and their impact on Tesla’s stock price.",
+                    "queries": [
+                        "How does investor sentiment influence Tesla stock performance?",
+                        "What is the role of retail investors versus institutional investors in Tesla's stock price movements?",
+                        "How have retail and institutional investors impacted Tesla’s stock price in recent months?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Financial Metrics and Valuation",
+            "queries": [
+                {
+                    "bullet": "Provide an in-depth look at Tesla’s financial health, including its revenue growth over recent quarters and annual periods.",
+                    "queries": [
+                        "How has Tesla’s revenue grown in recent quarters?",
+                        "What are the key drivers behind Tesla's revenue growth?",
+                        "How does Tesla’s revenue growth compare to other automakers?"
+                    ]
+                },
+                {
+                    "bullet": "Discuss Tesla’s earnings per share (EPS) and how it compares to analysts’ expectations and industry peers.",
+                    "queries": [
+                        "What is Tesla’s current earnings per share (EPS)?",
+                        "How does Tesla’s EPS compare to industry peers?",
+                        "How have Tesla’s earnings per share performed relative to analysts’ expectations?"
+                    ]
+                },
+                {
+                    "bullet": "Explore Tesla’s price-to-earnings (P/E) ratio and how it indicates the market's expectation of the company's future earnings growth.",
+                    "queries": [
+                        "What is Tesla's price-to-earnings (P/E) ratio?",
+                        "How does Tesla’s P/E ratio reflect the market's expectations for future growth?",
+                        "Why is Tesla's P/E ratio considered high compared to other automakers?"
+                    ]
+                },
+                {
+                    "bullet": "Consider other key financial metrics like gross margin, operating income, and cash flow, providing insight into Tesla’s overall valuation.",
+                    "queries": [
+                        "What are Tesla’s key financial metrics, such as gross margin and operating income?",
+                        "How do Tesla's cash flow and operating income reflect its financial health?",
+                        "What impact does Tesla's gross margin have on its valuation?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Risk and Volatility Analysis",
+            "queries": [
+                {
+                    "bullet": "Assess the risk factors that could affect Tesla’s stock, including market volatility and macroeconomic trends such as interest rates and inflation.",
+                    "queries": [
+                        "What are the macroeconomic risks affecting Tesla’s stock?",
+                        "How does interest rate fluctuation impact Tesla's stock price?",
+                        "What role does inflation play in the volatility of Tesla’s stock?"
+                    ]
+                },
+                {
+                    "bullet": "Discuss the impact of competition in the EV market and how it could affect Tesla’s market share and profitability.",
+                    "queries": [
+                        "How does competition from other EV manufacturers affect Tesla’s market share?",
+                        "What risks does Tesla face from new competitors in the EV market?",
+                        "How could increased competition impact Tesla’s profitability in the future?"
+                    ]
+                },
+                {
+                    "bullet": "Examine Tesla’s exposure to supply chain disruptions, regulatory changes, and raw material costs, and how these factors could affect its future stock performance.",
+                    "queries": [
+                        "How do supply chain disruptions impact Tesla’s stock price?",
+                        "What regulatory changes could affect Tesla's future stock performance?",
+                        "How do raw material costs influence Tesla’s stock and production capabilities?"
+                    ]
+                },
+                {
+                    "bullet": "Consider Tesla’s reliance on its leadership and CEO Elon Musk, and how his actions and statements may influence investor confidence and stock volatility.",
+                    "queries": [
+                        "How does Elon Musk’s leadership impact Tesla’s stock price?",
+                        "What role does Elon Musk play in influencing investor sentiment about Tesla?",
+                        "How has Elon Musk's statements affected Tesla’s stock volatility?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Competitor Comparison",
+            "queries": [
+                {
+                    "bullet": "Compare Tesla’s stock performance and market position with traditional automakers like Ford and General Motors, which are investing heavily in EVs.",
+                    "queries": [
+                        "How does Tesla's stock performance compare to traditional automakers like Ford?",
+                        "What are the market positions of Tesla, Ford, and General Motors in the EV industry?",
+                        "How does Tesla’s growth differ from other automakers investing in EVs?"
+                    ]
+                },
+                {
+                    "bullet": "Highlight new entrants into the EV space, such as Rivian and Lucid Motors, and how they compete with Tesla in terms of innovation, technology, and production capacity.",
+                    "queries": [
+                        "How does Tesla compete with new EV entrants like Rivian and Lucid Motors?",
+                        "What technological innovations differentiate Tesla from new competitors?",
+                        "How do Rivian and Lucid Motors challenge Tesla’s market dominance?"
+                    ]
+                },
+                {
+                    "bullet": "Examine Tesla’s competitive advantage, including its superior battery technology, software capabilities (e.g., Autopilot), and global manufacturing footprint.",
+                    "queries": [
+                        "What are Tesla’s competitive advantages in battery technology and software?",
+                        "How does Tesla’s global manufacturing footprint give it an edge over competitors?",
+                        "How has Tesla’s Autopilot technology contributed to its market position?"
+                    ]
+                },
+                {
+                    "bullet": "Evaluate Tesla's market share in relation to its competitors and how its future growth is influenced by innovation and the expansion of the EV market.",
+                    "queries": [
+                        "How does Tesla’s market share compare to competitors in the EV market?",
+                        "What factors will influence Tesla’s future growth in relation to its competitors?",
+                        "How does innovation play a role in Tesla’s ability to retain market leadership?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Future Outlook and Predictions",
+            "queries": [
+                {
+                    "bullet": "Discuss expert predictions for Tesla’s stock performance, with a focus on expected revenue growth and profit margins over the next few years.",
+                    "queries": [
+                        "What are the expert predictions for Tesla’s stock performance in the coming years?",
+                        "How do analysts expect Tesla’s revenue growth to evolve?",
+                        "What impact will profit margins have on Tesla’s future stock performance?"
+                    ]
+                },
+                {
+                    "bullet": "Analyze potential growth drivers such as new product releases, expansion into emerging markets, and strategic partnerships with other industries.",
+                    "queries": [
+                        "What new product releases could drive Tesla’s stock growth?",
+                        "How will Tesla’s expansion into emerging markets affect its future growth?",
+                        "What strategic partnerships could influence Tesla’s future prospects?"
+                    ]
+                },
+                {
+                    "bullet": "Examine risks that could affect Tesla’s future growth, including regulatory hurdles, technological challenges, and competition from established automakers and startups.",
+                    "queries": [
+                        "What risks could hinder Tesla’s future growth prospects?",
+                        "How could regulatory hurdles impact Tesla’s business operations?",
+                        "What technological challenges could slow Tesla’s innovation and growth?"
+                    ]
+                },
+                {
+                    "bullet": "Consider broader market trends, including the global shift to sustainable energy and how this could benefit Tesla’s long-term prospects.",
+                    "queries": [
+                        "How will the global shift to sustainable energy benefit Tesla in the long term?",
+                        "What market trends could drive Tesla’s growth in the next decade?",
+                        "How can Tesla capitalize on the increasing demand for sustainable energy solutions?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Stock Performance Visualization",
+            "queries": [
+                {
+                    "bullet": "Discuss how stock charts can help investors visualize Tesla’s price trends and identify patterns in its price movements over time.",
+                    "queries": [
+                        "How can stock charts be used to visualize Tesla's price trends?",
+                        "What patterns can investors identify from Tesla's stock price movements?",
+                        "How do stock charts help investors predict future price movements for Tesla?"
+                    ]
+                },
+                {
+                    "bullet": "Highlight the importance of trading volume in understanding investor sentiment and how spikes or drops in volume can indicate a change in market behavior.",
+                    "queries": [
+                        "What role does trading volume play in analyzing Tesla’s stock performance?",
+                        "How do spikes in trading volume reflect changes in investor sentiment?",
+                        "How can investors use trading volume to predict Tesla’s stock price movements?"
+                    ]
+                },
+                {
+                    "bullet": "Explain the role of key technical indicators such as moving averages, Relative Strength Index (RSI), and Bollinger Bands in assessing Tesla’s stock performance.",
+                    "queries": [
+                        "What role do moving averages play in analyzing Tesla’s stock performance?",
+                        "How can investors use Relative Strength Index (RSI) to assess Tesla stock?",
+                        "What are Bollinger Bands and how can they be used to analyze Tesla’s stock price?"
+                    ]
+                },
+                {
+                    "bullet": "Provide examples of how stock performance data visualizations can help investors make informed decisions about when to buy or sell Tesla stock.",
+                    "queries": [
+                        "How do stock performance visualizations help investors make buy or sell decisions?",
+                        "What are the most important data visualizations for analyzing Tesla stock?",
+                        "How can investors use stock charts to decide when to buy or sell Tesla stock?"
+                    ]
+                }
+            ]
+        }
+    ]
+}
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+    "currentDate": "09-08-2029",
+    "headings": [
+        "Introduction to Bitcoin",
+        "Recent Price Trends",
+        "Market Adoption and Regulation",
+        "Risk Factors and Volatility",
+        "Comparison with Other Cryptocurrencies",
+        "Future Outlook and Expert Predictions",
+        "Bitcoin Price Visualization"
+    ]
+
+        "paragraphs": [
+        {
+            "heading": "Introduction to Bitcoin",
+            "paragraph": [
+                "Introduce Bitcoin as the first decentralized cryptocurrency, launched in 2009 by an anonymous figure known as Satoshi Nakamoto.",
+                "Explain Bitcoin’s role in the digital currency ecosystem, being the most well-known and widely adopted cryptocurrency.",
+                "Discuss its foundational technology, blockchain, which ensures transparency and security in financial transactions without the need for intermediaries.",
+                "Highlight Bitcoin’s position as a store of value and its impact on the broader cryptocurrency market, influencing the creation of many other digital currencies."
+            ]
+        },
+        {
+            "heading": "Recent Price Trends",
+            "paragraph": [
+                "Analyze Bitcoin’s price movements over the last few months, focusing on key price spikes and drops in response to market events and global developments.",
+                "Highlight the factors driving Bitcoin’s price fluctuations, such as institutional adoption, media coverage, and macroeconomic trends like inflation fears or global economic uncertainty.",
+                "Examine the correlation between Bitcoin’s price trends and other financial markets, including its behavior during periods of stock market volatility or global financial crises.",
+                "Consider the role of Bitcoin in the emerging digital asset class and how its price trends reflect growing acceptance and adoption by both retail and institutional investors."
+            ]
+        },
+        {
+            "heading": "Market Adoption and Regulation",
+            "paragraph": [
+                "Discuss how Bitcoin is being increasingly adopted across the globe, from individual users to institutional investors and corporations looking to diversify their holdings.",
+                "Examine how different countries are handling Bitcoin’s adoption, from favorable regulatory environments in countries like El Salvador to more cautious or restrictive approaches in nations like China.",
+                "Analyze the role of governmental regulations in shaping Bitcoin’s market, especially regarding anti-money laundering (AML) and know-your-customer (KYC) laws.",
+                "Look at the growing interest in Bitcoin from financial institutions, such as banks, hedge funds, and publicly traded companies, and how this institutional adoption is helping to legitimize Bitcoin in mainstream finance."
+            ]
+        },
+        {
+            "heading": "Risk Factors and Volatility",
+            "paragraph": [
+                "Assess the volatility of Bitcoin’s price and its historical price swings, noting periods of significant rises and falls, which can be a risk for investors.",
+                "Identify the factors contributing to Bitcoin’s high volatility, such as speculative trading, market manipulation, and macroeconomic events.",
+                "Discuss the regulatory uncertainty surrounding Bitcoin and how potential government crackdowns or regulatory measures could cause price fluctuations.",
+                "Examine Bitcoin’s market risk, including its dependence on investor sentiment and the overall market adoption of cryptocurrencies."
+            ]
+        },
+        {
+            "heading": "Comparison with Other Cryptocurrencies",
+            "paragraph": [
+                "Compare Bitcoin’s market position with that of other leading cryptocurrencies, such as Ethereum, Litecoin, and newer entrants like Solana and Cardano.",
+                "Examine how Bitcoin’s role as a store of value contrasts with Ethereum’s utility as a platform for decentralized applications (dApps) and smart contracts.",
+                "Discuss the adoption rates and market capitalization of Bitcoin versus other cryptocurrencies and how Bitcoin maintains its dominance in the space.",
+                "Explore the technological differences between Bitcoin and other cryptocurrencies, focusing on transaction speed, scalability, and energy consumption."
+            ]
+        },
+        {
+            "heading": "Future Outlook and Expert Predictions",
+            "paragraph": [
+                "Provide insights from experts regarding Bitcoin’s future value, with many predicting a continued increase in adoption as a hedge against inflation and financial instability.",
+                "Discuss Bitcoin’s potential to become a more widely accepted global currency and its possible integration into the mainstream financial system.",
+                "Consider the risks and challenges Bitcoin faces, such as regulatory hurdles, scalability issues, and competition from central bank digital currencies (CBDCs).",
+                "Look at Bitcoin’s long-term outlook, considering factors like technological improvements (e.g., the Lightning Network) and increasing institutional involvement in the market."
+            ]
+        },
+        {
+            "heading": "Bitcoin Price Visualization",
+            "paragraph": [
+                "Introduce the role of price charts and data visualizations in understanding Bitcoin’s market trends and volatility.",
+                "Discuss how historical price charts can show patterns of Bitcoin’s performance over different time periods and help predict future price movements.",
+                "Highlight specific price indicators such as moving averages, RSI (Relative Strength Index), and Bollinger Bands, and how they are used by traders to assess Bitcoin’s market behavior.",
+                "Explain how trading volumes and price movements on various exchanges help provide a clearer understanding of Bitcoin’s market liquidity and investor interest."
+            ]
+        }
+    ]
+}
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+    "queries": [
+        {
+            "heading": "Introduction to Bitcoin",
+            "queries": [
+                {
+                    "bullet": "Introduce Bitcoin as the first decentralized cryptocurrency, launched in 2009 by an anonymous figure known as Satoshi Nakamoto.",
+                    "queries": [
+                        "What is Bitcoin and who created it?",
+                        "Who is Satoshi Nakamoto and what role did they play in Bitcoin’s creation?",
+                        "What makes Bitcoin the first decentralized cryptocurrency?"
+                    ]
+                },
+                {
+                    "bullet": "Explain Bitcoin’s role in the digital currency ecosystem, being the most well-known and widely adopted cryptocurrency.",
+                    "queries": [
+                        "How did Bitcoin become the most well-known cryptocurrency?",
+                        "What is Bitcoin's role in the digital currency ecosystem?",
+                        "Why is Bitcoin the most widely adopted cryptocurrency?"
+                    ]
+                },
+                {
+                    "bullet": "Discuss its foundational technology, blockchain, which ensures transparency and security in financial transactions without the need for intermediaries.",
+                    "queries": [
+                        "How does Bitcoin’s blockchain technology work?",
+                        "What is blockchain and why is it important for Bitcoin’s security?",
+                        "Why does Bitcoin not need intermediaries for financial transactions?"
+                    ]
+                },
+                {
+                    "bullet": "Highlight Bitcoin’s position as a store of value and its impact on the broader cryptocurrency market, influencing the creation of many other digital currencies.",
+                    "queries": [
+                        "How is Bitcoin considered a store of value?",
+                        "What impact has Bitcoin had on the broader cryptocurrency market?",
+                        "How has Bitcoin influenced the creation of other digital currencies?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Recent Price Trends",
+            "queries": [
+                {
+                    "bullet": "Analyze Bitcoin’s price movements over the last few months, focusing on key price spikes and drops in response to market events and global developments.",
+                    "queries": [
+                        "What were the key price movements of Bitcoin in recent months?",
+                        "What caused Bitcoin’s price to spike or drop in the last few months?",
+                        "How do market events and global developments affect Bitcoin’s price?"
+                    ]
+                },
+                {
+                    "bullet": "Highlight the factors driving Bitcoin’s price fluctuations, such as institutional adoption, media coverage, and macroeconomic trends like inflation fears or global economic uncertainty.",
+                    "queries": [
+                        "How does institutional adoption impact Bitcoin’s price?",
+                        "What role does media coverage play in Bitcoin’s price fluctuations?",
+                        "How do macroeconomic trends like inflation affect Bitcoin’s price?"
+                    ]
+                },
+                {
+                    "bullet": "Examine the correlation between Bitcoin’s price trends and other financial markets, including its behavior during periods of stock market volatility or global financial crises.",
+                    "queries": [
+                        "How is Bitcoin correlated with other financial markets?",
+                        "What happens to Bitcoin during periods of stock market volatility?",
+                        "How does Bitcoin react to global financial crises?"
+                    ]
+                },
+                {
+                    "bullet": "Consider the role of Bitcoin in the emerging digital asset class and how its price trends reflect growing acceptance and adoption by both retail and institutional investors.",
+                    "queries": [
+                        "What role does Bitcoin play in the digital asset class?",
+                        "How do Bitcoin’s price trends reflect its growing adoption?",
+                        "Why is Bitcoin gaining acceptance among both retail and institutional investors?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Market Adoption and Regulation",
+            "queries": [
+                {
+                    "bullet": "Discuss how Bitcoin is being increasingly adopted across the globe, from individual users to institutional investors and corporations looking to diversify their holdings.",
+                    "queries": [
+                        "How is Bitcoin being adopted by individuals and corporations globally?",
+                        "Why are institutional investors increasingly adopting Bitcoin?",
+                        "What factors are driving the adoption of Bitcoin by corporations?"
+                    ]
+                },
+                {
+                    "bullet": "Examine how different countries are handling Bitcoin’s adoption, from favorable regulatory environments in countries like El Salvador to more cautious or restrictive approaches in nations like China.",
+                    "queries": [
+                        "How are different countries handling Bitcoin’s adoption?",
+                        "Why is El Salvador’s regulatory environment favorable to Bitcoin?",
+                        "How do countries like China regulate Bitcoin and why are they cautious?"
+                    ]
+                },
+                {
+                    "bullet": "Analyze the role of governmental regulations in shaping Bitcoin’s market, especially regarding anti-money laundering (AML) and know-your-customer (KYC) laws.",
+                    "queries": [
+                        "How do governmental regulations affect Bitcoin’s market?",
+                        "What role do anti-money laundering (AML) and know-your-customer (KYC) laws play in Bitcoin’s market?",
+                        "How are governments regulating Bitcoin to prevent illicit activities?"
+                    ]
+                },
+                {
+                    "bullet": "Look at the growing interest in Bitcoin from financial institutions, such as banks, hedge funds, and publicly traded companies, and how this institutional adoption is helping to legitimize Bitcoin in mainstream finance.",
+                    "queries": [
+                        "How are financial institutions adopting Bitcoin?",
+                        "What role does institutional adoption play in Bitcoin’s legitimacy?",
+                        "Why are banks and hedge funds investing in Bitcoin?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Risk Factors and Volatility",
+            "queries": [
+                {
+                    "bullet": "Assess the volatility of Bitcoin’s price and its historical price swings, noting periods of significant rises and falls, which can be a risk for investors.",
+                    "queries": [
+                        "How volatile is Bitcoin's price historically?",
+                        "What caused the significant price swings in Bitcoin's history?",
+                        "Why is Bitcoin's price volatility a risk for investors?"
+                    ]
+                },
+                {
+                    "bullet": "Identify the factors contributing to Bitcoin’s high volatility, such as speculative trading, market manipulation, and macroeconomic events.",
+                    "queries": [
+                        "What factors contribute to Bitcoin’s high volatility?",
+                        "How does speculative trading affect Bitcoin’s price volatility?",
+                        "How do macroeconomic events impact Bitcoin's volatility?"
+                    ]
+                },
+                {
+                    "bullet": "Discuss the regulatory uncertainty surrounding Bitcoin and how potential government crackdowns or regulatory measures could cause price fluctuations.",
+                    "queries": [
+                        "How does regulatory uncertainty affect Bitcoin’s price?",
+                        "What would a government crackdown mean for Bitcoin's price?",
+                        "How could future regulations cause Bitcoin’s price to fluctuate?"
+                    ]
+                },
+                {
+                    "bullet": "Examine Bitcoin’s market risk, including its dependence on investor sentiment and the overall market adoption of cryptocurrencies.",
+                    "queries": [
+                        "What market risks are associated with Bitcoin?",
+                        "How does Bitcoin depend on investor sentiment?",
+                        "How does the adoption of cryptocurrencies affect Bitcoin’s market risk?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Comparison with Other Cryptocurrencies",
+            "queries": [
+                {
+                    "bullet": "Compare Bitcoin’s market position with that of other leading cryptocurrencies, such as Ethereum, Litecoin, and newer entrants like Solana and Cardano.",
+                    "queries": [
+                        "How does Bitcoin compare to Ethereum and Litecoin in market position?",
+                        "What is Bitcoin’s market position compared to Solana and Cardano?",
+                        "Why does Bitcoin maintain its dominance in the cryptocurrency market?"
+                    ]
+                },
+                {
+                    "bullet": "Examine how Bitcoin’s role as a store of value contrasts with Ethereum’s utility as a platform for decentralized applications (dApps) and smart contracts.",
+                    "queries": [
+                        "How does Bitcoin function as a store of value compared to Ethereum?",
+                        "What are the differences between Bitcoin and Ethereum’s use cases?",
+                        "Why is Bitcoin considered a store of value while Ethereum focuses on dApps?"
+                    ]
+                },
+                {
+                    "bullet": "Discuss the adoption rates and market capitalization of Bitcoin versus other cryptocurrencies and how Bitcoin maintains its dominance in the space.",
+                    "queries": [
+                        "How does Bitcoin’s adoption rate compare to other cryptocurrencies?",
+                        "What is Bitcoin’s market capitalization compared to Ethereum and others?",
+                        "Why does Bitcoin remain dominant in the cryptocurrency market?"
+                    ]
+                },
+                {
+                    "bullet": "Explore the technological differences between Bitcoin and other cryptocurrencies, focusing on transaction speed, scalability, and energy consumption.",
+                    "queries": [
+                        "What are the technological differences between Bitcoin and Ethereum?",
+                        "How does Bitcoin’s transaction speed compare to other cryptocurrencies?",
+                        "What is the energy consumption of Bitcoin compared to other digital currencies?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Future Outlook and Expert Predictions",
+            "queries": [
+                {
+                    "bullet": "Provide insights from experts regarding Bitcoin’s future value, with many predicting a continued increase in adoption as a hedge against inflation and financial instability.",
+                    "queries": [
+                        "What do experts predict for Bitcoin’s future value?",
+                        "Why do experts see Bitcoin as a hedge against inflation?",
+                        "How could Bitcoin’s adoption continue to grow in the coming years?"
+                    ]
+                },
+                {
+                    "bullet": "Discuss Bitcoin’s potential to become a more widely accepted global currency and its possible integration into the mainstream financial system.",
+                    "queries": [
+                        "Can Bitcoin become a widely accepted global currency?",
+                        "How could Bitcoin be integrated into the mainstream financial system?",
+                        "What challenges does Bitcoin face in becoming a global currency?"
+                    ]
+                },
+                {
+                    "bullet": "Consider the risks and challenges Bitcoin faces, such as regulatory hurdles, scalability issues, and competition from central bank digital currencies (CBDCs).",
+                    "queries": [
+                        "What risks does Bitcoin face in the future?",
+                        "How do scalability issues affect Bitcoin’s growth potential?",
+                        "What role will central bank digital currencies (CBDCs) play in Bitcoin’s future?"
+                    ]
+                },
+                {
+                    "bullet": "Look at Bitcoin’s long-term outlook, considering factors like technological improvements (e.g., the Lightning Network) and increasing institutional involvement in the market.",
+                    "queries": [
+                        "What is the long-term outlook for Bitcoin?",
+                        "How will the Lightning Network impact Bitcoin’s future?",
+                        "What role will institutional involvement play in Bitcoin’s long-term success?"
+                    ]
+                }
+            ]
+        },
+        {
+            "heading": "Bitcoin Price Visualization",
+            "queries": [
+                {
+                    "bullet": "Introduce the role of price charts and data visualizations in understanding Bitcoin’s market trends and volatility.",
+                    "queries": [
+                        "How can price charts help analyze Bitcoin’s market trends?",
+                        "What is the role of data visualizations in understanding Bitcoin’s volatility?",
+                        "Why are price charts important for Bitcoin traders?"
+                    ]
+                },
+                {
+                    "bullet": "Discuss how historical price charts can show patterns of Bitcoin’s performance over different time periods and help predict future price movements.",
+                    "queries": [
+                        "How do historical price charts predict Bitcoin's future price?",
+                        "What patterns can be identified from Bitcoin’s historical price data?",
+                        "Why are historical price charts important for Bitcoin investors?"
+                    ]
+                },
+                {
+                    "bullet": "Highlight specific price indicators such as moving averages, RSI (Relative Strength Index), and Bollinger Bands, and how they are used by traders to assess Bitcoin’s market behavior.",
+                    "queries": [
+                        "What are moving averages and how do they help analyze Bitcoin?",
+                        "How can RSI (Relative Strength Index) be used for Bitcoin price analysis?",
+                        "What are Bollinger Bands and how are they used in Bitcoin trading?"
+                    ]
+                },
+                {
+                    "bullet": "Explain how trading volumes and price movements on various exchanges help provide a clearer understanding of Bitcoin’s market liquidity and investor interest.",
+                    "queries": [
+                        "How do trading volumes affect Bitcoin’s market liquidity?",
+                        "Why are price movements on exchanges important for understanding Bitcoin’s behavior?",
+                        "How can Bitcoin’s trading volume give insights into investor interest?"
+                    ]
+                }
+            ]
+        }
+    ]
+}
+    ```
+</Example>
+
+<Input>
+```json
+{
+    "currentDate": "{{currentDate}}",
+    "headings": "{{headings}}"
+    
+        "paragraphs":"{{paragraphs}}"
+}
+```
+</Input>
+
+<Output>
+```json
+{
