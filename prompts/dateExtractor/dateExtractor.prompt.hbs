@@ -1,0 +1,149 @@
+This tool extracts the publication date of an article from an HTML page containing text, numbers, and multiple dates. It identifies the most likely publication date by prioritizing meta tags (e.g., <meta property="article:published_time">), visible dates near the title or author, structured URLs containing dates (YYYY/MM/DD or DD/MM/YYYY ), and the first valid date in the main content while ignoring timestamps, update dates, and unrelated numbers. If no clear publication date is found, the tool returns an error message.
+
+The following are complete examples of the input and output:
+
+<Example>
+    <Input>
+    ```json
+    {
+    "HTML": "<div class="article-header with-keyline">
+        
+		
+        <div class="category component">
+            <div class="component-content">
+                <div class="category-eyebrow">
+                    
+                    
+                        <span class="category-eyebrow__category category_release">PRESS RELEASE</span>
+                    
+                    
+                        <span class="category-eyebrow__date">January 30,
+    2025</span>
+                    
+                    
+                </div>
+            </div>
+        </div>
+
+        <div class="pagetitle component">
+            <div class="component-content">
+                
+                
+                
+                    <h1 class='hero-headline'>
+                        
+    
+        Apple reports first quarter results
+    
+
+                    </h1>
+                
+            </div>
+        </div>
+
+        <div class="article-subhead component">
+            <div class="component-content">
+                
+                
+                    All-time records for total company revenue and EPS
+<br /><br />
+Services revenue reaches new all-time high
+                
+            </div>
+        </div>
+"
+}
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+    "date": "30-01-2025",
+}
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+    "HTML": "<div class="tcl-region tcl-region--top"></div>
+
+<section class="tcl-permanent-cta tds--is_hidden">
+    <div class="react-permanent-cta"></div>
+</section>
+
+    <div class="tds-banner tds-scrim--blur tcl-internet-explorer-banner" data-addsearch="exclude">
+      For the best experience, we recommend upgrading or changing your web browser.
+      <a class="tds-link" href="https://www.tesla.com//support/browser-support">Learn More</a>
+    </div>
+      <div class="tds-shell tcl-page__shell dialog-off-canvas-main-canvas" data-off-canvas-main-canvas>
+    
+                
+    
+<section class="">
+  <div id="tds-site-header-wrapper">
+  <div id="mega-menu"></div>
+</div>
+</section>
+  
+
+
+
+
+<main role="main" class="tds-shell-content tcl-page__main-content ">
+  <a id="main-content" tabindex="-1"></a>
+  <div class="layout-content">
+      <div data-drupal-messages-fallback class="hidden"></div>
+<div id="block-tesla-frontend-content" class="block block-system block-system-main-block">
+  
+    
+      
+
+
+
+<section class="tds-layout tcl-layout tcl-layout--eight-columns tds-layout--constrained">
+    <section class="tds-layout-main tcl-layout__main">
+      <div class="tcl-blog-post">
+    <div class="tcl-blog-post__heading tcl-component-padding"
+      style="--tcl-component-padding-desktop-block-start: 88px; --tcl-component-padding-tablet-block-start: 24px;  --tcl-component-padding-mobile-block-start: 24px; --tcl-component-padding-desktop-block-end: 64px; --tcl-component-padding-tablet-block-end: 64px; --tcl-component-padding-mobile-block-end: 48px;">
+      <h1>
+        Standardizing Automotive Connectivity
+      </h1>
+              <span class="tds-text--caption">
+          The Tesla Team,
+        </span>
+                  <span class="tds-text--caption">
+        October 27,
+    2024
+      </span>
+          </div>
+  </div>
+
+  </section>
+</section>
+<div class="tcl-blog-post__body">"
+}
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+    "date": "27-10-2024"
+}
+    ```
+</Example>
+
+<Input>
+```json
+{
+    "HTML": "{{HTML}}"
+}
+```
+</Input>
+
+<Output>
+```json
+{
