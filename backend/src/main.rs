@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use crate::prelude::*;
 use actix_cors::Cors;
 use actix_web::{
@@ -12,11 +14,13 @@ use api::{
 };
 use auth_middleware::Auth;
 use jwt::TokenFactory;
+use llm::{ullm::UllmApi, LLMApi};
 
 mod api;
 mod auth_middleware;
 mod db;
 mod jwt;
+mod llm;
 mod models;
 mod prelude;
 mod rabbitmq;
@@ -26,6 +30,7 @@ mod search;
 async fn main() -> Result<()> {
     let db = db::connect().await?;
     let token_factory: TokenFactory = "secret".into();
+    let llm: Arc<dyn LLMApi> = Arc::new(UllmApi::new().await?);
 
     // Initialize the RabbitMQ consumer background task
     tokio::spawn(async move {
