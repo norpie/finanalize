@@ -25,6 +25,7 @@ mod models;
 mod prelude;
 mod rabbitmq;
 mod search;
+mod tasks;
 
 #[tokio::main]
 async fn main() -> Result<()> {
