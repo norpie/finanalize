@@ -32,6 +32,8 @@ pub enum FinanalizeError {
     Serde(#[from] serde_json::Error),
     #[error("Reqwest error: {0}")]
     Reqwest(#[from] reqwest::Error),
+    #[error("Handlebars error: {0}")]
+    Handlebars(#[from] handlebars::RenderError),
 }
 
 #[derive(Debug, Display)]
