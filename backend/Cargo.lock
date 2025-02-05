@@ -746,6 +746,7 @@ dependencies = [
  "handlebars",
  "jsonwebtoken",
  "lapin",
+ "once_cell",
  "reqwest",
  "serde",
  "serde_json",
