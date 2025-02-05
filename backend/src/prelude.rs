@@ -40,6 +40,8 @@ pub enum FinanalizeError {
     Polars(#[from] polars::prelude::PolarsError),
     #[error("Xlsl error: {0}")]
     Excel(#[from] calamine::XlsxError),
+    #[error("Lopdf error: {0}")]
+    LopdfError(#[from] lopdf::Error),
 }
 
 #[derive(Debug, Display)]
