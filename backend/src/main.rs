@@ -30,7 +30,7 @@ mod search;
 async fn main() -> Result<()> {
     let db = db::connect().await?;
     let token_factory: TokenFactory = "secret".into();
-    let llm: Arc<dyn LLMApi> = Arc::new(UllmApi::new().await?);
+    let llm: Arc<dyn LLMApi> = Arc::new(UllmApi::default());
 
     // Initialize the RabbitMQ consumer background task
     tokio::spawn(async move {
