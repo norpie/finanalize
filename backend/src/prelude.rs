@@ -34,6 +34,8 @@ pub enum FinanalizeError {
     Reqwest(#[from] reqwest::Error),
     #[error("Handlebars error: {0}")]
     Handlebars(#[from] handlebars::RenderError),
+    #[error("CdpError error: {0}")]
+    CdpError(#[from] chromiumoxide::error::CdpError),
 }
 
 #[derive(Debug, Display)]
