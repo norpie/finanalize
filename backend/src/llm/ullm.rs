@@ -3,10 +3,8 @@ use crate::prelude::*;
 use super::LLMApi;
 
 use async_trait::async_trait;
-use futures_util::future::Map;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UllmModel {
@@ -28,6 +26,15 @@ pub struct UllmCompletionRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UllmCompletionResponse {
     completion: String,
+}
+
+impl Default for UllmApi {
+    fn default() -> Self {
+        Self {
+            client: Default::default(),
+            base_url: "http://localhost:8082".to_string(),
+        }
+    }
 }
 
 impl UllmApi {
@@ -65,12 +72,6 @@ impl UllmApi {
 
 #[async_trait]
 impl LLMApi for UllmApi {
-    async fn new() -> Result<Self> {
-        let client = Client::new();
-        let base_url = "http://localhost:8082".to_string();
-        Ok(Self { client, base_url })
-    }
-
     async fn generate(&self, prompt: String) -> Result<String> {
         Ok(self
             .client
@@ -86,13 +87,11 @@ impl LLMApi for UllmApi {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
-
     use super::*;
 
     #[tokio::test]
     async fn test_new() {
-        let api = UllmApi::new().await.unwrap();
+        let api = UllmApi::default();
         dbg!(&api);
         // api.unload().await.unwrap();
         let list = api.list().await.unwrap();
