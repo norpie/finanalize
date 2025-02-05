@@ -5,6 +5,7 @@ use super::LLMApi;
 use async_trait::async_trait;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UllmModel {
@@ -73,15 +74,17 @@ impl UllmApi {
 #[async_trait]
 impl LLMApi for UllmApi {
     async fn generate(&self, prompt: String) -> Result<String> {
-        Ok(self
+        let value: Value = self
             .client
             .post(format!("{}/complete", self.base_url))
             .json(&UllmCompletionRequest { text: prompt })
             .send()
             .await?
-            .json::<UllmCompletionResponse>()
-            .await?
-            .completion)
+            .json()
+            .await?;
+        dbg!(&value);
+        let completion: UllmCompletionResponse = serde_json::from_value(value)?;
+        Ok(completion.completion)
     }
 }
 
