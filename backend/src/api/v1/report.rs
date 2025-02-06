@@ -1,7 +1,7 @@
 use crate::api::ApiResponse;
 use crate::db::SurrealDb;
 use crate::models::{
-    Report, ReportCreation, ReportStatus, ReportStatusEvent, SurrealDBReport, SurrealDBUser, User,
+    Report, ReportCreation, ReportStatusEvent, SurrealDBReport, SurrealDBUser,
 };
 use crate::prelude::FinanalizeError;
 use crate::rabbitmq::RabbitMQPublisher;
@@ -9,7 +9,6 @@ use actix_web::web::{Data, Json, Path};
 use actix_web::{get, post, Responder};
 use actix_web::http::StatusCode;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
 
 #[post("/reports")]
 pub async fn create_report(
