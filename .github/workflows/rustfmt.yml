@@ -16,4 +16,4 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           mode: review
-          args: "--manifest-path finanalize/backend/Cargo.toml"
+          args: "--manifest-path backend/Cargo.toml"
