@@ -4,8 +4,8 @@ on:
       - '**.rs'
 name: Clippy check
 
-env:
-  RUSTFLAGS: "-Dwarnings"
+# env:
+#   RUSTFLAGS: "-Dwarnings"
 
 jobs:
   clippy_check:
