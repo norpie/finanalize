@@ -24,7 +24,7 @@ Our solution is the development of Finanalyze, an accessible web app that offers
 2. `once` Generate a title for the report.
     1. `input`
         1. `user_input`
-    2. `output
+    2. `output`
         1. `generated_title`
 3. `once` Generate first level section headings that should be included in the report.
     1. `input`
@@ -34,20 +34,34 @@ Our solution is the development of Finanalyze, an accessible web app that offers
         1. `heading[]`
 4. `each heading` generate paragraph level description of the content that should be in the paragraph in bullet points.
     1. `input`
+        1. `heading`
+    2. `output`
+        1. `paragraph_bullet_point[]`
 5. `each paragraph_bullet` Generate 4-6 search queries that you could google to find.
     1. `input`
         1. `report_title`
         2. `section_heading`
     2. `output`
         1. `query[4..6]`
-6. `each content source(website,pdf)` generate a title and description for this source.
+6. `each query` look up and scrape top 5 results for html.
+7. `each source` extract data from this text (tables), if there is none, `null`
     1. `input`
-        1. `sanatized_content`
+        1. `raw_content`
+    2. `output`
+        1. `csv`
+8. `each source` extract content from this text (article), if there is none, `null`
+    1. `input`
+        1. `raw_content`
+    2. `output`
+        1. `sanatized_content_md`
+9. `each content source(website,pdf)` generate a title and description for this source.
+    1. `input`
+        1. `sanatized_content_md`
         2. `url`
     2. `output`
         1. `title`
         2. `description`
-7. `each data source(website table,pdf table,csv,excel)` generate a title and description for this source and it's data.
+10. `each data source(website table,pdf table,csv,excel)` generate a title and description for this source and it's data.
     1. `input`
         1. `surrounding_content_start`
         2. `data_head`
@@ -60,7 +74,7 @@ Our solution is the development of Finanalyze, an accessible web app that offers
             1. `name`
             2. `type`
             3. `description`
-8. `each paragraph bullet point` generate a chunk of text based on RAG'ed.
+11. `each paragraph bullet point` generate a chunk of text based on RAG'ed.
     1. `input`
         1. `heading`
         2. `heading_description`
@@ -75,7 +89,7 @@ Our solution is the development of Finanalyze, an accessible web app that offers
             1. `id`
             2. `name`
             3. `reason_used`
-9. `combined paragraph bullet point chunks` combine the chunks of text into a single coherent paragraph.
+12. `combined paragraph bullet point chunks` combine the chunks of text into a single coherent paragraph.
     1. `input`
         1. `heading`
         2. `heading_description`
@@ -92,7 +106,7 @@ Our solution is the development of Finanalyze, an accessible web app that offers
             1. `id`
             2. `name`
             3. `reason_used`
-10. `combined paragraphs` combine the paragraphs into a single coherent text under the heading.
+13. `combined paragraphs` combine the paragraphs into a single coherent text under the heading.
     1. `input`
         1. `heading`
         2. `heading_description`
@@ -107,7 +121,7 @@ Our solution is the development of Finanalyze, an accessible web app that offers
             1. `id`
             2. `name`
             3. `reason_used`
-11. `each heading text` insert bibtex citations into the text based on the reason, `id` is the bibtex citation key.
+14. `each heading text` insert bibtex citations into the text based on the reason, `id` is the bibtex citation key.
     1. `input`
         1. `heading_text`
         2. `source[]`
@@ -116,7 +130,7 @@ Our solution is the development of Finanalyze, an accessible web app that offers
             3. `reason`
     2. `output`
         1. `heading_text_with_citations`
-12. `each heading text` what graphics could be inserted to make the text more informative?
+15. `each heading text` what graphics could be inserted to make the text more informative?
     1. `input`
         1. `heading_text_with_citations`
     2. `output`
@@ -124,7 +138,7 @@ Our solution is the development of Finanalyze, an accessible web app that offers
                 1. `type`
                 2. `description`
                 3. `caption`
-13. `each generated graphic` insert the graphic into the text.
+16. `each generated graphic` insert the graphic into the text.
     1. `input`
             2. `heading_text_with_citations`
             3. `graphics[]`
