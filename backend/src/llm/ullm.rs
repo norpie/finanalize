@@ -21,7 +21,7 @@ pub struct UllmApi {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct UllmCompletionRequest {
+pub struct UllmTextBodyRequest {
     text: String,
 }
 
@@ -45,6 +45,11 @@ pub enum UllmStatusName {
     Unloaded,
     #[serde(rename = "no_model")]
     NoModel,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UllmEmbedResponse {
+    embedding: Vec<f32>,
 }
 
 impl Default for UllmApi {
@@ -111,7 +116,7 @@ impl LLMApi for UllmApi {
         let value: Value = self
             .client
             .post(format!("{}/complete", self.base_url))
-            .json(&UllmCompletionRequest { text: prompt })
+            .json(&UllmTextBodyRequest { text: prompt })
             .send()
             .await?
             .json()
@@ -119,6 +124,20 @@ impl LLMApi for UllmApi {
         dbg!(&value);
         let completion: UllmCompletionResponse = serde_json::from_value(value)?;
         Ok(completion.completion)
+    }
+
+    async fn embed(&self, text: String) -> Result<Vec<f32>> {
+        let value: Value = self
+            .client
+            .post(format!("{}/embed", self.base_url))
+            .json(&UllmTextBodyRequest { text })
+            .send()
+            .await?
+            .json()
+            .await?;
+        dbg!(&value);
+        let embed_response: UllmEmbedResponse = serde_json::from_value(value)?;
+        Ok(embed_response.embedding)
     }
 }
 
@@ -135,8 +154,10 @@ mod tests {
         dbg!(&list);
         // api.load(DEFAULT_MODEL.clone()).await.unwrap();
         let prompt = "Question: How tall is the Brussels Madou tower?\nAnswer:".to_string();
-        let generated = api.generate(prompt.clone()).await.unwrap();
-        println!("generated: {}", generated);
-        println!("full message: {}", prompt + &generated);
+        let embed = api.embed(prompt.clone()).await.unwrap();
+        dbg!(embed);
+        // let generated = api.generate(prompt.clone()).await.unwrap();
+        // println!("generated: {}", generated);
+        // println!("full message: {}", prompt + &generated);
     }
 }
