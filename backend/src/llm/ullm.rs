@@ -49,7 +49,7 @@ pub enum UllmStatusName {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UllmEmbedResponse {
-    embedding: Vec<f32>,
+    embeddings: Vec<f32>,
 }
 
 impl Default for UllmApi {
@@ -137,7 +137,7 @@ impl LLMApi for UllmApi {
             .await?;
         dbg!(&value);
         let embed_response: UllmEmbedResponse = serde_json::from_value(value)?;
-        Ok(embed_response.embedding)
+        Ok(embed_response.embeddings)
     }
 }
 
@@ -152,12 +152,17 @@ mod tests {
         // api.unload().await.unwrap();
         let list = api.list().await.unwrap();
         dbg!(&list);
-        // api.load(DEFAULT_MODEL.clone()).await.unwrap();
         let prompt = "Question: How tall is the Brussels Madou tower?\nAnswer:".to_string();
-        let embed = api.embed(prompt.clone()).await.unwrap();
+        let generated = api.generate(prompt.clone()).await.unwrap();
+        println!("generated: {}", generated);
+        println!("full message: {}", prompt + &generated);
+    }
+
+    #[tokio::test]
+    async fn test_embed() {
+        let api = UllmApi::default();
+        dbg!(&api);
+        let embed = api.embed("Hello World".into()).await.unwrap();
         dbg!(embed);
-        // let generated = api.generate(prompt.clone()).await.unwrap();
-        // println!("generated: {}", generated);
-        // println!("full message: {}", prompt + &generated);
     }
 }
