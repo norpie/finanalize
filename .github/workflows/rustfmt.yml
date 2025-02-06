@@ -13,15 +13,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
-      - name: Run Rustfmt Format
-        run: cargo fmt --all
-        working-directory: backend
-        
-      - name: Run Rustfmt Check
-        run: cargo fmt --all --check
-        working-directory: backend
-
-      # Run rustfmt review only if the previous check passes
       - name: Rustfmt Review
         if: success()
         uses: mbrobbel/rustfmt-check@master
