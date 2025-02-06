@@ -9,11 +9,21 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/checkout@v4
+      
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: rustfmt
-      - uses: mbrobbel/rustfmt-check@master
+
+      # Run rustfmt check before review to prevent invalid GitHub API calls
+      - name: Run Rustfmt Check
+        run: cargo fmt --all --check
+        working-directory: backend
+
+      # Run rustfmt review only if the previous check passes
+      - name: Rustfmt Review
+        if: success()
+        uses: mbrobbel/rustfmt-check@master
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           mode: review
-          args: "--manifest-path backend/Cargo.toml"
+
