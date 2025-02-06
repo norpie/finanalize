@@ -33,6 +33,7 @@ async fn main() -> Result<()> {
     let db = db::connect().await?;
     let token_factory: TokenFactory = "secret".into();
     let llm: Arc<dyn LLMApi> = Arc::new(UllmApi::default());
+    scraper::setup_browser().await?;
 
     // Initialize the RabbitMQ consumer background task
     tokio::spawn(async move {
