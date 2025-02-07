@@ -25,13 +25,14 @@ impl DataExtract for CsvExtractor {
             });
         }
 
+        // TODO: Use to generate the real stuff
         let title = "CSV Data Analysis".to_string();
         let description = format!(
             "DataFrame with {} rows and {} columns",
             df.height(),
             df.width()
         );
-        let head = df.head(Some(5));
+        let _head = df.head(Some(5));
 
         Ok(Data {
             title,

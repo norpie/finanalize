@@ -1,13 +1,11 @@
 use crate::api::ApiResponse;
 use crate::db::SurrealDb;
-use crate::models::{
-    Report, ReportCreation, ReportStatusEvent, SurrealDBReport, SurrealDBUser,
-};
+use crate::models::{Report, ReportCreation, ReportStatusEvent, SurrealDBReport, SurrealDBUser};
 use crate::prelude::FinanalizeError;
 use crate::rabbitmq::RabbitMQPublisher;
+use actix_web::http::StatusCode;
 use actix_web::web::{Data, Json, Path};
 use actix_web::{get, post, Responder};
-use actix_web::http::StatusCode;
 use serde::{Deserialize, Serialize};
 
 #[post("/reports")]
@@ -21,8 +19,7 @@ pub async fn create_report(
         .content(report_creation)
         .await?
         .ok_or(FinanalizeError::InternalServerError)?;
-    let relation = db
-        .query("RELATE $user -> has -> $report")
+    db.query("RELATE $user -> has -> $report")
         .bind(("user", user.id.clone()))
         .bind(("report", report.id.clone()))
         .await?;
@@ -34,7 +31,8 @@ pub async fn create_report(
 }
 
 #[get("/reports/{report_id}")]
-pub async fn get_report( // FIXME: if you know the id you can see any report.
+pub async fn get_report(
+    // FIXME: if you know the id you can see any report.
     db: Data<SurrealDb>,
     report_id: Path<String>,
 ) -> Result<impl Responder, FinanalizeError> {
@@ -67,7 +65,10 @@ pub async fn get_reports(
         .bind(("start", page.page * page.per_page))
         .await?;
     let Some(report_query) = response.take::<Option<ReportQuery>>(0)? else {
-        return Ok(ApiResponse::error(StatusCode::NOT_FOUND, "fucking hoe?".into()));
+        return Ok(ApiResponse::error(
+            StatusCode::NOT_FOUND,
+            "fucking hoe?".into(),
+        ));
     };
     let reports: Vec<Report> = report_query.reports.into_iter().map(|r| r.into()).collect();
     Ok(ApiResponse::new(reports))
@@ -75,5 +76,5 @@ pub async fn get_reports(
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportQuery {
-    reports: Vec<SurrealDBReport>
+    reports: Vec<SurrealDBReport>,
 }
