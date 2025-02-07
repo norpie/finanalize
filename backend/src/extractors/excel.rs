@@ -15,8 +15,7 @@ impl DataExtract for ExcelExtractor {
         let mut workbook: Xlsx<_> = open_workbook(file_path)?;
         // TODO: Fix error
         let sheet_names = workbook.sheet_names();
-        let sheet_name = sheet_names
-            .get(0)
+        let sheet_name = sheet_names.first()
             .ok_or(FinanalizeError::InternalServerError)?;
         let range = workbook.worksheet_range(sheet_name)?;
 

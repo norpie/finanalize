@@ -16,7 +16,7 @@ impl DataExtract for CsvExtractor {
         for column in df.get_columns() {
             columns.push(Column {
                 name: column.name().as_str().into(),
-                description: format!(""),
+                description: String::new(),
                 values: column
                     .str()?
                     .into_iter()
@@ -25,7 +25,7 @@ impl DataExtract for CsvExtractor {
             });
         }
 
-        let title = format!("CSV Data Analysis");
+        let title = "CSV Data Analysis".to_string();
         let description = format!(
             "DataFrame with {} rows and {} columns",
             df.height(),
