@@ -55,6 +55,7 @@ async fn main() -> Result<()> {
             .wrap(cors)
             .app_data(Data::new(token_factory.clone()))
             .app_data(Data::new(db.clone()))
+            .app_data(Data::new(llm.clone()))
             .default_service(web::route().to(not_found))
             .service(
                 web::scope("/api/v1/auth")
