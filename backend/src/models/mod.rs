@@ -62,7 +62,7 @@ impl From<SurrealDBReport> for Report {
     }
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ReportStatus{
+pub enum ReportStatus {
     Pending,
     Valid,
     Invalid,
@@ -70,12 +70,10 @@ pub enum ReportStatus{
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ReportStatusEvent{
+pub struct ReportStatusEvent {
     pub report_id: String,
     pub status: ReportStatus,
 }
-
-
 
 impl From<Report> for ReportStatusEvent {
     fn from(report: Report) -> Self {

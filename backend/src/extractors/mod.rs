@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 
 pub mod csv;
 pub mod excel;
-pub mod text;
 pub mod pdf;
+pub mod text;
 
 #[async_trait]
 trait ContentExtract {

@@ -4,7 +4,6 @@ use crate::{llm::LLMApi, prelude::*};
 use handlebars::Handlebars;
 use serde::{de::DeserializeOwned, Serialize};
 
-
 pub struct Task<'a>(&'a str);
 
 impl<'a> Task<'a> {
