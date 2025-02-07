@@ -1,34 +1,43 @@
 use crate::prelude::*;
-use crate::extract::Extract; // Import the Extract trait
 use async_trait::async_trait;
-use polars::prelude::*;
-use std::fs::File;
-use std::io::BufReader;
+use polars::{io::SerReader, prelude::CsvReadOptions};
+
+use super::{Column, Data, DataExtract};
 
 pub struct CsvExtractor;
 
 #[async_trait]
-impl Extract for CsvExtractor {
-    async fn extract(&self, file_path: &str) -> crate::prelude::Result<()> { // Disambiguate Result
-        let file = File::open(file_path)?;
-        let reader = BufReader::new(file);
-        let df = CsvReader::new(reader)
-            .infer_schema(None)
-            .has_header(true)
+impl DataExtract for CsvExtractor {
+    async fn extract(&self, file_path: &str) -> Result<Data> {
+        let df = CsvReadOptions::default()
+            .try_into_reader_with_file_path(Some(file_path.into()))?
             .finish()?;
+        let mut columns = vec![];
+        for column in df.get_columns() {
+            columns.push(Column {
+                name: column.name().as_str().into(),
+                description: format!(""),
+                values: column
+                    .str()?
+                    .into_iter()
+                    .map(|v| v.unwrap_or("").into())
+                    .collect(),
+            });
+        }
 
-        // Extract head of the CSV file
+        let title = format!("CSV Data Analysis");
+        let description = format!(
+            "DataFrame with {} rows and {} columns",
+            df.height(),
+            df.width()
+        );
         let head = df.head(Some(5));
 
-        // Generate description,title, and possible graphs
-        let description = format!("DataFrame with {} rows and {} columns", df.height(), df.width());
-        let title = "CSV Data Analysis";
-        let possible_graphs = vec!["Histogram", "Scatter Plot", "Line Chart"];
-
-        // Save to database (pseudo-code, replace with actual database logic)
-        // save_to_database(description, title, possible_graphs);
-
-        Ok(())
+        Ok(Data {
+            title,
+            description,
+            columns,
+        })
     }
 }
 

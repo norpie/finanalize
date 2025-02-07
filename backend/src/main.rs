@@ -19,16 +19,15 @@ use llm::{ullm::UllmApi, LLMApi};
 mod api;
 mod auth_middleware;
 mod db;
+mod extractors;
 mod jwt;
 mod llm;
 mod models;
 mod prelude;
 mod rabbitmq;
+mod scraper;
 mod search;
 mod tasks;
-mod scraper;
-mod extractors;
-mod extract;
 
 #[tokio::main]
 async fn main() -> Result<()> {
