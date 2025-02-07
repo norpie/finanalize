@@ -62,12 +62,12 @@ impl Default for UllmApi {
 }
 
 impl UllmApi {
-    pub async fn list(&self) -> Result<Vec<UllmModel>> {
-        let url = format!("{}/models", self.base_url);
-        let response = self.client.get(&url).send().await?;
-        let models = response.json::<Vec<UllmModel>>().await?;
-        Ok(models)
-    }
+    // pub async fn list(&self) -> Result<Vec<UllmModel>> {
+    //     let url = format!("{}/models", self.base_url);
+    //     let response = self.client.get(&url).send().await?;
+    //     let models = response.json::<Vec<UllmModel>>().await?;
+    //     Ok(models)
+    // }
 
     pub async fn status(&self) -> Result<UllmStatus> {
         let url = format!("{}/status", self.base_url);
@@ -76,17 +76,17 @@ impl UllmApi {
         Ok(status)
     }
 
-    pub async fn unload(&self) -> Result<()> {
-        let url = format!("{}/models", self.base_url);
-        let response = self.client.delete(&url).send().await?;
-        if !response.status().is_success() {
-            return Err(FinanalizeError::LlmApi(format!(
-                "Failed to unload models: {}",
-                response.text().await?
-            )));
-        }
-        Ok(())
-    }
+    // pub async fn unload(&self) -> Result<()> {
+    //     let url = format!("{}/models", self.base_url);
+    //     let response = self.client.delete(&url).send().await?;
+    //     if !response.status().is_success() {
+    //         return Err(FinanalizeError::LlmApi(format!(
+    //             "Failed to unload models: {}",
+    //             response.text().await?
+    //         )));
+    //     }
+    //     Ok(())
+    // }
 
     pub async fn load(&self, model: UllmModel) -> Result<()> {
         let url = format!("{}/models/{}/{}", self.base_url, model.engine, model.name);
@@ -150,8 +150,8 @@ mod tests {
         let api = UllmApi::default();
         dbg!(&api);
         // api.unload().await.unwrap();
-        let list = api.list().await.unwrap();
-        dbg!(&list);
+        // let list = api.list().await.unwrap();
+        // dbg!(&list);
         let prompt = "Question: How tall is the Brussels Madou tower?\nAnswer:".to_string();
         let generated = api.generate(prompt.clone()).await.unwrap();
         println!("generated: {}", generated);

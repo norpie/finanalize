@@ -21,6 +21,7 @@ mod auth_middleware;
 mod db;
 mod extractors;
 mod jwt;
+#[allow(dead_code)]
 mod llm;
 mod models;
 mod prelude;
