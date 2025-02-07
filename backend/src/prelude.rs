@@ -9,8 +9,8 @@ pub enum FinanalizeError {
     NotFound,
     #[error("Authorization error: {0}")]
     Unauthorized(AuthError),
-    #[error("Not implemented")]
-    NotImplemented,
+    // #[error("Not implemented")]
+    // NotImplemented,
     #[error("Internal server error")]
     InternalServerError,
 
@@ -48,14 +48,14 @@ pub enum FinanalizeError {
 pub enum AuthError {
     #[display("Invalid token")]
     InvalidToken,
-    #[display("Expired token")]
-    ExpiredToken,
-    #[display("Invalid refresh token")]
-    MissingCredentials,
+    // #[display("Expired token")]
+    // ExpiredToken,
+    // #[display("Invalid refresh token")]
+    // MissingCredentials,
     #[display("Invalid credentials")]
     InvalidCredentials,
     #[display("Email already exists")]
     EmailAlreadyExists,
-    #[display("Missing token")]
-    MissingToken,
+    // #[display("Missing token")]
+    // MissingToken,
 }
