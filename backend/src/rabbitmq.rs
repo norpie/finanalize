@@ -1,9 +1,9 @@
-use futures_util::TryStreamExt;
 use crate::models::ReportStatusEvent;
 use crate::prelude::FinanalizeError;
+use futures_util::TryStreamExt;
 use lapin::options::{BasicConsumeOptions, BasicPublishOptions, QueueDeclareOptions};
-use lapin::{BasicProperties, Channel, Connection, ConnectionProperties, Queue};
 use lapin::types::FieldTable;
+use lapin::{BasicProperties, Channel, Connection, ConnectionProperties};
 
 pub struct RabbitMQPublisher {
     connection: Connection,
@@ -27,7 +27,14 @@ impl RabbitMQPublisher {
         message: ReportStatusEvent,
     ) -> Result<String, FinanalizeError> {
         let message = serde_json::to_string(&message)?;
-        let queue = self.channel.queue_declare("report_status", QueueDeclareOptions::default(), Default::default()).await?;
+        let queue = self
+            .channel
+            .queue_declare(
+                "report_status",
+                QueueDeclareOptions::default(),
+                Default::default(),
+            )
+            .await?;
         self.channel
             .basic_publish(
                 "",
@@ -43,9 +50,9 @@ impl RabbitMQPublisher {
 }
 
 pub struct RabbitMQConsumer {
-    connection: Connection,
+    // connection: Connection,
     channel: Channel,
-    queue: Queue,
+    // queue: Queue,
     queue_name: String,
 }
 
@@ -56,13 +63,17 @@ impl RabbitMQConsumer {
             Connection::connect("amqp://localhost", ConnectionProperties::default()).await?;
         let channel = connection.create_channel().await?;
         let queue = channel
-            .queue_declare("report_status", QueueDeclareOptions::default(), Default::default())
+            .queue_declare(
+                "report_status",
+                QueueDeclareOptions::default(),
+                Default::default(),
+            )
             .await?;
         let queue_name = queue.name().to_string();
         Ok(RabbitMQConsumer {
-            connection,
+            // connection,
             channel,
-            queue,
+            // queue,
             queue_name,
         })
     }
