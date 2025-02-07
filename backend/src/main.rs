@@ -25,8 +25,11 @@ mod llm;
 mod models;
 mod prelude;
 mod rabbitmq;
+#[allow(dead_code)]
 mod scraper;
+#[allow(dead_code)]
 mod search;
+#[allow(dead_code)]
 mod tasks;
 
 #[tokio::main]
