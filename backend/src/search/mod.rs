@@ -5,7 +5,7 @@ use serde::Deserialize;
 
 #[async_trait]
 trait SearchEngine {
-    async fn search(&self, query: &str) ->Result<Vec<String>>;
+    async fn search(&self, query: &str) -> Result<Vec<String>>;
 }
 
 #[derive(Default)]
@@ -23,7 +23,7 @@ impl SearxNG {
     }
 }
 
- #[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize)]
 struct SearxNGResult {
     results: Vec<SearxNGItem>,
 }
@@ -37,14 +37,14 @@ struct SearxNGItem {
 impl SearchEngine for SearxNG {
     async fn search(&self, query: &str) -> Result<Vec<String>> {
         let mut urls = Vec::new();
-            let url = format!(
-                "{}/search?q={}&format=json&pageno={}",
-                self.base_url, query, 1
-            );
-            
-            let response = self.client.get(&url).send().await?;
-            let results: SearxNGResult = response.json().await?;
-            urls.extend(results.results.into_iter().map(|r| r.url));   
+        let url = format!(
+            "{}/search?q={}&format=json&pageno={}",
+            self.base_url, query, 1
+        );
+
+        let response = self.client.get(&url).send().await?;
+        let results: SearxNGResult = response.json().await?;
+        urls.extend(results.results.into_iter().map(|r| r.url));
         Ok(urls)
     }
 }
@@ -55,7 +55,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_searxng() {
-        let searxng = SearxNG::new("http://localhost:8081"); 
+        let searxng = SearxNG::new("http://localhost:8081");
         let results = searxng.search("rust").await.unwrap();
         assert!(!results.is_empty());
     }

@@ -5,7 +5,7 @@ use once_cell::sync::OnceCell;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::spawn;
-use tokio::sync::{Mutex};
+use tokio::sync::Mutex;
 use tokio::time::{sleep, timeout};
 
 #[derive(Debug, Clone)]
