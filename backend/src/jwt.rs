@@ -37,12 +37,6 @@ impl TokenFactory {
         )?;
         Ok(token.claims.sub)
     }
-
-    pub fn generate_token_from_refresh(&self, refresh: &str) -> Result<String> {
-        let subject = self.subject(refresh)?;
-        let claims = Claims::new(subject, &TokenType::Access);
-        self.generate_token_from_claims(claims)
-    }
 }
 
 impl From<String> for TokenFactory {
@@ -129,7 +123,7 @@ mod tests {
 
     #[test]
     fn test_generate_token() {
-        let token = generate_test_token().unwrap();
+        generate_test_token().unwrap();
     }
 
     #[test]
