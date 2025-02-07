@@ -34,8 +34,8 @@ impl ContentExtract for TextExtractor {
 mod tests {
     use super::*;
 
-    #[test]
-    fn test_extract() {
+    #[tokio::test]
+    async fn test_extract() {
         let text = "Once upon a time, in a vast kingdom surrounded by towering mountains and endless forests, there lived a wise old storyteller named Eldrin. \
         He traveled from village to village, sharing tales of ancient heroes, mystical creatures, and forgotten lands. Children gathered around him, eyes wide with wonder, \
         as he spoke of dragons soaring through the skies, knights embarking on perilous quests, and hidden treasures buried deep beneath the earth. \
@@ -45,7 +45,7 @@ mod tests {
         where dreams shaped reality and hope never faded. Eldrin smiled, knowing that every story leads to another.";
 
         let extractor = TextExtractor;
-        let chunks = extractor.extract(text);
+        let chunks = extractor.extract(text).await.unwrap();
 
         // Check that each chunk is at most 512 characters
         for chunk in &chunks {
