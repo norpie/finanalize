@@ -19,6 +19,7 @@ use llm::{ullm::UllmApi, LLMApi};
 mod api;
 mod auth_middleware;
 mod db;
+#[allow(dead_code)]
 mod extractors;
 mod jwt;
 #[allow(dead_code)]
