@@ -38,6 +38,8 @@ pub enum FinanalizeError {
     CdpError(#[from] chromiumoxide::error::CdpError),
     #[error("Polars error: {0}")]
     Polars(#[from] polars::prelude::PolarsError),
+    #[error("Xlsl error: {0}")]
+    Excel(#[from] calamine::XlsxError),
 }
 
 #[derive(Debug, Display)]

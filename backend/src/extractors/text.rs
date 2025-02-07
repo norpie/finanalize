@@ -1,9 +1,13 @@
-use crate::extractors::ContentExtractor;
+use crate::prelude::*;
+use async_trait::async_trait;
+
+use super::ContentExtract;
 
 pub struct TextExtractor;
 
-impl ContentExtractor for TextExtractor {
-    fn extract(&self, input: &str) -> Vec<String> {
+#[async_trait]
+impl ContentExtract for TextExtractor {
+    async fn extract(&self, input: &str) -> Result<Vec<String>> {
         let mut chunks = Vec::new();
         let mut current_chunk = String::new();
 
@@ -22,7 +26,7 @@ impl ContentExtractor for TextExtractor {
             chunks.push(current_chunk);
         }
 
-        chunks
+        Ok(chunks)
     }
 }
 
