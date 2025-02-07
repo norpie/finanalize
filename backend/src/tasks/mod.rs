@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use crate::{llm::LLMApi, prelude::*};
 use handlebars::Handlebars;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Serialize};
+
 
 pub struct Task<'a>(&'a str);
 
@@ -35,12 +36,20 @@ impl<'a> Task<'a> {
         Ok(output)
     }
 
-    fn prompt_template() -> String {
-        EXAMPLE_TASK_PROMPT_TEMPLATE.to_string()
+    fn prompt_template(&self) -> String {
+        self.0.to_string()
     }
 }
 
-static EXAMPLE_TASK_PROMPT_TEMPLATE: &str = r#"
+#[cfg(test)]
+mod tests {
+    use serde::Deserialize;
+
+    use crate::llm::ullm::UllmApi;
+
+    use super::*;
+
+    static EXAMPLE_TASK_PROMPT_TEMPLATE: &str = r#"
 This tool extracts the city and country from a user's message. The message either contains a well-known city or it doesn't.
 If it does, the tool extracts the city and country (ISO 3166-1 alpha-3). If it doesn't, the tool returns an error message.
 
@@ -93,22 +102,16 @@ The following are complete examples of the input and output:
 ```json
 {"#;
 
-#[derive(Debug, Serialize, PartialEq, Eq)]
-struct ExampleTaskInpput {
-    message: String,
-}
+    #[derive(Debug, Serialize, PartialEq, Eq)]
+    struct ExampleTaskInpput {
+        message: String,
+    }
 
-#[derive(Debug, Deserialize, PartialEq, Eq)]
-struct ExampleTaskOutput {
-    city: String,
-    country: String,
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::llm::ullm::UllmApi;
-
-    use super::*;
+    #[derive(Debug, Deserialize, PartialEq, Eq)]
+    struct ExampleTaskOutput {
+        city: String,
+        country: String,
+    }
 
     #[tokio::test]
     async fn test_example_task() {
