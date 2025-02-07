@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use chromiumoxide::{Browser, BrowserConfig, Handler};
 use futures_util::StreamExt;
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::OnceCell;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::spawn;
@@ -30,7 +30,7 @@ pub async fn setup_browser() -> Result<()> {
 pub async fn scrape_page(url: String) -> Result<String> {
     let wrapper = INSTANCE.get().unwrap();
     let browser = wrapper.browser.clone();
-    let mut handler = wrapper.handler.clone();
+    let handler = wrapper.handler.clone();
     let handle = spawn(async move {
         let mut locked_handler = handler.lock().await;
         loop {
