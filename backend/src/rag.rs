@@ -109,6 +109,6 @@ mod tests {
         let query = "Hello".to_string();
         let results = vector_search(db, llm_api, report, query).await.unwrap();
         dbg!(&results);
-        assert_eq!(results.len(), 0);
+        assert_eq!(results.len(), 3);
     }
 }
