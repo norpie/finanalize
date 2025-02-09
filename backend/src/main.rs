@@ -33,6 +33,7 @@ mod scraper;
 mod search;
 #[allow(dead_code)]
 mod tasks;
+mod rag;
 
 #[tokio::main]
 async fn main() -> Result<()> {
