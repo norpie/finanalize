@@ -96,3 +96,32 @@ impl JobType {
         }
     }
 }
+
+mod nop {
+    use std::sync::Arc;
+
+    use async_trait::async_trait;
+
+    use crate::{
+        db::SurrealDb, llm::LLMApi, prelude::*, scraper::BrowserWrapper, search::SearchEngine,
+    };
+
+    use super::Job;
+
+    pub struct NopJob;
+
+    #[async_trait]
+    impl Job for NopJob {
+        async fn run(
+            &self,
+            _report_id: String,
+            _db: Arc<SurrealDb>,
+            _llm: Arc<dyn LLMApi>,
+            _search: Arc<dyn SearchEngine>,
+            _browser: BrowserWrapper,
+        ) -> Result<()> {
+            Ok(())
+        }
+    }
+}
+
