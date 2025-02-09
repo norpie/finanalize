@@ -87,15 +87,15 @@ pub async fn vector_search(
     llm_api: Arc<dyn LLMApi>,
     report: Thing,
     query: String,
-) -> Result<Vec<Document>> {
+) -> Result<Vec<DocumentChunk>> {
     let search_embed = llm_api.embed(query).await?;
-    let results: Vec<SurrealDbDocument> = db
+    let results: Vec<SurrealDbDocumentChunk> = db
         .query(VECTOR_SEARCH_QUERY)
         .bind(("search_embed", search_embed))
         .bind(("report", report))
         .await?
         .take(0)?;
-    Ok(results.into_iter().map(Document::from).collect())
+    Ok(results.into_iter().map(DocumentChunk::from).collect())
 }
 
 #[cfg(test)]
