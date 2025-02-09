@@ -101,7 +101,9 @@ mod tests {
     #[ignore = "Depends on external service"]
     async fn test_generate() {
         let ollama = Ollama::default();
-        let response = ollama.generate("Q: How tall is the Madou Tower in Brussels?\nA:".to_string()).await;
+        let response = ollama
+            .generate("Q: How tall is the Madou Tower in Brussels?\nA:".to_string())
+            .await;
         assert!(response.is_ok());
         dbg!(response.unwrap());
     }

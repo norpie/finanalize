@@ -2,8 +2,8 @@ use crate::prelude::*;
 
 use async_trait::async_trait;
 
-pub mod ullm;
 pub mod ollama;
+pub mod ullm;
 
 #[async_trait]
 pub trait LLMApi: Send + Sync + 'static {
