@@ -125,3 +125,54 @@ mod nop {
     }
 }
 
+mod validation {
+    use async_trait::async_trait;
+    use serde::{Deserialize, Serialize};
+
+    use crate::{models::SurrealDBReport, prelude::*, tasks::Task};
+
+    use std::sync::Arc;
+
+    use crate::{db::SurrealDb, llm::LLMApi, scraper::BrowserWrapper, search::SearchEngine};
+
+    use super::Job;
+
+    #[derive(Debug, Serialize)]
+    struct ValidationTaskInpput {
+        user_input: String,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct ValidationTaskOutput {
+        valid: bool,
+        error: Option<String>,
+    }
+
+    pub struct ValidationJob;
+
+    #[async_trait]
+    impl Job for ValidationJob {
+        async fn run(
+            &self,
+            report_id: String,
+            db: Arc<SurrealDb>,
+            llm: Arc<dyn LLMApi>,
+            _search: Arc<dyn SearchEngine>,
+            _browser: BrowserWrapper,
+        ) -> Result<()> {
+            // TODO: Pass the real `validation_prompt` to task
+            let validation_task = Task::new("");
+            let report: SurrealDBReport = db
+                .select(("report", report_id))
+                .await?
+                .ok_or(FinanalizeError::ReportNotFound)?;
+            let validation_input = ValidationTaskInpput {
+                user_input: report.user_input,
+            };
+            let validation_output: ValidationTaskOutput =
+                validation_task.run(llm, &validation_input).await?;
+            // TODO: Add back to database
+            Ok(())
+        }
+    }
+}
