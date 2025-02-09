@@ -69,6 +69,7 @@ mod test {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "Depends on external service"]
     async fn test_scrape_page() {
         setup_browser().await.unwrap();
         sleep(Duration::from_secs(2)).await;
