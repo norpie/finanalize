@@ -146,6 +146,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "Depends on external service"]
     async fn test_new() {
         let api = UllmApi::default();
         dbg!(&api);
@@ -159,6 +160,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "Depends on external service"]
     async fn test_embed() {
         let api = UllmApi::default();
         dbg!(&api);
