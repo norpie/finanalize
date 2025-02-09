@@ -4,7 +4,7 @@ use reqwest::Client;
 use serde::Deserialize;
 
 #[async_trait]
-pub trait SearchEngine {
+pub trait SearchEngine: Send + Sync + 'static {
     async fn search(&self, query: &str) -> Result<Vec<String>>;
 }
 
