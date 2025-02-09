@@ -56,6 +56,7 @@ use async_trait::async_trait;
 pub trait Job {
     async fn run(
         &self,
+        report_id: String,
         db: Arc<SurrealDb>,
         llm: Arc<dyn LLMApi>,
         search: Arc<dyn SearchEngine>,
