@@ -106,6 +106,7 @@ mod tests {
     use crate::models::{ReportStatus, ReportStatusEvent};
 
     #[tokio::test]
+    #[ignore = "Depends on extenal service"]
     async fn test_rabbitmq_publisher() {
         let publisher = RabbitMQPublisher::new().await.unwrap();
         let message = ReportStatusEvent {
@@ -117,6 +118,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore = "Depends on extenal service"]
     async fn test_rabbitmq_consumer() {
         let consumer = RabbitMQConsumer::new().await.unwrap();
         consumer.consume_report_status().await.unwrap();
