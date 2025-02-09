@@ -33,6 +33,7 @@ mod scraper;
 mod search;
 #[allow(dead_code)]
 mod tasks;
+#[allow(dead_code)]
 mod rag;
 
 #[tokio::main]
