@@ -13,6 +13,8 @@ pub enum FinanalizeError {
     // NotImplemented,
     #[error("Internal server error")]
     InternalServerError,
+    #[error("Missing prompt: {0}")]
+    MissingPrompt(String),
 
     #[error("LLM API error: {0}")]
     LlmApi(String),
