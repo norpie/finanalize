@@ -97,3 +97,22 @@ pub async fn vector_search(
         .take(0)?;
     Ok(results.into_iter().map(Document::from).collect())
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{db, llm::ollama::Ollama};
+
+    use super::*;
+    use surrealdb::sql::Thing;
+
+    #[tokio::test]
+    async fn test_vector_search() {
+        let db = Arc::new(db::connect().await.unwrap());
+        let llm_api = Arc::new(Ollama::default());
+        let report = Thing::from(("report", "jgq1yy5g4i5zfgv8w1xy"));
+        let query = "Hello".to_string();
+        let results = vector_search(db, llm_api, report, query).await.unwrap();
+        dbg!(&results);
+        assert_eq!(results.len(), 0);
+    }
+}
