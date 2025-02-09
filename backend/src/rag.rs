@@ -39,7 +39,6 @@ pub struct SurrealDbDocument {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DocumentChunk {
-    pub id: String,
     pub content: String,
     pub distance: f64,
     pub report_source: Document,
@@ -48,7 +47,6 @@ pub struct DocumentChunk {
 impl From<SurrealDbDocumentChunk> for DocumentChunk {
     fn from(chunk: SurrealDbDocumentChunk) -> Self {
         DocumentChunk {
-            id: chunk.id.id.to_string(),
             content: chunk.content,
             distance: chunk.distance,
             report_source: chunk.report_source.into(),
@@ -58,14 +56,13 @@ impl From<SurrealDbDocumentChunk> for DocumentChunk {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SurrealDbDocumentChunk {
-    pub id: Thing,
     pub content: String,
     pub distance: f64,
     pub report_source: SurrealDbDocument,
 }
 
 static VECTOR_SEARCH_QUERY: &str = r#"
-SELECT id, content, distance, report_source FROM (SELECT
+SELECT content, distance, report_source FROM (SELECT
     content,
     vector::similarity::cosine(embedding, $search_embed) AS distance,
     <-has_content_chunk<-report_source AS report_source
