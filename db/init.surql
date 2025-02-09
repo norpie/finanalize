@@ -104,7 +104,6 @@ DEFINE FIELD prompt_caching_write_MTok ON model_cost TYPE int PERMISSIONS FULL;
 
 DEFINE TABLE report TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD created_at ON report TYPE datetime PERMISSIONS FULL;
-DEFINE FIELD has_verdict ON report TYPE bool PERMISSIONS FULL;
 DEFINE FIELD status ON report TYPE string DEFAULT Pending PERMISSIONS FULL;
 DEFINE FIELD updated_at ON report TYPE datetime PERMISSIONS FULL;
 DEFINE FIELD user_input ON report TYPE string PERMISSIONS FULL;
@@ -136,6 +135,34 @@ DEFINE TABLE source_chunk TYPE NORMAL SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD content ON source_chunk TYPE string PERMISSIONS FULL;
 DEFINE FIELD embedding ON source_chunk TYPE array<float> PERMISSIONS FULL;
 
+DEFINE INDEX mt_pts ON source_chunk FIELDS embedding MTREE DIMENSION 4 DIST COSINE TYPE F32;
+
 DEFINE TABLE user TYPE ANY SCHEMAFULL PERMISSIONS NONE;
 DEFINE FIELD email ON user TYPE string PERMISSIONS FULL;
 DEFINE FIELD password ON user TYPE string PERMISSIONS FULL;
+
+// Create a default user
+LET $user = CREATE user SET email = 'test@gmail.com', password = crypto::argon2::generate('password');
+
+// Create a default report
+LET $report = CREATE report SET created_at = time::now(), status = 'Pending', updated_at = time::now(), user_input = 'Apple\'s current state';
+RELATE $user -> has -> $report;
+
+// Create a default report source
+LET $report_source = (CREATE report_source CONTENT {
+	description: 'Apple earnings report',
+	file_path: '/tmp/apple_earnings_report.pdf',
+	title: 'Apple Earnings Report',
+	type: 'pdf',
+	url: 'https://www.apple.com/investor/earnings-call/'
+});
+RELATE $report -> has_research -> $report_source;
+
+// Create some source chunks
+FOR $chunk IN ["Example chunk 1", "Example chunk 2", "Example chunk 3"] {
+    LET $source_chunk = CREATE source_chunk CONTENT {
+        embedding: [rand::float(), rand::float(), rand::float(), rand::float()],
+        content: $chunk
+    };
+    RELATE $report_source -> has_content_chunk -> $source_chunk;
+}
