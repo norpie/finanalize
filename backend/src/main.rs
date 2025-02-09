@@ -26,6 +26,8 @@ mod jwt;
 mod llm;
 mod models;
 mod prelude;
+#[allow(dead_code)]
+mod prompting;
 mod rabbitmq;
 #[allow(dead_code)]
 mod rag;
