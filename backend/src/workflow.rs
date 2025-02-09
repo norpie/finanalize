@@ -133,6 +133,13 @@ impl JobType {
             JobType::Done => None,
         }
     }
+
+    pub fn job(&self) -> Box<dyn Job> {
+        match self {
+            JobType::Validation => Box::new(validation::ValidationJob),
+            _ => Box::new(nop::NopJob),
+        }
+    }
 }
 
 mod nop {
