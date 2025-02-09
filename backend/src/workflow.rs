@@ -69,7 +69,7 @@ pub trait Job {
     /// - `Err(Error)` if the job failed.
     async fn run(
         &self,
-        report: SurrealDBReport,
+        report: &SurrealDBReport,
         db: Arc<SurrealDb>,
         llm: Arc<dyn LLMApi>,
         search: Arc<dyn SearchEngine>,
@@ -161,7 +161,7 @@ mod nop {
     impl Job for NopJob {
         async fn run(
             &self,
-            _report: SurrealDBReport,
+            _report: &SurrealDBReport,
             _db: Arc<SurrealDb>,
             _llm: Arc<dyn LLMApi>,
             _search: Arc<dyn SearchEngine>,
@@ -215,7 +215,7 @@ mod validation {
     impl Job for ValidationJob {
         async fn run(
             &self,
-            report: SurrealDBReport,
+            report: &SurrealDBReport,
             db: Arc<SurrealDb>,
             llm: Arc<dyn LLMApi>,
             _search: Arc<dyn SearchEngine>,
@@ -238,8 +238,8 @@ mod validation {
                 .await?
                 .ok_or(FinanalizeError::UnableToCreateReportVerdict)?;
             db.query("RELATE $report -> has_verdict -> $verdict")
-                .bind(("report", report))
-                .bind(("verdict", sdb_verdict))
+                .bind(("report", report.id.clone()))
+                .bind(("verdict", sdb_verdict.id))
                 .await?;
             Ok(())
         }
