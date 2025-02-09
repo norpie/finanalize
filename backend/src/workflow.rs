@@ -175,8 +175,9 @@ mod nop {
 mod validation {
     use async_trait::async_trait;
     use serde::{Deserialize, Serialize};
+    use surrealdb::sql::Thing;
 
-    use crate::{models::SurrealDBReport, prelude::*, tasks::Task};
+    use crate::{models::SurrealDBReport, prelude::*, prompting, tasks::Task};
 
     use std::sync::Arc;
 
@@ -197,28 +198,49 @@ mod validation {
 
     pub struct ValidationJob;
 
+    #[derive(Debug, Serialize)]
+    pub struct ReportVerdict {
+        justification: String,
+        valid: bool,
+    }
+
+    #[derive(Debug, Deserialize, Serialize)]
+    pub struct SurrealDBVerdict {
+        id: Thing,
+        justification: String,
+        valid: bool,
+    }
+
     #[async_trait]
     impl Job for ValidationJob {
         async fn run(
             &self,
             report: SurrealDBReport,
-            _db: Arc<SurrealDb>,
+            db: Arc<SurrealDb>,
             llm: Arc<dyn LLMApi>,
             _search: Arc<dyn SearchEngine>,
             _browser: BrowserWrapper,
         ) -> Result<()> {
-            // TODO: Pass the real `validation_prompt` to task
-            let validation_task = Task::new("");
-            // let report: SurrealDBReport = db
-            // .select(("report", report_id))
-            // .await?
-            // .ok_or(FinanalizeError::ReportNotFound)?;
+            let prompt = prompting::get_prompt(db.clone(), "validation".into()).await?;
+            let validation_task = Task::new(&prompt);
             let validation_input = ValidationTaskInpput {
-                user_input: report.user_input,
+                user_input: report.user_input.clone(),
             };
-            let _validation_output: ValidationTaskOutput =
+            let validation_output: ValidationTaskOutput =
                 validation_task.run(llm, &validation_input).await?;
-            // TODO: Add back to database
+            let verdict = ReportVerdict {
+                justification: validation_output.error.unwrap_or("N/A".into()),
+                valid: validation_output.valid,
+            };
+            let sdb_verdict: SurrealDBVerdict = db
+                .create("report_verdict")
+                .content(verdict)
+                .await?
+                .ok_or(FinanalizeError::UnableToCreateReportVerdict)?;
+            db.query("RELATE $report -> has_verdict -> $verdict")
+                .bind(("report", report))
+                .bind(("verdict", sdb_verdict))
+                .await?;
             Ok(())
         }
     }
