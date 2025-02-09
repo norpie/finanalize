@@ -44,3 +44,21 @@
 //!
 //! This file contains the data structures that represent the workflow and the
 //! jobs.
+use std::sync::Arc;
+
+use crate::{
+    db::SurrealDb, llm::LLMApi, prelude::*, scraper::BrowserWrapper, search::SearchEngine,
+};
+
+use async_trait::async_trait;
+
+#[async_trait]
+pub trait Job {
+    async fn run(
+        &self,
+        db: Arc<SurrealDb>,
+        llm: Arc<dyn LLMApi>,
+        search: Arc<dyn SearchEngine>,
+        browser: BrowserWrapper,
+    ) -> Result<()>;
+}
