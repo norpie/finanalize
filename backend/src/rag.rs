@@ -102,6 +102,7 @@ mod tests {
     use surrealdb::sql::Thing;
 
     #[tokio::test]
+    #[ignore = "Depends on external service"]
     async fn test_vector_search() {
         let db = Arc::new(db::connect().await.unwrap());
         let llm_api = Arc::new(Ollama::default());
