@@ -54,6 +54,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8080:8080
+    env_file: ".env"
 
   searxng:
     container_name: searxng
