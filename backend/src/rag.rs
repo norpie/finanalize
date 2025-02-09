@@ -71,7 +71,6 @@ FROM (
         ->has_research->report_source->has_content_chunk->source_chunk AS chunks
     FROM ONLY
         $report
-    GROUP ALL
     FETCH chunks)
 ).chunks
 ORDER BY distance ASC)
