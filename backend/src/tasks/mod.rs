@@ -113,6 +113,7 @@ The following are complete examples of the input and output:
     }
 
     #[tokio::test]
+    #[ignore = "Depends on external service"]
     async fn test_example_task() {
         let task = Task::new(EXAMPLE_TASK_PROMPT_TEMPLATE);
 
