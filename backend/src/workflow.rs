@@ -54,6 +54,18 @@ use async_trait::async_trait;
 
 #[async_trait]
 pub trait Job {
+    /// Runs the job.
+    ///
+    /// # Arguments
+    /// - `report_id` - The ID of the report that the job is being run for.
+    /// - `db` - The database connection.
+    /// - `llm` - The LLM API connection.
+    /// - `search` - The search engine connection.
+    /// - `browser` - The browser connection.
+    ///
+    /// # Returns
+    /// - `Ok(())` if the job was successful.
+    /// - `Err(Error)` if the job failed.
     async fn run(
         &self,
         report_id: String,
