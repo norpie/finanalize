@@ -1,0 +1,22 @@
+name: Test Rust project
+on:
+  pull_request:
+    paths:
+      - '**.rs'
+name: Run tests
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        rust: [stable]
+
+    steps:
+    - uses: hecrj/setup-rust-action@v2
+      with:
+        rust-version: ${{ matrix.rust }}
+    - uses: actions/checkout@master
+    - name: Run tests
+      run: cd backend && cargo test --verbose
