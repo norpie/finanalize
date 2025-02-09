@@ -77,6 +77,7 @@ pub trait Job {
     ) -> Result<()>;
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum JobType {
     Pending,
     Validation,
@@ -100,6 +101,12 @@ pub enum JobType {
     CompileSections,
     GeneratePDFReport,
     Done,
+}
+
+impl From<&ReportStatus> for JobType {
+    fn from(value: &ReportStatus) -> Self {
+        serde_json::from_value(serde_json::to_value(value).unwrap()).unwrap()
+    }
 }
 
 impl JobType {
