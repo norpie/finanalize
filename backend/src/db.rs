@@ -8,7 +8,11 @@ use crate::prelude::*;
 pub type SurrealDb = Surreal<Client>;
 
 pub async fn connect() -> Result<SurrealDb> {
-    let db = Surreal::new::<Ws>("surrealdb:8000").await?;
+    let mut default_address = "localhost:8000".to_string();
+    if let Ok(env_address) = std::env::var("SURREALDB_URL") {
+        default_address = env_address;
+    }
+    let db = Surreal::new::<Ws>(default_address).await?;
 
     // Signin as a namespace, database, or root user
     db.signin(Root {
