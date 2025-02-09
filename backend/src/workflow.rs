@@ -62,3 +62,24 @@ pub trait Job {
         browser: BrowserWrapper,
     ) -> Result<()>;
 }
+
+pub enum JobType {
+    Pending,
+    Validation,
+    Done,
+}
+
+impl JobType {
+    /// Advances the job type to the next step in the workflow.
+    ///
+    /// # Returns
+    /// - `Some(JobType)` if the current state is not `Done`
+    /// - `None` if the current state is `Done`, as there are no more steps.
+    pub fn next(&self) -> Option<JobType> {
+        match self {
+            JobType::Pending => Some(JobType::Validation),
+            JobType::Validation => Some(JobType::Done),
+            JobType::Done => None,
+        }
+    }
+}
