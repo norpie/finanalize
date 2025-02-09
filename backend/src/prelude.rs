@@ -19,6 +19,8 @@ pub enum FinanalizeError {
 
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
+    #[error("Env error: {0}")]
+    Env(#[from] std::env::VarError),
 
     #[error("SurrealDB error: {0}")]
     SurrealDB(#[from] surrealdb::Error),
