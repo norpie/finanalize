@@ -145,7 +145,7 @@ DEFINE FIELD password ON user TYPE string PERMISSIONS FULL;
 LET $user = CREATE user SET email = 'test@gmail.com', password = crypto::argon2::generate('password');
 
 // Create a default report
-LET $report = CREATE report SET created_at = time::now(), status = 'Pending', updated_at = time::now(), user_input = 'Apple\'s current state';
+LET $report = CREATE report:jgq1yy5g4i5zfgv8w1xy SET created_at = time::now(), status = 'Pending', updated_at = time::now(), user_input = 'Apple\'s current state';
 RELATE $user -> has -> $report;
 
 // Create a default report source
