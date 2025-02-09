@@ -109,6 +109,12 @@ impl From<&ReportStatus> for JobType {
     }
 }
 
+impl From<JobType> for ReportStatus {
+    fn from(value: JobType) -> Self {
+        serde_json::from_value(serde_json::to_value(value).unwrap()).unwrap()
+    }
+}
+
 impl JobType {
     /// Advances the job type to the next step in the workflow.
     ///
