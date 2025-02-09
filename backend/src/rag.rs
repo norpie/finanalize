@@ -63,3 +63,22 @@ pub struct SurrealDbDocumentChunk {
     pub distance: f64,
     pub report_source: SurrealDbDocument,
 }
+
+static VECTOR_SEARCH_QUERY: &str = r#"
+SELECT id, content, distance, report_source FROM (SELECT
+    content,
+    vector::similarity::cosine(embedding, $search_embed) AS distance,
+    <-has_content_chunk<-report_source AS report_source
+FROM (
+    (SELECT
+        ->has_research->report_source->has_content_chunk->source_chunk AS chunks
+    FROM ONLY
+        $report
+    GROUP ALL
+    FETCH chunks)
+).chunks
+ORDER BY distance ASC)
+SPLIT report_source
+FETCH report_source;
+"#;
+
