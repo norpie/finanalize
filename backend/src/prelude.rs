@@ -15,6 +15,10 @@ pub enum FinanalizeError {
     InternalServerError,
     #[error("Missing prompt: {0}")]
     MissingPrompt(String),
+    #[error("Trying to perform job on non-existing report")]
+    ReportNotFound,
+    #[error("Unable to create report verdict")]
+    UnableToCreateReportVerdict,
 
     #[error("LLM API error: {0}")]
     LlmApi(String),
@@ -46,8 +50,6 @@ pub enum FinanalizeError {
     Excel(#[from] calamine::XlsxError),
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
-    #[error("Trying to perform job on non-existing report")]
-    ReportNotFound,
 }
 
 #[derive(Debug, Display)]
