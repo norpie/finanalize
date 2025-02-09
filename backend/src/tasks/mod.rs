@@ -19,7 +19,13 @@ impl<'a> Task<'a> {
         let prompt = Handlebars::default().render_template(self.0, input)?;
         let generated = api.generate(prompt.clone()).await?;
         let full = format!("{}{}", prompt, generated);
-        let json = full
+        let json = self.parse_output(&full)?;
+        let output: U = serde_json::from_str(&json)?;
+        Ok(output)
+    }
+
+    fn parse_output(&self, output: &str) -> Result<String> {
+        let json = output
             .lines()
             .skip_while(|line| !line.starts_with("<Output>"))
             .skip(1)
@@ -31,8 +37,7 @@ impl<'a> Task<'a> {
             .replace("</Output>", "")
             .trim()
             .to_string();
-        let output: U = serde_json::from_str(&json)?;
-        Ok(output)
+        Ok(json)
     }
 
     fn prompt_template(&self) -> String {
@@ -131,5 +136,54 @@ The following are complete examples of the input and output:
         let result: ExampleTaskOutput = task.run(api, &input).await.unwrap();
 
         assert_eq!(result, output);
+    }
+
+    #[derive(Debug, Deserialize, PartialEq, Eq)]
+    struct ParseOutputTest {
+        input: String,
+        expected: String,
+    }
+
+    #[tokio::test]
+    async fn test_parse_output() {
+        let task = Task::new(EXAMPLE_TASK_PROMPT_TEMPLATE);
+
+        let tests = vec![
+            ParseOutputTest {
+                input: r#"<Output>
+```json
+{
+    "city": "New York",
+    "country": "USA"
+}
+```
+</Output>"#
+                    .to_string(),
+                expected: r#"{
+    "city": "New York",
+    "country": "USA"
+}"#
+                .to_string(),
+            },
+            ParseOutputTest {
+                input: r#"<Output>
+```json
+{
+    "error": "No city found in the message"
+}
+```
+</Output>"#
+                    .to_string(),
+                expected: r#"{
+    "error": "No city found in the message"
+}"#
+                .to_string(),
+            },
+        ];
+
+        for test in tests {
+            let result = task.parse_output(&test.input).unwrap();
+            assert_eq!(result, test.expected);
+        }
     }
 }
