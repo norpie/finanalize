@@ -47,11 +47,43 @@
 use std::sync::Arc;
 
 use crate::{
-    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, scraper::BrowserWrapper,
+    db::SurrealDb,
+    llm::LLMApi,
+    models::{ReportStatus, SurrealDBReport},
+    prelude::*,
+    scraper::BrowserWrapper,
     search::SearchEngine,
 };
 
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
+
+pub async fn run_next_job(
+    report_id: String,
+    db: Arc<SurrealDb>,
+    llm: Arc<dyn LLMApi>,
+    search: Arc<dyn SearchEngine>,
+    browser: BrowserWrapper,
+) -> Result<()> {
+    let mut report: SurrealDBReport = db
+        .select(("report", report_id))
+        .await?
+        .ok_or(FinanalizeError::ReportNotFound)?;
+    let job_type = JobType::from(&report.status);
+    let job = job_type.job();
+    job.run(&report, db.clone(), llm, search, browser).await?;
+    let Some(next) = job_type.next() else {
+        return Ok(());
+    };
+    report.status = next.into();
+    let report: SurrealDBReport = db
+        .update(("report", report.id.id.to_string()))
+        .content(report)
+        .await?
+        .ok_or(FinanalizeError::UnableToUpdateReport)?;
+    dbg!(report);
+    Ok(())
+}
 
 #[async_trait]
 pub trait Job {
