@@ -14,6 +14,7 @@ impl DataExtract for CsvExtractor {
             .finish()?;
         let mut columns = vec![];
         for column in df.get_columns() {
+            let column = column.cast(&polars::prelude::DataType::String)?;
             columns.push(Column {
                 name: column.name().as_str().into(),
                 description: String::new(),
@@ -69,7 +70,7 @@ mod tests {
         let result = extractor.extract(file_path.to_str().unwrap()).await;
 
         // Assert that the result is Ok
-        assert!(result.is_ok());
+        result.unwrap();
 
         // Clean up the temporary directory
         dir.close().unwrap();
