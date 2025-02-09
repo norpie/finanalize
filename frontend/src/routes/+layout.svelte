@@ -16,7 +16,7 @@
     import { user } from '$lib/store';
     import { page } from '$app/state';
 
-    const hideSidebarRoutes = ['/', '/login', '/register'];
+    const hideSidebarRoutes = ['/', '/login', '/register','/about','/contact'];
 
     let { children } = $props();
 
