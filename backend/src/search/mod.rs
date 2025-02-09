@@ -54,6 +54,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "Depends on external service"]
     async fn test_searxng() {
         let searxng = SearxNG::new("http://localhost:8081");
         let results = searxng.search("rust").await.unwrap();
