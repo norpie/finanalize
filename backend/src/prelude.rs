@@ -46,6 +46,8 @@ pub enum FinanalizeError {
     Excel(#[from] calamine::XlsxError),
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
+    #[error("Trying to perform job on non-existing report")]
+    ReportNotFound,
 }
 
 #[derive(Debug, Display)]
