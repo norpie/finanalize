@@ -47,7 +47,8 @@
 use std::sync::Arc;
 
 use crate::{
-    db::SurrealDb, llm::LLMApi, prelude::*, scraper::BrowserWrapper, search::SearchEngine,
+    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, scraper::BrowserWrapper,
+    search::SearchEngine,
 };
 
 use async_trait::async_trait;
@@ -68,7 +69,7 @@ pub trait Job {
     /// - `Err(Error)` if the job failed.
     async fn run(
         &self,
-        report_id: String,
+        report: SurrealDBReport,
         db: Arc<SurrealDb>,
         llm: Arc<dyn LLMApi>,
         search: Arc<dyn SearchEngine>,
@@ -148,7 +149,8 @@ mod nop {
     use async_trait::async_trait;
 
     use crate::{
-        db::SurrealDb, llm::LLMApi, prelude::*, scraper::BrowserWrapper, search::SearchEngine,
+        db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, scraper::BrowserWrapper,
+        search::SearchEngine,
     };
 
     use super::Job;
@@ -159,7 +161,7 @@ mod nop {
     impl Job for NopJob {
         async fn run(
             &self,
-            _report_id: String,
+            _report: SurrealDBReport,
             _db: Arc<SurrealDb>,
             _llm: Arc<dyn LLMApi>,
             _search: Arc<dyn SearchEngine>,
@@ -199,22 +201,22 @@ mod validation {
     impl Job for ValidationJob {
         async fn run(
             &self,
-            report_id: String,
-            db: Arc<SurrealDb>,
+            report: SurrealDBReport,
+            _db: Arc<SurrealDb>,
             llm: Arc<dyn LLMApi>,
             _search: Arc<dyn SearchEngine>,
             _browser: BrowserWrapper,
         ) -> Result<()> {
             // TODO: Pass the real `validation_prompt` to task
             let validation_task = Task::new("");
-            let report: SurrealDBReport = db
-                .select(("report", report_id))
-                .await?
-                .ok_or(FinanalizeError::ReportNotFound)?;
+            // let report: SurrealDBReport = db
+            // .select(("report", report_id))
+            // .await?
+            // .ok_or(FinanalizeError::ReportNotFound)?;
             let validation_input = ValidationTaskInpput {
                 user_input: report.user_input,
             };
-            let validation_output: ValidationTaskOutput =
+            let _validation_output: ValidationTaskOutput =
                 validation_task.run(llm, &validation_input).await?;
             // TODO: Add back to database
             Ok(())
