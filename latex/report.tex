@@ -18,12 +18,11 @@
 %	CLASS, PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-\documentclass[
-a4paper, % Paper size, use either a4paper or letterpaper
-12pt, % Default font size, the components is designed to look good at 12pt so it's best not to change this
+    \documentclass[
+    report, % Paper size, use either a4paper or letterpaper
+    12pt, % Default font size, the components is designed to look good at 12pt so it's best not to change this
 %unnumberedsections, % Uncomment for no section numbering
 ]{CSSullivanBusinessReport}
-
 % All required packages and configuration are included in the CSSullivanBusinessReport.cls file (normally).
 %\usepackage{biblatex}
 %\addbibresource{sample.bib} % BibLaTeX bibliography file, should be created through the LLM.
@@ -32,7 +31,7 @@ a4paper, % Paper size, use either a4paper or letterpaper
 %	REPORT INFORMATION
 %----------------------------------------------------------------------------------------
 
-\include{components/report_information}
+    \include{components/report_information}
 
 %----------------------------------------------------------------------------------------
 
@@ -42,97 +41,73 @@ a4paper, % Paper size, use either a4paper or letterpaper
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\include{components/titlepage}
-\newpage
+    \include{components/titlepage}
+    \newpage
 
 %----------------------------------------------------------------------------------------
 %	DISCLAIMER/COPYRIGHT PAGE
 %----------------------------------------------------------------------------------------
 
-\include{components/disclaimer}
-\newpage
+    \include{components/disclaimer}
+    \newpage
 
 %----------------------------------------------------------------------------------------
 %	TABLE OF CONTENTS
 %----------------------------------------------------------------------------------------
 
-\include{components/tableofcontents}
-\newpage
+    \include{components/tableofcontents}
+    \newpage
 
 %----------------------------------------------------------------------------------------
 %	SECTIONS
 %----------------------------------------------------------------------------------------
 
-\include{components/sections}
-
-%----------------------------------------------------------------------------------------
-%	FONTS
-%----------------------------------------------------------------------------------------
-
-\include{components/fonts}
-
-%----------------------------------------------------------------------------------------
-%	QUOTATIONS
-%----------------------------------------------------------------------------------------
-
-\include{components/quotations}
+    \include{components/sections}
 
 %----------------------------------------------------------------------------------------
 %	TABLES
 %----------------------------------------------------------------------------------------
 
-\include{components/tables}
+    \include{components/tables}
 
 %----------------------------------------------------------------------------------------
 %	FIGURES
 %----------------------------------------------------------------------------------------
 
-\include{components/figures}
+    \include{components/figures}
 
 %----------------------------------------------------------------------------------------
 %	LISTS
 %----------------------------------------------------------------------------------------
 
-\include{components/lists}
+    \include{components/lists}
 
 %----------------------------------------------------------------------------------------
 %	REFERENCING CITATIONS
 %----------------------------------------------------------------------------------------
 
-\include{components/citations}
+    \include{components/citations}
 
 %----------------------------------------------------------------------------------------
 %	LINKS
 %----------------------------------------------------------------------------------------
 
-\include{components/links}
+    \include{components/links}
 
 %----------------------------------------------------------------------------------------
 %	EQUATIONS
 %----------------------------------------------------------------------------------------
 
-\include{components/equations}
-
-%----------------------------------------------------------------------------------------
-%	CODE
-%----------------------------------------------------------------------------------------
-
-\include{components/code}
+    \include{components/equations}
 
 %----------------------------------------------------------------------------------------
 %	 REFERENCES/BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
-\newpage
-\include{components/bibliography}
-
-%----------------------------------------------------------------------------------------
-%	APPENDICES
-%----------------------------------------------------------------------------------------
-
-\newpage
-\include{components/appendices}
+    \newpage
+    \include{components/bibliography}
 
 %----------------------------------------------------------------------------------------
 
 \end{document}
+
