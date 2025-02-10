@@ -7,6 +7,7 @@ use actix_web::http::StatusCode;
 use actix_web::web::{Data, Json, Path};
 use actix_web::{get, post, Responder};
 use serde::{Deserialize, Serialize};
+use surrealdb::sql::Thing;
 
 #[post("/reports")]
 pub async fn create_report(
@@ -32,15 +33,26 @@ pub async fn create_report(
 
 #[get("/reports/{report_id}")]
 pub async fn get_report(
-    // FIXME: if you know the id you can see any report.
+    user: SurrealDBUser,
     db: Data<SurrealDb>,
     report_id: Path<String>,
 ) -> Result<impl Responder, FinanalizeError> {
-    let report: SurrealDBReport = db
-        .select(("report", report_id.to_string()))
-        .await?
-        .ok_or(FinanalizeError::NotFound)?;
-    Ok(ApiResponse::new(Report::from(report)))
+    dbg!(&user);
+    dbg!(&report_id);
+    let report_thing: Thing = ("report", report_id.as_str()).into();
+    let mut response = db
+        .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
+        .bind(("user", user.id))
+        .bind(("report", report_thing))
+        .await?;
+    let Some(query) = response.take::<Option<SurrealDBReport>>(0)? else {
+        return Ok(ApiResponse::error(
+            StatusCode::NOT_FOUND,
+            "fucking hoe?".into(),
+        ));
+    };
+    let report = query.clone();
+Ok(ApiResponse::new(Report::from(report)))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
