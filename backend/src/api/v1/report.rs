@@ -37,8 +37,6 @@ pub async fn get_report(
     db: Data<SurrealDb>,
     report_id: Path<String>,
 ) -> Result<impl Responder, FinanalizeError> {
-    dbg!(&user);
-    dbg!(&report_id);
     let report_thing: Thing = ("report", report_id.as_str()).into();
     let mut response = db
         .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
@@ -48,7 +46,7 @@ pub async fn get_report(
     let Some(query) = response.take::<Option<SurrealDBReport>>(0)? else {
         return Ok(ApiResponse::error(
             StatusCode::NOT_FOUND,
-            "fucking hoe?".into(),
+            "Report not found".into(),
         ));
     };
     let report = query.clone();
@@ -79,7 +77,7 @@ pub async fn get_reports(
     let Some(report_query) = response.take::<Option<ReportQuery>>(0)? else {
         return Ok(ApiResponse::error(
             StatusCode::NOT_FOUND,
-            "fucking hoe?".into(),
+            "Report not found".into(),
         ));
     };
     let reports: Vec<Report> = report_query.reports.into_iter().map(|r| r.into()).collect();
