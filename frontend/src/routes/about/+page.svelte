@@ -1,7 +1,10 @@
 <script lang="ts">
     import { Button } from '$lib/components/ui/button/index.js';
-
+    import { user } from '$lib/store';
     import { goto } from '$app/navigation';
+    import Spinner from '$lib/components/spinner.svelte';
+
+    
 </script>
 
 
@@ -18,14 +21,25 @@
             </div>
         </nav>
         <div class="flex gap-2">
-            
-            <a href="/login">
-                <Button class="bg-gray-700 hover:bg-gray-600">Log In</Button>
-            </a>
-            <a href="/register">
-                <Button class="bg-purple-700 hover:bg-purple-600">Sign Up</Button>
-            </a>
-        </div>
+			<!-- Existing Button Logic -->
+			<div class="button-wrapper mt-8 flex justify-center">
+				{#if user}
+					<Button onclick={() => goto('/dashboard')} class="bg-purple-700 hover:bg-purple-600"
+						>Dashboard</Button
+					>
+				{:else if user === null}
+					<Button onclick={() => goto('/login')} class="mr-2  bg-gray-600 hover:bg-purple-600"
+						>Login</Button
+					>
+
+					<Button onclick={() => goto('/signup')} class="bg-purple-700 hover:bg-purple-600"
+						>Sign Up</Button
+					>
+				{:else if user === undefined}
+					<Button><Spinner color="purple" /></Button>
+				{/if}
+			</div>
+		</div>
     </header>
 <div class="about-page-wrapper bg-gray-900">
 
@@ -64,7 +78,7 @@
 
     <!-- Footer Section -->
     <footer class="bg-gray-900 text-gray-400 py-6 text-center mt-16">
-        <p>&copy; {new Date().getFullYear()} FinAn. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Finanalize. All rights reserved.</p>
     </footer>
 </div>
 
