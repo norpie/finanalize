@@ -68,15 +68,15 @@
 	marginparsep=1cm, % Padding between the main text and the large right margin (sidebar)
 	footskip=1.5cm, % Space from the bottom margin to the baseline of the footer
 	headsep=0.8cm, % Space from the top margin to the baseline of the header
-	headheight=1cm, % Height of the header
-	%showframe % Uncomment to show frames around the margins for debugging purposes
+	headheight=6cm, % Height of the header
+%showframe % Uncomment to show frames around the margins for debugging purposes
 ]{geometry}
 
 \usepackage[oneside]{sidenotes} % Required for outputting content to the margin
 
 % Restyle the \sidenote command from the sidenotes package to reduce the font size
 \makeatletter
-\RenewDocumentCommand\sidenotetext{o o +m}{%      
+\RenewDocumentCommand\sidenotetext{o o +m}{%
 	\IfNoValueOrEmptyTF{#1}{%
 		\@sidenotes@placemarginal{#2}{\textsuperscript{\thesidenote}\footnotesize#3}%
 		\refstepcounter{sidenote}%
@@ -88,13 +88,13 @@
 
 \newenvironment{fullwidth}{ % Environment to output to the full page width (excluding page margins)
 	\begin{adjustwidth}{}{\dimexpr-\marginparwidth-\marginparsep\relax} % Pull into the right margin by the margin width and margin skip width
-}{
+	}{
 	\end{adjustwidth}
 }
 
 \newenvironment{twothirdswidth}{ % Environment to output content at two-thirds of the whole page width
 	\begin{adjustwidth}{}{\dimexpr-0.5\marginparwidth-0.5\marginparsep\relax} % Pull into the right margin by half the margin width and half the margin skip width
-}{
+	}{
 	\end{adjustwidth}
 }
 
@@ -161,52 +161,52 @@
 }
 
 \titleformat
-	{\section} % Section type being modified
-	[block] % Section layout type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
-	{\raggedright\LARGE\bfseries} % Text formatting of the whole section, i.e. label and title
-	{\thesection} % Section label (e.g. number) and its formatting
-	{5pt} % Horizontal space between the section label and title
-	{} % Code before the section title
-	[] % Code after the section title
+{\section} % Section type being modified
+[block] % Section layout type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
+{\raggedright\LARGE\bfseries} % Text formatting of the whole section, i.e. label and title
+{\thesection} % Section label (e.g. number) and its formatting
+{5pt} % Horizontal space between the section label and title
+{} % Code before the section title
+[] % Code after the section title
 
 \titlespacing*{\section}{0pt}{\baselineskip}{4pt} % Spacing around section titles, the order is: left, before and after
 
 %------------------------------------------------
 
 \titleformat
-	{\subsection} % Section type being modified
-	[block] % Section layout type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
-	{\raggedright\large\bfseries} % Text formatting of the whole section, i.e. label and title
-	{\thesubsection} % Section label (e.g. number) and its formatting
-	{5pt} % Horizontal space between the section label and title
-	{} % Code before the section title
-	[] % Code after the section title
+{\subsection} % Section type being modified
+[block] % Section layout type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
+{\raggedright\large\bfseries} % Text formatting of the whole section, i.e. label and title
+{\thesubsection} % Section label (e.g. number) and its formatting
+{5pt} % Horizontal space between the section label and title
+{} % Code before the section title
+[] % Code after the section title
 
 \titlespacing*{\subsection}{0pt}{0.75\baselineskip}{4pt} % Spacing around section titles, the order is: left, before and after
 
 %------------------------------------------------
 
 \titleformat
-	{\subsubsection} % Section type being modified
-	[block] % Section layout type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
-	{\raggedright\bfseries\normalsize} % Text formatting of the whole section, i.e. label and title
-	{\thesubsubsection} % Section label (e.g. number) and its formatting
-	{5pt} % Horizontal space between the section label and title
-	{} % Code before the section title
-	[] % Code after the section title
+{\subsubsection} % Section type being modified
+[block] % Section layout type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
+{\raggedright\bfseries\normalsize} % Text formatting of the whole section, i.e. label and title
+{\thesubsubsection} % Section label (e.g. number) and its formatting
+{5pt} % Horizontal space between the section label and title
+{} % Code before the section title
+[] % Code after the section title
 
 \titlespacing*{\subsubsection}{0pt}{0.5\baselineskip}{0pt} % Spacing around section titles, the order is: left, before and after
 
 %------------------------------------------------
 
 \titleformat
-	{\paragraph} % Section type being modified
-	[runin] % Section layout type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
-	{\bfseries} % Text formatting of the whole section, i.e. label and title
-	{} % Section label (e.g. number) and its formatting
-	{0pt} % Horizontal space between the section label and title
-	{} % Code before the section title
-	[~~~~] % Code after the section title
+{\paragraph} % Section type being modified
+[runin] % Section layout type, can be: hang, block, display, runin, leftmargin, rightmargin, drop, wrap, frame
+{\bfseries} % Text formatting of the whole section, i.e. label and title
+{} % Section label (e.g. number) and its formatting
+{0pt} % Horizontal space between the section label and title
+{} % Code before the section title
+[~~~~] % Code after the section title
 
 \titlespacing*{\paragraph}{0pt}{0pt}{0pt} % Spacing around section titles, the order is: left, before and after
 
@@ -221,32 +221,32 @@
 \renewcommand{\contentsname}{Table of Contents} % Rename the table of contents section heading
 
 \titlecontents{section} % Section type being modified
-	[0pt] % Left indentation
-	{\vspace{-2pt}} % Before code
-	{\textsb{\thecontentslabel}~~\textsb} % Formatting of numbered sections of this type
-	{\textsb} % Formatting of numberless sections of this type
-	{\titlerule*[6pt]{.}\textsb{\contentspage}} % Formatting of the filler to the right of the heading and the page number
-	[\vspace{2pt}] % After code
+[0pt] % Left indentation
+{\vspace{-2pt}} % Before code
+{\textsb{\thecontentslabel}~~\textsb} % Formatting of numbered sections of this type
+{\textsb} % Formatting of numberless sections of this type
+{\titlerule*[6pt]{.}\textsb{\contentspage}} % Formatting of the filler to the right of the heading and the page number
+[\vspace{2pt}] % After code
 
 %------------------------------------------------
 
 \titlecontents{subsection} % Section type being modified
-	[0.5cm] % Left indentation
-	{\vspace{-8pt}} % Before code
-	{\textsb{\thecontentslabel}~~} % Formatting of numbered sections of this type
-	{} % Formatting of numberless sections of this type
-	{\titlerule*[6pt]{.}\contentspage} % Formatting of the filler to the right of the heading and the page number
-	[] % After code
-	
+[0.5cm] % Left indentation
+{\vspace{-8pt}} % Before code
+{\textsb{\thecontentslabel}~~} % Formatting of numbered sections of this type
+{} % Formatting of numberless sections of this type
+{\titlerule*[6pt]{.}\contentspage} % Formatting of the filler to the right of the heading and the page number
+[] % After code
+
 %------------------------------------------------
 
 \titlecontents{subsubsection} % Section type being modified
-	[1.35cm] % Left indentation
-	{\vspace{-4pt}} % Before code
-	{\textsb{\thecontentslabel}~~} % Formatting of numbered sections of this type
-	{} % Formatting of numberless sections of this type
-	{\titlerule*[6pt]{.}\contentspage} % Formatting of the filler to the right of the heading and the page number
-	[] % After code
+[1.35cm] % Left indentation
+{\vspace{-4pt}} % Before code
+{\textsb{\thecontentslabel}~~} % Formatting of numbered sections of this type
+{} % Formatting of numberless sections of this type
+{\titlerule*[6pt]{.}\contentspage} % Formatting of the filler to the right of the heading and the page number
+[] % After code
 
 %----------------------------------------------------------------------------------------
 %	COLORS
@@ -265,7 +265,7 @@
 	citestyle=numeric, % In-text citation style
 	bibstyle=numeric, % Bibliography style
 ]{biblatex}
-
+\addbibresource{sample.bib}
 \newcommand{\sidecite}[2][0pt]{\sidenote[][#1]{\textcite{#2}}} % Parenthetical citations in the margin
 \newcommand{\fullsidecite}[2][0pt]{\sidenote[][#1]{\fullcite{#2}}} % Full citations in the margin
 
