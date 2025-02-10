@@ -50,7 +50,7 @@ pub async fn get_report(
         ));
     };
     let report = query.clone();
-Ok(ApiResponse::new(Report::from(report)))
+    Ok(ApiResponse::new(Report::from(report)))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
