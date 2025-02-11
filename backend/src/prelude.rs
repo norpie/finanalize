@@ -23,6 +23,8 @@ pub enum FinanalizeError {
     UnableToUpdateReport,
     #[error("Unable to create report title")]
     UnableToCreateReportTitle,
+    #[error("Unable to create bullets for heading")]
+    UnableToGenerateBullets,
 
     #[error("LLM API error: {0}")]
     LlmApi(String),
@@ -54,6 +56,7 @@ pub enum FinanalizeError {
     Excel(#[from] calamine::XlsxError),
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
+
 }
 
 #[derive(Debug, Display)]
