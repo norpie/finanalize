@@ -219,3 +219,4 @@ mod nop {
 
 mod title;
 mod validation;
+mod bullets_gen;
