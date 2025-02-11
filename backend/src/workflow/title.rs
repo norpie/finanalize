@@ -8,7 +8,6 @@ use std::sync::Arc;
 
 use crate::{db::SurrealDb, llm::LLMApi, scraper::BrowserWrapper, search::SearchEngine};
 
-
 use super::Job;
 
 #[derive(Debug, Serialize)]
@@ -32,7 +31,6 @@ pub struct ReportTitle {
 pub struct SurrealDBTitle {
     id: Thing,
     title: String,
-
 }
 
 #[async_trait]
@@ -50,11 +48,10 @@ impl Job for TitleJob {
         let title_input = TitleTaskInpput {
             user_input: report.user_input.clone(),
         };
-        let title_output: TitleTaskOutput =
-            title_task.run(llm, &title_input).await?;
+        let title_output: TitleTaskOutput = title_task.run(llm, &title_input).await?;
 
         let report_title = ReportTitle {
-                title: title_output.output,
+            title: title_output.output,
         };
 
         let sdb_title: SurrealDBTitle = db
