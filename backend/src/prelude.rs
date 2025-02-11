@@ -21,6 +21,8 @@ pub enum FinanalizeError {
     UnableToCreateReportVerdict,
     #[error("Unable to update report")]
     UnableToUpdateReport,
+    #[error("Unable to create report title")]
+    UnableToCreateReportTitle,
 
     #[error("LLM API error: {0}")]
     LlmApi(String),
