@@ -57,7 +57,9 @@ impl Job for BulletsGenJob {
             .await?;
 
         let title: String = db_title.take::<Option<String>>(0)?.unwrap();
-        let headings: Vec<Heading> = db_section_headings.take::<Option<Vec<Heading>>>(0)?.unwrap();
+        let headings: Vec<Heading> = db_section_headings
+            .take::<Option<Vec<Heading>>>(0)?
+            .unwrap();
 
         let gen_bullets_task = Task::new(&prompt);
         let gen_bullets_input = BulletsGenInput { title, headings };
