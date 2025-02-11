@@ -27,7 +27,7 @@ struct BulletsGenOutput {
 
 // Prompt structs
 #[derive(Debug, Serialize, Deserialize)]
-struct Heading{
+struct Heading {
     heading: String,
     description: String,
 }
