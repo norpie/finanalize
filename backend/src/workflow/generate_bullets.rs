@@ -12,16 +12,16 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use surrealdb::sql::Thing;
 
-pub struct BulletsGenJob;
+pub struct GenerateBulletsJob;
 // Job input and output
 #[derive(Debug, Serialize)]
-struct BulletsGenInput {
+struct GenerateBulletsInput {
     message: String,
     title: String,
     headings: Vec<Heading>,
 }
 #[derive(Debug, Serialize, Deserialize)]
-struct BulletsGenOutput {
+struct GenerateBulletsOutput {
     paragraphs: Vec<Paragraph>,
 }
 
@@ -31,12 +31,12 @@ struct Heading {
     heading: String,
     description: String,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Paragraph {
     heading: String,
     has_bullets: Vec<Bullet>,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Bullet {
     bullet: String,
 }
@@ -48,7 +48,7 @@ pub struct SurrealDBParagraphs {
 }
 
 #[async_trait]
-impl Job for BulletsGenJob {
+impl Job for GenerateBulletsJob {
     async fn run(
         &self,
         report: &SurrealDBReport,
@@ -78,12 +78,12 @@ impl Job for BulletsGenJob {
             .unwrap();
 
         let gen_bullets_task = Task::new(&prompt);
-        let gen_bullets_input = BulletsGenInput {
+        let gen_bullets_input = GenerateBulletsInput {
             message,
             title,
             headings,
         };
-        let gen_bullets_output: BulletsGenOutput =
+        let gen_bullets_output: GenerateBulletsOutput =
             gen_bullets_task.run(llm, &gen_bullets_input).await?;
 
         let sdb_paragraphs: SurrealDBParagraphs = db
@@ -94,6 +94,10 @@ impl Job for BulletsGenJob {
         db.query("RELATE $report -> has_paragraphs -> $paragraphs")
             .bind(("report", report.id.clone()))
             .bind(("paragraphs", sdb_paragraphs.id.clone()))
+            .await?;
+        db.query("RELATE $paragraph -> has_bullets -> $bullets")
+            .bind(("paragraph", sdb_paragraphs.id.clone()))
+            .bind(("bullets", sdb_paragraphs.has_bullets.clone()))
             .await?;
 
         Ok(())
