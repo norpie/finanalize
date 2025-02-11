@@ -217,5 +217,5 @@ mod nop {
     }
 }
 
-mod validation;
 mod title;
+mod validation;
