@@ -56,7 +56,6 @@ pub enum FinanalizeError {
     Excel(#[from] calamine::XlsxError),
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
-
 }
 
 #[derive(Debug, Display)]
