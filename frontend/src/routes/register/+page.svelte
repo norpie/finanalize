@@ -3,7 +3,9 @@
     import * as Card from '$lib/components/ui/card/index.js';
     import { Input } from '$lib/components/ui/input/index.js';
     import { Label } from '$lib/components/ui/label/index.js';
-
+    import { user } from '$lib/store';
+    import { get } from '$lib/request';
+    import type User from '../../models/user';
     import { toast } from 'svelte-sonner';
 
     import { post } from '$lib/request';
@@ -33,6 +35,8 @@
 
         localStorage.setItem('accessToken', response.result.access_token);
         toast.success('Logged in successfully');
+        const newUser = (await get<User>('v1/protected/me')).result;
+        user.set(newUser);
         goto('/dashboard');
     }
 

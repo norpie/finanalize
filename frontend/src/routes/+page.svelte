@@ -44,7 +44,7 @@
 						>Login</Button
 					>
 
-					<Button onclick={() => goto('/signup')} class="bg-purple-700 hover:bg-purple-600"
+					<Button onclick={() => goto('/register')} class="bg-purple-700 hover:bg-purple-600"
 						>Sign Up</Button
 					>
 				{:else if user === undefined}
