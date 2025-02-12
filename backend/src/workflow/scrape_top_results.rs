@@ -5,9 +5,9 @@ use crate::models::SurrealDBReport;
 use crate::prelude::*;
 use crate::scraper::{scrape_page, BrowserWrapper};
 use crate::search::SearchEngine;
+use async_trait::async_trait;
 use serde::Deserialize;
 use std::sync::Arc;
-use async_trait::async_trait;
 use surrealdb::sql::Thing;
 
 pub struct ScrapeTopResultsJob;
@@ -35,7 +35,7 @@ impl Job for ScrapeTopResultsJob {
         let source_urls: Vec<String> = db_source_urls
             .take::<Option<Vec<String>>>(0)?
             .ok_or(FinanalizeError::NotFound)?;
-        
+
         // Scrape the top results from the source urls
         for url in source_urls {
             let scraped_url = scrape_page(url).await?;

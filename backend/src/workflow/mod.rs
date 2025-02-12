@@ -218,6 +218,6 @@ mod nop {
 }
 
 mod generate_bullets;
+mod scrape_top_results;
 mod title;
 mod validation;
-mod scrape_top_results;
