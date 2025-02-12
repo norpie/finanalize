@@ -34,17 +34,14 @@ struct Heading {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Paragraph {
     heading: String,
-    has_bullets: Vec<Bullet>,
-}
-#[derive(Debug, Serialize, Deserialize, Clone)]
-struct Bullet {
-    bullet: String,
+    has_bullets: Vec<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct SurrealDBParagraphs {
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct SurrealDBParagraph {
     id: Thing,
-    has_bullets: Vec<Paragraph>,
+    heading: String,
+    has_bullets: Vec<String>,
 }
 
 #[async_trait]
@@ -71,11 +68,15 @@ impl Job for GenerateBulletsJob {
             .bind(("report", report.clone()))
             .await?;
 
-        let message: String = db_message.take::<Option<String>>(0)?.unwrap();
-        let title: String = db_title.take::<Option<String>>(0)?.unwrap();
+        let message: String = db_message
+            .take::<Option<String>>(0)?
+            .ok_or(FinanalizeError::NotFound)?;
+        let title: String = db_title
+            .take::<Option<String>>(0)?
+            .ok_or(FinanalizeError::NotFound)?;
         let headings: Vec<Heading> = db_section_headings
             .take::<Option<Vec<Heading>>>(0)?
-            .unwrap();
+            .ok_or(FinanalizeError::NotFound)?;
 
         let gen_bullets_task = Task::new(&prompt);
         let gen_bullets_input = GenerateBulletsInput {
@@ -86,20 +87,15 @@ impl Job for GenerateBulletsJob {
         let gen_bullets_output: GenerateBulletsOutput =
             gen_bullets_task.run(llm, &gen_bullets_input).await?;
 
-        let sdb_paragraphs: SurrealDBParagraphs = db
+        let sdb_paragraphs: SurrealDBParagraph = db
             .create("paragraphs")
             .content(gen_bullets_output.paragraphs)
             .await?
             .ok_or(FinanalizeError::UnableToGenerateBullets)?;
-        db.query("RELATE $report -> has_paragraphs -> $paragraphs")
-            .bind(("report", report.id.clone()))
-            .bind(("paragraphs", sdb_paragraphs.id.clone()))
+        db.query("RELATE $report ->has_paragraph -> $paragraphs")
+            .bind(("report", report.clone()))
+            .bind(("paragraphs", sdb_paragraphs))
             .await?;
-        db.query("RELATE $paragraph -> has_bullets -> $bullets")
-            .bind(("paragraph", sdb_paragraphs.id.clone()))
-            .bind(("bullets", sdb_paragraphs.has_bullets.clone()))
-            .await?;
-
         Ok(())
     }
 }
