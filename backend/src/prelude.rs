@@ -25,6 +25,8 @@ pub enum FinanalizeError {
     UnableToCreateReportTitle,
     #[error("Unable to create bullets for heading")]
     UnableToGenerateBullets,
+    #[error("Unable to add scraped url")]
+    UnableToAddScrapedUrl,
 
     #[error("LLM API error: {0}")]
     LlmApi(String),
