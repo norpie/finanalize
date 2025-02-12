@@ -3,10 +3,11 @@
     import * as Card from '$lib/components/ui/card/index.js';
     import { Input } from '$lib/components/ui/input/index.js';
     import { Label } from '$lib/components/ui/label/index.js';
-
+    import { user } from '$lib/store';
     import { toast } from 'svelte-sonner';
-
     import { post } from '$lib/request';
+    import type User from '../../models/user';
+    import { get } from '$lib/request';
 
     import { goto } from '$app/navigation';
 
@@ -28,11 +29,16 @@
 
         localStorage.setItem('token', response.result.access_token);
         toast.success('Logged in successfully');
+        const newUser = (await get<User>('v1/protected/me')).result;
+        user.set(newUser);
         goto('/dashboard');
     }
 
     let email = $state();
     let password = $state();
+
+    
+    
 </script>
 
 <div class="flex h-screen w-full items-center justify-center px-4">
