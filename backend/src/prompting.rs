@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -11,7 +9,7 @@ pub struct SurrealDbPrompt {
     template: String,
 }
 
-pub async fn get_prompt(db: Arc<SurrealDb>, id: String) -> Result<String> {
+pub async fn get_prompt(db: SurrealDb, id: String) -> Result<String> {
     let result: SurrealDbPrompt = db
         .select(("prompt", &id))
         .await?
@@ -23,12 +21,11 @@ pub async fn get_prompt(db: Arc<SurrealDb>, id: String) -> Result<String> {
 mod tests {
     use super::*;
     use crate::db::{self};
-    use std::sync::Arc;
 
     #[tokio::test]
     #[ignore = "Depends on external service"]
     async fn test_get_prompt() {
-        let db = Arc::new(db::connect().await.unwrap());
+        let db = db::connect().await.unwrap();
         let id = ("prompt", "test");
         let mut prompt = SurrealDbPrompt {
             id: Thing::from(id),

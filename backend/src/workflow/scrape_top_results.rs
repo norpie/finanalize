@@ -22,7 +22,7 @@ impl Job for ScrapeTopResultsJob {
     async fn run(
         &self,
         report: &SurrealDBReport,
-        db: Arc<SurrealDb>,
+        db: SurrealDb,
         _llm: Arc<dyn LLMApi>,
         _search: Arc<dyn SearchEngine>,
         _browser: BrowserWrapper,

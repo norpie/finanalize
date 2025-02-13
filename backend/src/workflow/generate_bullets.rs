@@ -49,7 +49,7 @@ impl Job for GenerateBulletsJob {
     async fn run(
         &self,
         report: &SurrealDBReport,
-        db: Arc<SurrealDb>,
+        db: SurrealDb,
         llm: Arc<dyn LLMApi>,
         _search: Arc<dyn SearchEngine>,
         _browser: BrowserWrapper,
