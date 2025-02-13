@@ -9,12 +9,18 @@ use actix_web::{get, post, Responder};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ReportCreationLight {
+    user_input: String,
+}
+
 #[post("/reports")]
 pub async fn create_report(
     user: SurrealDBUser,
     db: Data<SurrealDb>,
-    report_creation: Json<ReportCreation>,
+    report_creation: Json<ReportCreationLight>,
 ) -> Result<impl Responder, FinanalizeError> {
+    let report_creation = ReportCreation::new(report_creation.user_input.clone());
     let report: SurrealDBReport = db
         .create("report")
         .content(report_creation)
