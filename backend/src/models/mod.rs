@@ -1,6 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::Thing;
+use surrealdb::sql::{Datetime, Thing};
+
+use crate::workflow::ReportStatus;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -46,8 +48,8 @@ pub struct SurrealDBReport {
     pub id: Thing,
     pub user_input: String,
     pub status: ReportStatus,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    pub created_at: Datetime,
+    pub updated_at: Datetime,
 }
 
 impl From<SurrealDBReport> for Report {
@@ -56,17 +58,10 @@ impl From<SurrealDBReport> for Report {
             id: report.id.id.to_string(),
             user_input: report.user_input,
             status: report.status,
-            created_at: report.created_at,
-            updated_at: report.updated_at,
+            created_at: report.created_at.to_utc(),
+            updated_at: report.updated_at.to_utc(),
         }
     }
-}
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum ReportStatus {
-    Pending,
-    Valid,
-    Invalid,
-    Done,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

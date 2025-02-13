@@ -47,11 +47,7 @@
 use std::sync::Arc;
 
 use crate::{
-    db::SurrealDb,
-    llm::LLMApi,
-    models::{ReportStatus, SurrealDBReport},
-    prelude::*,
-    scraper::BrowserWrapper,
+    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, scraper::BrowserWrapper,
     search::SearchEngine,
 };
 
@@ -59,8 +55,8 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 pub async fn run_next_job(
-    report_id: String,
-    db: Arc<SurrealDb>,
+    report_id: &String,
+    db: SurrealDb,
     llm: Arc<dyn LLMApi>,
     search: Arc<dyn SearchEngine>,
     browser: BrowserWrapper,
@@ -69,24 +65,30 @@ pub async fn run_next_job(
         .select(("report", report_id))
         .await?
         .ok_or(FinanalizeError::ReportNotFound)?;
-    let job_type = JobType::from(&report.status);
-    let job = job_type.job();
+    println!("Running job for report: {}", report.id.id);
+    let status = report.status;
+    println!("Current status: {:?}", status);
+    let job = status.job();
+    println!("Running job: {:?}", status);
     job.run(&report, db.clone(), llm, search, browser).await?;
-    let Some(next) = job_type.next() else {
+    println!("Job completed successfully");
+    let Some(next) = status.next() else {
+        println!("No more jobs to run");
         return Ok(());
     };
-    report.status = next.into();
-    let report: SurrealDBReport = db
+    report.status = next;
+    println!("Updating report status to: {:?}", next);
+    let _report: SurrealDBReport = db
         .update(("report", report.id.id.to_string()))
         .content(report)
         .await?
         .ok_or(FinanalizeError::UnableToUpdateReport)?;
-    dbg!(report);
+    println!("Report updated successfully");
     Ok(())
 }
 
 #[async_trait]
-pub trait Job {
+pub trait Job: Send + Sync + 'static {
     /// Runs the job.
     ///
     /// # Arguments
@@ -102,7 +104,7 @@ pub trait Job {
     async fn run(
         &self,
         report: &SurrealDBReport,
-        db: Arc<SurrealDb>,
+        db: SurrealDb,
         llm: Arc<dyn LLMApi>,
         search: Arc<dyn SearchEngine>,
         browser: BrowserWrapper,
@@ -110,7 +112,7 @@ pub trait Job {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum JobType {
+pub enum ReportStatus {
     Pending,
     Validation,
     GenerateTitle,
@@ -132,57 +134,51 @@ pub enum JobType {
     FinalizeSection,
     CompileSections,
     GeneratePDFReport,
+    // The two end conditions
+    Invalid,
     Done,
 }
 
-impl From<&ReportStatus> for JobType {
-    fn from(value: &ReportStatus) -> Self {
-        serde_json::from_value(serde_json::to_value(value).unwrap()).unwrap()
-    }
-}
-
-impl From<JobType> for ReportStatus {
-    fn from(value: JobType) -> Self {
-        serde_json::from_value(serde_json::to_value(value).unwrap()).unwrap()
-    }
-}
-
-impl JobType {
+impl ReportStatus {
     /// Advances the job type to the next step in the workflow.
     ///
     /// # Returns
     /// - `Some(JobType)` if the current state is not `Done`
     /// - `None` if the current state is `Done`, as there are no more steps.
-    pub fn next(&self) -> Option<JobType> {
+    pub fn next(&self) -> Option<ReportStatus> {
         match self {
-            JobType::Pending => Some(JobType::Validation),
-            JobType::Validation => Some(JobType::GenerateTitle),
-            JobType::GenerateTitle => Some(JobType::GenerateSectionHeadings),
-            JobType::GenerateSectionHeadings => Some(JobType::GenerateParagraphBullets),
-            JobType::GenerateParagraphBullets => Some(JobType::GenerateSearchQueries),
-            JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
-            JobType::SearchQueries => Some(JobType::ScrapeTopResults),
-            JobType::ScrapeTopResults => Some(JobType::ExtractContent),
-            JobType::ExtractContent => Some(JobType::ExtractStructuredData),
-            JobType::ExtractStructuredData => Some(JobType::ChunkText),
-            JobType::ChunkText => Some(JobType::RAGPrepareChunks),
-            JobType::RAGPrepareChunks => Some(JobType::GenerateBulletTexts),
-            JobType::GenerateBulletTexts => Some(JobType::CombineBulletsIntoParagraph),
-            JobType::CombineBulletsIntoParagraph => Some(JobType::AssembleSectionContent),
-            JobType::AssembleSectionContent => Some(JobType::AddCitations),
-            JobType::AddCitations => Some(JobType::IdentifyVisualizationNeeds),
-            JobType::IdentifyVisualizationNeeds => Some(JobType::GenerateVisualizations),
-            JobType::GenerateVisualizations => Some(JobType::FinalizeSection),
-            JobType::FinalizeSection => Some(JobType::CompileSections),
-            JobType::CompileSections => Some(JobType::GeneratePDFReport),
-            JobType::GeneratePDFReport => Some(JobType::Done),
-            JobType::Done => None,
+            ReportStatus::Pending => Some(ReportStatus::Validation),
+            ReportStatus::Validation => Some(ReportStatus::GenerateTitle),
+            ReportStatus::GenerateTitle => Some(ReportStatus::GenerateSectionHeadings),
+            ReportStatus::GenerateSectionHeadings => Some(ReportStatus::GenerateParagraphBullets),
+            ReportStatus::GenerateParagraphBullets => Some(ReportStatus::GenerateSearchQueries),
+            ReportStatus::GenerateSearchQueries => Some(ReportStatus::SearchQueries),
+            ReportStatus::SearchQueries => Some(ReportStatus::ScrapeTopResults),
+            ReportStatus::ScrapeTopResults => Some(ReportStatus::ExtractContent),
+            ReportStatus::ExtractContent => Some(ReportStatus::ExtractStructuredData),
+            ReportStatus::ExtractStructuredData => Some(ReportStatus::ChunkText),
+            ReportStatus::ChunkText => Some(ReportStatus::RAGPrepareChunks),
+            ReportStatus::RAGPrepareChunks => Some(ReportStatus::GenerateBulletTexts),
+            ReportStatus::GenerateBulletTexts => Some(ReportStatus::CombineBulletsIntoParagraph),
+            ReportStatus::CombineBulletsIntoParagraph => Some(ReportStatus::AssembleSectionContent),
+            ReportStatus::AssembleSectionContent => Some(ReportStatus::AddCitations),
+            ReportStatus::AddCitations => Some(ReportStatus::IdentifyVisualizationNeeds),
+            ReportStatus::IdentifyVisualizationNeeds => Some(ReportStatus::GenerateVisualizations),
+            ReportStatus::GenerateVisualizations => Some(ReportStatus::FinalizeSection),
+            ReportStatus::FinalizeSection => Some(ReportStatus::CompileSections),
+            ReportStatus::CompileSections => Some(ReportStatus::GeneratePDFReport),
+            ReportStatus::GeneratePDFReport => Some(ReportStatus::Done),
+            ReportStatus::Invalid => None,
+            ReportStatus::Done => None,
         }
     }
 
     pub fn job(&self) -> Box<dyn Job> {
         match self {
-            JobType::Validation => Box::new(validation::ValidationJob),
+            ReportStatus::Pending => Box::new(validation::ValidationJob),
+            ReportStatus::Validation => Box::new(title::TitleJob),
+            ReportStatus::GenerateTitle => Box::new(nop::NopJob),
+            ReportStatus::GenerateSectionHeadings => Box::new(generate_bullets::GenerateBulletsJob),
             _ => Box::new(nop::NopJob),
         }
     }
@@ -207,7 +203,7 @@ mod nop {
         async fn run(
             &self,
             _report: &SurrealDBReport,
-            _db: Arc<SurrealDb>,
+            _db: SurrealDb,
             _llm: Arc<dyn LLMApi>,
             _search: Arc<dyn SearchEngine>,
             _browser: BrowserWrapper,
