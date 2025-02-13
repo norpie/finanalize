@@ -14,7 +14,8 @@ use api::{
 };
 use auth_middleware::Auth;
 use jwt::TokenFactory;
-use llm::{ullm::UllmApi, LLMApi};
+use llm::{ollama::Ollama, ullm::UllmApi, LLMApi};
+use search::SearxNG;
 
 mod api;
 mod auth_middleware;
@@ -44,13 +45,21 @@ mod workflow;
 async fn main() -> Result<()> {
     let db = db::connect().await?;
     let token_factory: TokenFactory = "secret".into();
-    let llm: Arc<dyn LLMApi> = Arc::new(UllmApi::default());
+    let llm: Arc<dyn LLMApi> = Arc::new(Ollama::default());
+    let search = Arc::new(SearxNG::new("http://localhost:8081"));
     scraper::setup_browser().await?;
+    let db_clone = db.clone();
 
     // Initialize the RabbitMQ consumer background task
     tokio::spawn(async move {
+        let db = db.clone();
+        let llm = llm.clone();
+        let browser = scraper::INSTANCE.get().unwrap().clone();
+        let search = search.clone();
         let consumer = rabbitmq::RabbitMQConsumer::new().await?;
-        consumer.consume_report_status().await
+        consumer
+            .consume_report_status(db, llm, search, browser)
+            .await
     });
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -65,8 +74,7 @@ async fn main() -> Result<()> {
         App::new()
             .wrap(cors)
             .app_data(Data::new(token_factory.clone()))
-            .app_data(Data::new(db.clone()))
-            .app_data(Data::new(llm.clone()))
+            .app_data(Data::new(db_clone.clone()))
             .default_service(web::route().to(not_found))
             .service(
                 web::scope("/api/v1/auth")
