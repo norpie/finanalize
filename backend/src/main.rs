@@ -43,6 +43,7 @@ mod workflow;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    dotenvy::from_filename(".env").ok();
     let db = db::connect().await?;
     let token_factory: TokenFactory = "secret".into();
     let llm: Arc<dyn LLMApi> = Arc::new(Ollama::default());
@@ -50,7 +51,7 @@ async fn main() -> Result<()> {
     scraper::setup_browser().await?;
     let db_clone = db.clone();
 
-    // Initialize the RabbitMQ consumer background task
+    // Initialize the RabbiAtMQ consumer background task
     tokio::spawn(async move {
         let db = db.clone();
         let llm = llm.clone();
