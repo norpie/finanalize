@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::{Datetime, Thing};
+use surrealdb::sql::Thing;
 
 use crate::workflow::ReportStatus;
 
@@ -48,8 +48,8 @@ pub struct SurrealDBReport {
     pub id: Thing,
     pub user_input: String,
     pub status: ReportStatus,
-    pub created_at: Datetime,
-    pub updated_at: Datetime,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }
 
 impl From<SurrealDBReport> for Report {
