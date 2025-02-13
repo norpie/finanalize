@@ -10,7 +10,7 @@ for PROMPT_ID in $PROMPT_IDS; do
     PROMPT_ID=$(basename $PROMPT_ID)
     HBS_FILE=$(echo $HBS_FILES | cut -d ' ' -f 1)
     # replace `'` with `\'`
-    CONTENT=$(cat $HBS_FILE | sed "s/'/\\\'/g")
+    CONTENT=$(awk '{printf "%s\\n", $0}' $HBS_FILE | sed "s/'/\\\'/g")
     read -r -d '' STATEMENT <<EOM
     UPSERT prompt:$PROMPT_ID SET template = '$CONTENT';
 EOM
