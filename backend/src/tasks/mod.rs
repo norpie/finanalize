@@ -3,6 +3,7 @@ use std::sync::Arc;
 use crate::{llm::LLMApi, prelude::*};
 use handlebars::Handlebars;
 use serde::{de::DeserializeOwned, Serialize};
+use serde_json::Value;
 
 pub struct Task<'a>(&'a str);
 
@@ -19,8 +20,12 @@ impl<'a> Task<'a> {
         let prompt = Handlebars::default().render_template(self.0, input)?;
         let generated = api.generate(prompt.clone()).await?;
         let full = format!("{}{}", prompt, generated);
+        println!("full: {}", full);
         let json = self.parse_output(&full)?;
-        let output: U = serde_json::from_str(&json)?;
+        println!("json: {}", json);
+        let value: Value = serde_json::from_str(&json)?;
+        dbg!(&value);
+        let output: U = serde_json::from_value(value)?;
         Ok(output)
     }
 
