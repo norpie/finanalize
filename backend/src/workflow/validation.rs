@@ -69,3 +69,29 @@ impl Job for ValidationJob {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{db, llm::ollama::Ollama, models::ReportCreation, scraper, search::SearxNG};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test() {
+        let db = db::connect().await.unwrap();
+        let llm = Arc::new(Ollama::default());
+        let search = Arc::new(SearxNG::new("http://localhost:8081"));
+        scraper::setup_browser().await.unwrap();
+        let browser = scraper::INSTANCE.get().unwrap().clone();
+        let creation = ReportCreation::new("Apple 2025 Q4 outlook".into());
+        let report: SurrealDBReport = db
+            .create("report")
+            .content(creation)
+            .await
+            .unwrap()
+            .unwrap();
+        dbg!(&report);
+        let job = ValidationJob;
+        job.run(&report, db, llm, search, browser).await.unwrap();
+    }
+}
