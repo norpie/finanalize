@@ -14,7 +14,7 @@ use api::{
 };
 use auth_middleware::Auth;
 use jwt::TokenFactory;
-use llm::{ollama::Ollama, ullm::UllmApi, LLMApi};
+use llm::{ollama::Ollama, LLMApi};
 use search::SearxNG;
 
 mod api;
