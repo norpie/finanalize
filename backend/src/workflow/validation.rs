@@ -12,7 +12,7 @@ use super::Job;
 
 #[derive(Debug, Serialize)]
 struct ValidationTaskInpput {
-    user_input: String,
+    message: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -49,7 +49,7 @@ impl Job for ValidationJob {
         let prompt = prompting::get_prompt(db.clone(), "validation".into()).await?;
         let validation_task = Task::new(&prompt);
         let validation_input = ValidationTaskInpput {
-            user_input: report.user_input.clone(),
+            message: report.user_input.clone(),
         };
         let validation_output: ValidationTaskOutput =
             validation_task.run(llm, &validation_input).await?;
