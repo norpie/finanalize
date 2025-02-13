@@ -16,7 +16,7 @@ pub struct ScrapeTopResultsJob;
 struct SurrealDBScrapedUrl {
     id: Thing,
     url: String,
-    content: String
+    content: String,
 }
 #[async_trait]
 impl Job for ScrapeTopResultsJob {
