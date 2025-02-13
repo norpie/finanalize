@@ -9,13 +9,13 @@ pub trait SearchEngine: Send + Sync + 'static {
 }
 
 #[derive(Default)]
-struct SearxNG {
+pub struct SearxNG {
     base_url: String,
     client: Client,
 }
 
 impl SearxNG {
-    fn new(base_url: &str) -> Self {
+    pub fn new(base_url: &str) -> Self {
         SearxNG {
             base_url: base_url.to_string(),
             client: Client::new(),
