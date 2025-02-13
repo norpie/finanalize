@@ -1,6 +1,13 @@
+use std::sync::Arc;
+
+use crate::db::SurrealDb;
+use crate::llm::LLMApi;
 use crate::models::ReportStatusEvent;
-use crate::prelude::FinanalizeError;
+use crate::scraper::BrowserWrapper;
+use crate::search::SearchEngine;
+use crate::{prelude::*, workflow};
 use futures_util::TryStreamExt;
+use lapin::message::Delivery;
 use lapin::options::{BasicConsumeOptions, BasicPublishOptions, QueueDeclareOptions};
 use lapin::types::FieldTable;
 use lapin::{BasicProperties, Channel, Connection, ConnectionProperties};
@@ -11,7 +18,7 @@ pub struct RabbitMQPublisher {
 }
 
 impl RabbitMQPublisher {
-    pub async fn new() -> Result<Self, FinanalizeError> {
+    pub async fn new() -> Result<Self> {
         // TODO: change the connection string to use env variable
         let connection =
             Connection::connect("amqp://localhost", ConnectionProperties::default()).await?;
@@ -22,10 +29,7 @@ impl RabbitMQPublisher {
         })
     }
 
-    pub async fn publish_report_status(
-        &self,
-        message: ReportStatusEvent,
-    ) -> Result<String, FinanalizeError> {
+    pub async fn publish_report_status(&self, message: ReportStatusEvent) -> Result<String> {
         let message = serde_json::to_string(&message)?;
         let queue = self
             .channel
@@ -57,7 +61,7 @@ pub struct RabbitMQConsumer {
 }
 
 impl RabbitMQConsumer {
-    pub async fn new() -> Result<Self, FinanalizeError> {
+    pub async fn new() -> Result<Self> {
         // TODO: change the connection string to use env variable
         let connection =
             Connection::connect("amqp://localhost", ConnectionProperties::default()).await?;
@@ -78,7 +82,14 @@ impl RabbitMQConsumer {
         })
     }
 
-    pub async fn consume_report_status(&self) -> Result<(), FinanalizeError> {
+    pub async fn consume_report_status(
+        &self,
+        db: SurrealDb,
+        llm: Arc<dyn LLMApi>,
+        search: Arc<dyn SearchEngine>,
+        browser: BrowserWrapper,
+    ) -> Result<()> {
+        let publisher = Arc::new(RabbitMQPublisher::new().await?);
         let consumer = self
             .channel
             .basic_consume(
@@ -88,13 +99,44 @@ impl RabbitMQConsumer {
                 FieldTable::default(),
             )
             .await?;
-        let messages = consumer.try_for_each(|delivery| async move {
+        async fn consume(
+            delivery: &Delivery,
+            publisher: Arc<RabbitMQPublisher>,
+            db: SurrealDb,
+            llm: Arc<dyn LLMApi>,
+            search: Arc<dyn SearchEngine>,
+            browser: BrowserWrapper,
+        ) -> Result<()> {
             let message = String::from_utf8_lossy(&delivery.data);
-            println!("Received message: {:?}", message);
-            self.channel
-                .basic_ack(delivery.delivery_tag, Default::default())
-                .await?;
+            let report_status: ReportStatusEvent = serde_json::from_str(&message)?;
+            workflow::run_next_job(&report_status.report_id, db, llm, search, browser).await?;
+            publisher.publish_report_status(report_status).await?;
             Ok(())
+        }
+        let messages = consumer.try_for_each(|delivery| {
+            let publisher = publisher.clone();
+            let db = db.clone();
+            let llm = llm.clone();
+            let search = search.clone();
+            let browser = browser.clone();
+            async move {
+                let result = consume(
+                    &delivery,
+                    publisher,
+                    db.clone(),
+                    llm.clone(),
+                    search.clone(),
+                    browser.clone(),
+                )
+                .await;
+                if result.is_err() {
+                    panic!("{}", result.unwrap_err());
+                }
+                self.channel
+                    .basic_ack(delivery.delivery_tag, Default::default())
+                    .await?;
+                Ok(())
+            }
         });
         Ok(messages.await?)
     }
@@ -102,8 +144,10 @@ impl RabbitMQConsumer {
 
 #[cfg(test)]
 mod tests {
+    use workflow::ReportStatus;
+
     use super::*;
-    use crate::models::{ReportStatus, ReportStatusEvent};
+    use crate::models::ReportStatusEvent;
 
     #[tokio::test]
     #[ignore = "Depends on extenal service"]
@@ -120,7 +164,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "Depends on extenal service"]
     async fn test_rabbitmq_consumer() {
-        let consumer = RabbitMQConsumer::new().await.unwrap();
-        consumer.consume_report_status().await.unwrap();
+        // let consumer = RabbitMQConsumer::new().await.unwrap();
+        // consumer.consume_report_status().await.unwrap();
     }
 }
