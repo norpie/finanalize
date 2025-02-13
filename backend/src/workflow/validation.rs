@@ -76,7 +76,9 @@ mod tests {
 
     use super::*;
 
+
     #[tokio::test]
+    #[ignore = "Depends on external service"]
     async fn test() {
         let db = db::connect().await.unwrap();
         let llm = Arc::new(Ollama::default());
