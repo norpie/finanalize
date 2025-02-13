@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use crate::prelude::*;
 
-use std::env;
+use std::{collections::HashMap, env};
 
 use super::LLMApi;
 
@@ -33,10 +33,11 @@ impl Default for Ollama {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct OllamaCompletionRequest {
+pub struct OllamaCompletionRequest<'a> {
     model: String,
     prompt: String,
     stream: bool,
+    options: HashMap<&'a str, Vec<&'a str>>,
     raw: bool,
 }
 
@@ -59,12 +60,16 @@ pub struct OllamaCompletionResponse {
 #[async_trait]
 impl LLMApi for Ollama {
     async fn generate(&self, prompt: String) -> Result<String> {
+        let mut options = HashMap::new();
+        options.insert("stop", vec!["```"]);
         let request = OllamaCompletionRequest {
             model: self.completion_model.clone(),
             prompt,
+            options,
             stream: false,
             raw: true,
         };
+        dbg!("requesting", &request);
         let value = self
             .client
             .post(format!("{}/api/generate", self.base_url))
@@ -73,6 +78,7 @@ impl LLMApi for Ollama {
             .await?
             .json::<Value>()
             .await?;
+        dbg!("response", &value);
         Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
     }
 
