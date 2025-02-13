@@ -16,6 +16,7 @@ pub struct ScrapeTopResultsJob;
 struct SurrealDBScrapedUrl {
     id: Thing,
     url: String,
+    content: String
 }
 #[async_trait]
 impl Job for ScrapeTopResultsJob {
@@ -48,6 +49,10 @@ impl Job for ScrapeTopResultsJob {
             db.query("RELATE $report ->has_scraped_urls -> $scraped_url")
                 .bind(("report", report.id.clone()))
                 .bind(("scraped_url", sdb_scraped_url.id.clone()))
+                .await?;
+            db.query("RELATE $scraped_url -> has_html_content -> $content")
+                .bind(("scraped_url", sdb_scraped_url.id.clone()))
+                .bind(("content", sdb_scraped_url.content.clone()))
                 .await?;
         }
         Ok(())
