@@ -91,4 +91,19 @@ pub struct Report {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportCreation {
     pub user_input: String,
+    pub status: ReportStatus,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+impl ReportCreation {
+    pub fn new(user_input: String) -> Self {
+        let now = Utc::now();
+        ReportCreation {
+            user_input,
+            status: ReportStatus::Pending,
+            created_at: now,
+            updated_at: now,
+        }
+    }
 }
