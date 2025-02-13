@@ -76,7 +76,6 @@ mod tests {
 
     use super::*;
 
-
     #[tokio::test]
     #[ignore = "Depends on external service"]
     async fn test() {
