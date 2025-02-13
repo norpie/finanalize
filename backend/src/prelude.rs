@@ -1,4 +1,5 @@
 use derive_more::derive::Display;
+use selectors::parser::SelectorParseErrorKind;
 use thiserror::Error;
 
 pub type Result<T> = std::result::Result<T, FinanalizeError>;
@@ -60,6 +61,15 @@ pub enum FinanalizeError {
     LopdfError(#[from] lopdf::Error),
     #[error("Task execution error: {0}")]
     TaskExecutionError(String),
+    #[error("Parse error: {0}")]
+    ParseError(String),
+}
+
+impl From<SelectorParseErrorKind<'_>> for FinanalizeError {
+    fn from(error: SelectorParseErrorKind<'_>) -> Self {
+        // Manually format the error as a string using `Debug`
+        FinanalizeError::ParseError(format!("{:?}", error)) // Convert to FinanalizeError::ParseError
+    }
 }
 
 #[derive(Debug, Display)]

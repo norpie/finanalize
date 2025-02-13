@@ -6,6 +6,7 @@ pub mod csv;
 pub mod excel;
 pub mod pdf;
 pub mod text;
+pub mod html;
 
 #[async_trait]
 trait ContentExtract {
