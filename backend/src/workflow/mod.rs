@@ -217,6 +217,6 @@ mod nop {
     }
 }
 
-mod title;
 mod generate_bullets;
+mod title;
 mod validation;
