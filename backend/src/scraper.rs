@@ -14,7 +14,7 @@ pub struct BrowserWrapper {
     handler: Arc<Mutex<Handler>>,
 }
 
-static INSTANCE: OnceCell<BrowserWrapper> = OnceCell::new();
+pub static INSTANCE: OnceCell<BrowserWrapper> = OnceCell::new();
 
 pub async fn setup_browser() -> Result<()> {
     let browser_config = BrowserConfig::builder().no_sandbox().build().unwrap();
