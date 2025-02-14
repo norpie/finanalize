@@ -59,7 +59,7 @@ pub enum FinanalizeError {
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
     #[error("Task execution error: {0}")]
-    TaskExecutionError(String)    
+    TaskExecutionError(String),
 }
 
 #[derive(Debug, Display)]
