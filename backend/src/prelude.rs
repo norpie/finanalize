@@ -58,6 +58,8 @@ pub enum FinanalizeError {
     Excel(#[from] calamine::XlsxError),
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
+    #[error("Task execution error: {0}")]
+    TaskExecutionError(String)    
 }
 
 #[derive(Debug, Display)]
