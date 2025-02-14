@@ -57,7 +57,10 @@ impl Job for TitleJob {
         }
 
         let report_title = ReportTitle {
-            title: title_output.output.clone().unwrap_or_else(|| "Default Title".to_string()),
+            title: title_output
+                .output
+                .clone()
+                .unwrap_or_else(|| "Default Title".to_string()),
         };
 
         let sdb_title: SurrealDBTitle = db
