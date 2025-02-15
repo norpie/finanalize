@@ -2,7 +2,7 @@ use crate::api::ApiResponse;
 use crate::db::SurrealDb;
 use crate::models::{Report, ReportCreation, ReportStatusEvent, SurrealDBReport, SurrealDBUser};
 use crate::prelude::FinanalizeError;
-use crate::rabbitmq::RabbitMQPublisher;
+use crate::rabbitmq::{RabbitMQPublisher, PUBLISHER};
 use actix_web::http::StatusCode;
 use actix_web::web::{Data, Json, Path};
 use actix_web::{get, post, Responder};
@@ -32,8 +32,7 @@ pub async fn create_report(
         .await?;
     let created_report: Report = Report::from(report.clone());
     let report_status_event: ReportStatusEvent = ReportStatusEvent::from(created_report.clone());
-    let publisher = RabbitMQPublisher::new().await?;
-    publisher.publish_report_status(report_status_event).await?;
+    PUBLISHER.get().unwrap().publish_report_status(report_status_event).await?;
     Ok(ApiResponse::new(created_report))
 }
 
