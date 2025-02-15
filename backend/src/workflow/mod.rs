@@ -60,7 +60,7 @@ pub async fn run_next_job(
     llm: Arc<dyn LLMApi>,
     search: Arc<dyn SearchEngine>,
     browser: BrowserWrapper,
-) -> Result<()> {
+) -> Result<ReportStatus> {
     let mut report: SurrealDBReport = db
         .select(("report", report_id))
         .await?
@@ -74,17 +74,17 @@ pub async fn run_next_job(
     println!("Job completed successfully");
     let Some(next) = status.next() else {
         println!("No more jobs to run");
-        return Ok(());
+        return Ok(ReportStatus::Done);
     };
     report.status = next;
     println!("Updating report status to: {:?}", next);
-    let _report: SurrealDBReport = db
+    let report: SurrealDBReport = db
         .update(("report", report.id.id.to_string()))
         .content(report)
         .await?
         .ok_or(FinanalizeError::UnableToUpdateReport)?;
     println!("Report updated successfully");
-    Ok(())
+    Ok(report.status)
 }
 
 #[async_trait]
@@ -154,7 +154,8 @@ impl ReportStatus {
             ReportStatus::GenerateParagraphBullets => Some(ReportStatus::GenerateSearchQueries),
             ReportStatus::GenerateSearchQueries => Some(ReportStatus::SearchQueries),
             ReportStatus::SearchQueries => Some(ReportStatus::ScrapeTopResults),
-            ReportStatus::ScrapeTopResults => Some(ReportStatus::ExtractContent),
+            ReportStatus::ScrapeTopResults => Some(ReportStatus::Done),
+            // ReportStatus::ScrapeTopResults => Some(ReportStatus::ExtractContent),
             ReportStatus::ExtractContent => Some(ReportStatus::ExtractStructuredData),
             ReportStatus::ExtractStructuredData => Some(ReportStatus::ChunkText),
             ReportStatus::ChunkText => Some(ReportStatus::RAGPrepareChunks),
@@ -175,15 +176,20 @@ impl ReportStatus {
 
     pub fn job(&self) -> Box<dyn Job> {
         match self {
-            ReportStatus::Pending => Box::new(validation::ValidationJob),
-            ReportStatus::Validation => Box::new(title::TitleJob),
-            ReportStatus::GenerateTitle => Box::new(sectionheadings::GenerateSectionHeadingsJob),
-            ReportStatus::GenerateSectionHeadings => Box::new(generate_bullets::GenerateBulletsJob),
+            ReportStatus::Pending => Box::new(nop::NopJob),
+            ReportStatus::Validation => Box::new(validation::ValidationJob),
+            ReportStatus::GenerateTitle => Box::new(title::TitleJob),
+            ReportStatus::GenerateSectionHeadings => {
+                Box::new(sectionheadings::GenerateSectionHeadingsJob)
+            }
             ReportStatus::GenerateParagraphBullets => {
+                Box::new(generate_bullets::GenerateBulletsJob)
+            }
+            ReportStatus::GenerateSearchQueries => {
                 Box::new(generate_search_queries::SearchGenerationJob)
             }
-            ReportStatus::GenerateSearchQueries => Box::new(searchquery::SearchQueriesJob),
-            ReportStatus::SearchQueries => Box::new(scrape_top_results::ScrapeTopResultsJob),
+            ReportStatus::SearchQueries => Box::new(searchquery::SearchQueriesJob),
+            ReportStatus::ScrapeTopResults => Box::new(scrape_top_results::ScrapeTopResultsJob),
             _ => Box::new(nop::NopJob),
         }
     }
