@@ -1,8 +1,7 @@
 use super::Job;
 use crate::{db::SurrealDb, llm::LLMApi, scraper::BrowserWrapper, search::SearchEngine};
-use crate::{models::SurrealDBReport, prelude::*, tasks::Task};
+use crate::{models::SurrealDBReport, prelude::*};
 use async_trait::async_trait;
-use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use surrealdb::sql::Thing;
