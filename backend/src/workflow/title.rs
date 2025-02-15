@@ -31,7 +31,7 @@ pub struct ReportTitle {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct SurrealDBTitle {
     id: Thing,
-    title: String,
+    pub title: String,
 }
 
 #[async_trait]
