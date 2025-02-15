@@ -177,8 +177,13 @@ impl ReportStatus {
         match self {
             ReportStatus::Pending => Box::new(validation::ValidationJob),
             ReportStatus::Validation => Box::new(title::TitleJob),
-            ReportStatus::GenerateTitle => Box::new(nop::NopJob),
+            ReportStatus::GenerateTitle => Box::new(sectionheadings::GenerateSectionHeadingsJob),
             ReportStatus::GenerateSectionHeadings => Box::new(generate_bullets::GenerateBulletsJob),
+            ReportStatus::GenerateParagraphBullets => {
+                Box::new(generate_search_queries::SearchGenerationJob)
+            }
+            ReportStatus::GenerateSearchQueries => Box::new(searchquery::SearchQueriesJob),
+            ReportStatus::SearchQueries => Box::new(scrape_top_results::ScrapeTopResultsJob),
             _ => Box::new(nop::NopJob),
         }
     }
