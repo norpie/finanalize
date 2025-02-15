@@ -10,45 +10,55 @@ use futures_util::TryStreamExt;
 use lapin::message::Delivery;
 use lapin::options::{BasicConsumeOptions, BasicPublishOptions, QueueDeclareOptions};
 use lapin::types::FieldTable;
-use lapin::{BasicProperties, Channel, Connection, ConnectionProperties};
+use lapin::{BasicProperties, Channel, Connection, ConnectionProperties, Queue};
+use tokio::sync::OnceCell;
 
+#[derive(Debug)]
 pub struct RabbitMQPublisher {
     connection: Connection,
     channel: Channel,
+    queue: Queue,
 }
 
+pub static PUBLISHER: OnceCell<Arc<RabbitMQPublisher>> = OnceCell::const_new();
+
 impl RabbitMQPublisher {
-    pub async fn new() -> Result<Self> {
+    pub async fn setup() -> Result<()> {
         // TODO: change the connection string to use env variable
         let connection =
             Connection::connect("amqp://localhost", ConnectionProperties::default()).await?;
         let channel = connection.create_channel().await?;
-        Ok(Self {
-            connection,
-            channel,
-        })
-    }
 
-    pub async fn publish_report_status(&self, message: ReportStatusEvent) -> Result<String> {
-        let message = serde_json::to_string(&message)?;
-        let queue = self
-            .channel
+        let queue = channel
             .queue_declare(
                 "report_status",
                 QueueDeclareOptions::default(),
                 Default::default(),
             )
             .await?;
+
+        PUBLISHER
+            .set(Arc::new(Self {
+                connection,
+                channel,
+                queue,
+            }))
+            .unwrap();
+
+        Ok(())
+    }
+
+    pub async fn publish_report_status(&self, message: ReportStatusEvent) -> Result<String> {
+        let message = serde_json::to_string(&message)?;
         self.channel
             .basic_publish(
                 "",
-                queue.name().as_str(),
+                self.queue.name().as_str(),
                 BasicPublishOptions::default(),
                 message.as_bytes(),
                 BasicProperties::default(),
             )
             .await?;
-        self.connection.close(200, "Connection closed").await?;
         Ok("Report status published successfully".to_string())
     }
 }
@@ -89,7 +99,6 @@ impl RabbitMQConsumer {
         search: Arc<dyn SearchEngine>,
         browser: BrowserWrapper,
     ) -> Result<()> {
-        let publisher = Arc::new(RabbitMQPublisher::new().await?);
         let consumer = self
             .channel
             .basic_consume(
@@ -101,7 +110,6 @@ impl RabbitMQConsumer {
             .await?;
         async fn consume(
             delivery: &Delivery,
-            publisher: Arc<RabbitMQPublisher>,
             db: SurrealDb,
             llm: Arc<dyn LLMApi>,
             search: Arc<dyn SearchEngine>,
@@ -110,11 +118,14 @@ impl RabbitMQConsumer {
             let message = String::from_utf8_lossy(&delivery.data);
             let report_status: ReportStatusEvent = serde_json::from_str(&message)?;
             workflow::run_next_job(&report_status.report_id, db, llm, search, browser).await?;
-            publisher.publish_report_status(report_status).await?;
+            PUBLISHER
+                .get()
+                .unwrap()
+                .publish_report_status(report_status)
+                .await?;
             Ok(())
         }
         let messages = consumer.try_for_each(|delivery| {
-            let publisher = publisher.clone();
             let db = db.clone();
             let llm = llm.clone();
             let search = search.clone();
@@ -122,7 +133,6 @@ impl RabbitMQConsumer {
             async move {
                 let result = consume(
                     &delivery,
-                    publisher,
                     db.clone(),
                     llm.clone(),
                     search.clone(),
@@ -152,7 +162,8 @@ mod tests {
     #[tokio::test]
     #[ignore = "Depends on extenal service"]
     async fn test_rabbitmq_publisher() {
-        let publisher = RabbitMQPublisher::new().await.unwrap();
+        RabbitMQPublisher::setup().await.unwrap();
+        let publisher = PUBLISHER.get().unwrap();
         let message = ReportStatusEvent {
             report_id: "123".to_string(),
             status: ReportStatus::Pending,

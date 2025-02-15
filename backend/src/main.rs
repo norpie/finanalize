@@ -15,6 +15,7 @@ use api::{
 use auth_middleware::Auth;
 use jwt::TokenFactory;
 use llm::{ollama::Ollama, LLMApi};
+use rabbitmq::RabbitMQPublisher;
 use search::SearxNG;
 
 mod api;
@@ -49,6 +50,7 @@ async fn main() -> Result<()> {
     let llm: Arc<dyn LLMApi> = Arc::new(Ollama::default());
     let search = Arc::new(SearxNG::new("http://localhost:8081"));
     scraper::setup_browser().await?;
+    RabbitMQPublisher::setup().await?;
     let db_clone = db.clone();
 
     // Initialize the RabbiAtMQ consumer background task
