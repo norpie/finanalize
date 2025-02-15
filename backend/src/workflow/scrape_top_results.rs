@@ -14,18 +14,18 @@ pub struct ScrapeTopResultsJob;
 
 #[derive(Debug, Serialize, Clone)]
 struct ScrapedContent {
-    content: String
+    content: String,
 }
 #[derive(Debug, Deserialize, Clone)]
 struct SurrealDBScrapedContent {
     id: Thing,
-    content: String
+    content: String,
 }
 
 #[derive(Debug, Deserialize, Clone)]
 struct SurrealDBSourceURL {
     id: Thing,
-    url: String
+    url: String,
 }
 
 #[async_trait]
@@ -40,7 +40,9 @@ impl Job for ScrapeTopResultsJob {
     ) -> Result<()> {
         // Get the source url's from the database, and scrape them using the custom scraper.rs
         let mut db_source_urls = db
-            .query("SELECT ->has_source_url->source_url as source_urls FROM $report FETCH source_urls")
+            .query(
+                "SELECT ->has_source_url->source_url as source_urls FROM $report FETCH source_urls",
+            )
             .bind(("report", report.id.clone()))
             .await?;
         let sdb_source_urls: Vec<SurrealDBSourceURL> = db_source_urls
@@ -49,8 +51,8 @@ impl Job for ScrapeTopResultsJob {
 
         // Scrape the top results from the source urls
         for sdb_url in sdb_source_urls {
-            let scraped_content = ScrapedContent{
-                content: scrape_page(sdb_url.url).await?
+            let scraped_content = ScrapedContent {
+                content: scrape_page(sdb_url.url).await?,
             };
             // Save the scraped data to the database
             let sdb_scraped_content: SurrealDBScrapedContent = db
@@ -68,24 +70,24 @@ impl Job for ScrapeTopResultsJob {
 }
 #[cfg(test)]
 mod tests {
-    use serde::Serialize;
     use super::*;
     use crate::llm::ollama::Ollama;
     use crate::models::{ReportCreation, SurrealDBReport};
     use crate::search::SearxNG;
     use crate::{db, scraper};
+    use serde::Serialize;
 
     #[derive(Debug, Deserialize, Serialize)]
-    struct TestURL{
+    struct TestURL {
         url: String,
     }
     #[derive(Debug, Deserialize, Serialize)]
-    struct TestSDBurl{
+    struct TestSDBurl {
         id: Thing,
         url: String,
     }
 
-        #[tokio::test]
+    #[tokio::test]
     #[ignore = "Depends on external services"]
     async fn test_scrape_top_results() {
         dotenvy::from_filename(".env").ok();
@@ -102,16 +104,13 @@ mod tests {
             .unwrap()
             .unwrap();
         dbg!(&report);
-        let urls: Vec<String> =
-           vec![
-              "https://en.wikipedia.org/wiki/Example.com".into(),
-              "https://www.example.com".into(),
-          ];
+        let urls: Vec<String> = vec![
+            "https://en.wikipedia.org/wiki/Example.com".into(),
+            "https://www.example.com".into(),
+        ];
 
-        for url in urls{
-            let db_url = TestURL {
-                url: url.clone(),
-            };
+        for url in urls {
+            let db_url = TestURL { url: url.clone() };
             let db_url: TestSDBurl = db
                 .create("source_url")
                 .content(db_url)
@@ -124,6 +123,9 @@ mod tests {
                 .await
                 .unwrap();
         }
-        ScrapeTopResultsJob.run(&report, db, llm, search, browser).await.unwrap();
+        ScrapeTopResultsJob
+            .run(&report, db, llm, search, browser)
+            .await
+            .unwrap();
     }
 }
