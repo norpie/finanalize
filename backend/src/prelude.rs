@@ -40,6 +40,8 @@ pub enum FinanalizeError {
     Io(#[from] std::io::Error),
     #[error("Env error: {0}")]
     Env(#[from] std::env::VarError),
+    #[error("FromUtf8 error: {0}")]
+    Utf8(#[from] std::string::FromUtf8Error),
 
     #[error("SurrealDB error: {0}")]
     SurrealDB(#[from] surrealdb::Error),
