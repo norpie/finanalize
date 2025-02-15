@@ -6,32 +6,30 @@ use surrealdb::sql::Thing;
 use super::Job;
 use crate::{
     db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, prompting,
-    scraper::BrowserWrapper, search::SearchEngine, tasks::Task,
+    scraper::BrowserWrapper, search::SearchEngine, tasks::Task, workflow::title::SurrealDBTitle,
 };
 
 #[derive(Debug, Serialize)]
 struct SectionHeadingTaskInput {
-    heading: Option<String>,
     message: String,
-    title: String, // Add the title field if required by the API
+    title: String,
 }
 
 #[derive(Debug, Deserialize)]
 struct SectionHeadingTaskOutput {
-    next_section: Option<String>,
-    headings: Option<Vec<Heading>>, // Expect an array of headings
+    headings: Vec<Heading>, // Expect an array of headings
 }
 
 #[derive(Debug, Deserialize)]
 struct Heading {
     heading: String,
-    description: Option<String>,
+    description: String,
 }
 
 #[derive(Debug, Serialize)]
 pub struct SectionHeading {
     heading: String,
-    description: Option<String>,
+    description: String,
     order: usize,
 }
 
@@ -39,7 +37,7 @@ pub struct SectionHeading {
 pub struct SurrealDbSectionHeading {
     pub id: Thing,
     pub heading: String,
-    pub description: Option<String>,
+    pub description: String,
     pub order: usize,
 }
 
@@ -61,54 +59,43 @@ impl Job for GenerateSectionHeadingsJob {
 
         let task = Task::new(&prompt);
 
+        let title: SurrealDBTitle = db
+            .query(
+                "SELECT * FROM (SELECT ->has_title->report_title as titles FROM $report)[0].titles",
+            )
+            .bind(("report", report.id.clone()))
+            .await?
+            .take::<Option<SurrealDBTitle>>(0)?
+            .ok_or(FinanalizeError::MissingReportTitle)?;
+
         // Create task input (with title included)
         let input = SectionHeadingTaskInput {
-            heading: None, // Adjust if initial heading exists
             message: report.user_input.clone(),
-            title: "Financial performance analysis of Apple and Microsoft in Q4 2024".to_string(), // Example title, update as needed
+            title: title.title.clone(),
         };
-
-        // Log the input JSON to ensure it's well-formed
-        println!(
-            "Serialized Input JSON: {}",
-            serde_json::to_string(&input).unwrap()
-        );
 
         // Run task to generate sections
         let output: SectionHeadingTaskOutput = task.run(llm.clone(), &input).await?;
 
-        // Log the raw API response for debugging
-        println!("Raw API response: {:?}", output);
+        for (index, heading) in output.headings.iter().enumerate() {
+            let section_heading = SectionHeading {
+                heading: heading.heading.clone(),
+                description: heading.description.clone(),
+                order: index + 1, // The order depends on the index in the array
+            };
 
-        // Check if the 'headings' field is present and handle accordingly
-        if let Some(headings) = output.headings {
-            if !headings.is_empty() {
-                // Process each heading in the response
-                for (index, heading) in headings.iter().enumerate() {
-                    let section_heading = SectionHeading {
-                        heading: heading.heading.clone(),
-                        description: heading.description.clone(),
-                        order: index + 1, // The order depends on the index in the array
-                    };
+            // Create the section heading entity in the database
+            let db_section: SurrealDbSectionHeading = db
+                .create("section_headings")
+                .content(section_heading)
+                .await?
+                .ok_or(FinanalizeError::UnableToCreateSectionHeading)?;
 
-                    // Create the section heading entity in the database
-                    let db_section: SurrealDbSectionHeading = db
-                        .create("section_headings")
-                        .content(section_heading)
-                        .await?
-                        .ok_or(FinanalizeError::UnableToCreateSectionHeading)?;
-
-                    // Relate section to the report
-                    db.query("RELATE $report ->has_section -> $section")
-                        .bind(("report", report.id.clone()))
-                        .bind(("section", db_section.id.clone()))
-                        .await?;
-                }
-            } else {
-                eprintln!("API response 'headings' field is empty.");
-            }
-        } else {
-            eprintln!("Missing 'headings' field in the API response.");
+            // Relate section to the report
+            db.query("RELATE $report ->has_section -> $section")
+                .bind(("report", report.id.clone()))
+                .bind(("section", db_section.id.clone()))
+                .await?;
         }
 
         Ok(())
