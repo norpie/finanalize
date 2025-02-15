@@ -5,6 +5,7 @@ use crate::llm::LLMApi;
 use crate::models::ReportStatusEvent;
 use crate::scraper::BrowserWrapper;
 use crate::search::SearchEngine;
+use crate::workflow::ReportStatus;
 use crate::{prelude::*, workflow};
 use futures_util::TryStreamExt;
 use lapin::message::Delivery;
@@ -116,8 +117,14 @@ impl RabbitMQConsumer {
             browser: BrowserWrapper,
         ) -> Result<()> {
             let message = String::from_utf8_lossy(&delivery.data);
-            let report_status: ReportStatusEvent = serde_json::from_str(&message)?;
-            workflow::run_next_job(&report_status.report_id, db, llm, search, browser).await?;
+            let mut report_status: ReportStatusEvent = serde_json::from_str(&message)?;
+            let status =
+                workflow::run_next_job(&report_status.report_id, db, llm, search, browser).await?;
+            if status == ReportStatus::Done || status == ReportStatus::Invalid {
+                println!("No more jobs to run, quiting");
+                return Ok(());
+            }
+            report_status.status = status;
             PUBLISHER
                 .get()
                 .unwrap()
