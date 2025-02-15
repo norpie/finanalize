@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use async_trait::async_trait;
-use scraper::{Html, Selector, ElementRef};
+use scraper::{ElementRef, Html, Selector};
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 use tokio::task;
@@ -24,9 +24,8 @@ impl ContentExtract for HTMLExtractor {
             let document = Html::parse_document(&buffer);
 
             // Select all `div` and `article` elements inside `<body>`
-            let selector = Selector::parse("body > div, body > article").map_err(|err| {
-                FinanalizeError::ParseError(format!("{:?}", err))
-            })?;
+            let selector = Selector::parse("body > div, body > article")
+                .map_err(|err| FinanalizeError::ParseError(format!("{:?}", err)))?;
 
             let mut text = String::new();
 
@@ -54,7 +53,7 @@ impl ContentExtract for HTMLExtractor {
 /// Function to check if an element is inside a header, nav, aside, or footer
 fn is_inside_ignored_section(element: ElementRef) -> bool {
     let mut parent = element.parent();
-    
+
     while let Some(node) = parent {
         if let Some(el) = ElementRef::wrap(node) {
             match el.value().name() {
@@ -64,7 +63,7 @@ fn is_inside_ignored_section(element: ElementRef) -> bool {
         }
         parent = node.parent();
     }
-    
+
     false
 }
 
@@ -86,7 +85,7 @@ mod tests {
             </body>
         </html>
         "#;
-        
+
         let file_path = "test.html";
         tokio::fs::write(file_path, test_html)
             .await
@@ -98,13 +97,17 @@ mod tests {
         println!("Extracted text: {:?}", result);
 
         assert!(result.iter().any(|text| text.contains("Main Content")));
-        assert!(result.iter().any(|text| text.contains("Another Important Section")));
-        
+        assert!(result
+            .iter()
+            .any(|text| text.contains("Another Important Section")));
+
         // Ensure unwanted elements are not included
         assert!(!result.iter().any(|text| text.contains("Header Title")));
         assert!(!result.iter().any(|text| text.contains("Navigation Links")));
         assert!(!result.iter().any(|text| text.contains("Sidebar Content")));
-        assert!(!result.iter().any(|text| text.contains("Footer Information")));
+        assert!(!result
+            .iter()
+            .any(|text| text.contains("Footer Information")));
 
         tokio::fs::remove_file(file_path)
             .await
