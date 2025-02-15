@@ -30,6 +30,8 @@ pub enum FinanalizeError {
     UnableToAddScrapedUrl,
     #[error("Unable to create heading url")]
     UnableToCreateSectionHeading,
+    #[error("Unable to save search query")]
+    UnableToSaveSearchQuery,
 
     #[error("LLM API error: {0}")]
     LlmApi(String),

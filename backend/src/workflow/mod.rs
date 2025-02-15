@@ -214,6 +214,7 @@ mod nop {
 }
 
 mod generate_bullets;
+mod generate_search_queries;
 mod scrape_top_results;
 mod sectionheadings;
 mod title;
