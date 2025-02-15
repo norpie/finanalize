@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
+use serde_json::ser::PrettyFormatter;
 use surrealdb::sql::Thing;
 
 use crate::{models::SurrealDBReport, prelude::*, prompting, tasks::Task};
@@ -28,7 +29,7 @@ struct SearchGenerationTaskInput {
 #[derive(Debug, Deserialize)]
 struct HeadingQueries {
     heading: String,
-    queries: Vec<ParagraphQueries>,
+    queries: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -83,8 +84,16 @@ impl Job for SearchGenerationJob {
             headings.push(paragraph.heading.clone());
         }
 
-        let headings_json = serde_json::to_string(&headings)?;
-        let paragraphs_json = serde_json::to_string(&paragraphs)?;
+        fn ser<T: Serialize>(obj: T) -> Result<String> {
+            let mut buf = Vec::new();
+            let formatter = PrettyFormatter::with_indent(b"    ");
+            let mut ser = serde_json::Serializer::with_formatter(&mut buf, formatter);
+            obj.serialize(&mut ser)?;
+            Ok(String::from_utf8(buf)?)
+        }
+
+        let headings_json = ser(&headings)?;
+        let paragraphs_json = ser(&paragraphs)?;
 
         let search_generation_input = SearchGenerationTaskInput {
             current_date: date,
@@ -98,10 +107,8 @@ impl Job for SearchGenerationJob {
 
         let mut all_queries = vec![];
         for heading in output.queries {
-            for paragraph in heading.queries {
-                for query in paragraph.queries {
-                    all_queries.push(SearchQuery { query });
-                }
+            for query in heading.queries {
+                all_queries.push(SearchQuery { query });
             }
         }
 
