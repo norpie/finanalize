@@ -28,6 +28,8 @@ pub enum FinanalizeError {
     UnableToGenerateBullets,
     #[error("Unable to add scraped url")]
     UnableToAddScrapedUrl,
+    #[error("Unable to create heading url")]
+    UnableToCreateSectionHeading,
 
     #[error("LLM API error: {0}")]
     LlmApi(String),
