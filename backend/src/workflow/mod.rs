@@ -215,6 +215,6 @@ mod nop {
 
 mod generate_bullets;
 mod scrape_top_results;
+mod sectionheadings;
 mod title;
 mod validation;
-mod sectionheadings;
