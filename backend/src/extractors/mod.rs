@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 
 pub mod csv;
 pub mod excel;
+pub mod html;
 pub mod pdf;
 pub mod text;
-pub mod html;
 
 #[async_trait]
 trait ContentExtract {
