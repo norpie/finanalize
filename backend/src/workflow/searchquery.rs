@@ -27,10 +27,10 @@ struct SDBSearchQuery {
     query: String,
 }
 
-pub struct SearchGenerationJob;
+pub struct SearchQueriesJob;
 
 #[async_trait]
-impl Job for SearchGenerationJob {
+impl Job for SearchQueriesJob {
     async fn run(
         &self,
         report: &SurrealDBReport,
@@ -115,7 +115,7 @@ mod tests {
         }
 
         // Run the job
-        let job = SearchGenerationJob;
+        let job = SearchQueriesJob;
         job.run(
             &report,
             db.clone(),
