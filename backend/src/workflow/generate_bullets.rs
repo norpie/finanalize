@@ -17,8 +17,8 @@ pub struct GenerateBulletsJob;
 #[derive(Debug, Serialize)]
 struct GenerateBulletsInput {
     message: String,
-    title: Title,
-    headings: Vec<Heading>,
+    title: String,
+    headings: String,
 }
 #[derive(Debug, Serialize, Deserialize)]
 struct GenerateBulletsOutput {
@@ -28,11 +28,11 @@ struct GenerateBulletsOutput {
 // Prompt structs
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Title {
-    report_title: String,
+    title: String,
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Heading {
-    report_section_heading: String,
+    heading: String,
     description: String,
 }
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -60,26 +60,24 @@ impl Job for GenerateBulletsJob {
     ) -> Result<()> {
         let prompt = prompting::get_prompt(db.clone(), "paragraph".into()).await?;
         let mut db_titles = db
-            .query("SELECT * FROM (SELECT ->has_title->title as titles FROM $report FETCH titles)[0].titles[0]")
+            .query("SELECT * FROM (SELECT ->has_title->report_title as titles FROM $report FETCH titles)[0].titles[0]")
             .bind(("report", report.id.clone()))
             .await?;
         let mut db_section_headings = db
-            .query("SELECT ->has_section_heading->section_headings as headings FROM $report FETCH headings")
+            .query("SELECT * FROM (SELECT ->has_section->section_headings as headings FROM $report)[0].headings;")
             .bind(("report", report.id.clone()))
             .await?;
 
         let message: String = report.user_input.clone();
         let titles: Vec<Title> = db_titles.take(0)?;
         let title: &Title = titles.first().ok_or(FinanalizeError::NotFound)?;
-        let headings: Vec<Heading> = db_section_headings
-            .take::<Option<Vec<Heading>>>("headings")?
-            .ok_or(FinanalizeError::NotFound)?;
+        let headings = db_section_headings.take::<Vec<Heading>>(0)?;
 
         let gen_bullets_task = Task::new(&prompt);
         let gen_bullets_input = GenerateBulletsInput {
             message,
-            title: title.clone(),
-            headings,
+            title: title.title.clone(),
+            headings: serde_json::to_string_pretty(&headings)?,
         };
         let gen_bullets_output: GenerateBulletsOutput =
             gen_bullets_task.run(llm, &gen_bullets_input).await?;
