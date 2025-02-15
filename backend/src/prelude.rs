@@ -67,6 +67,8 @@ pub enum FinanalizeError {
     TaskExecutionError(String),
     #[error("Parse error: {0}")]
     ParseError(String),
+    #[error("Missing report title")]
+    MissingReportTitle,
 }
 
 impl From<SelectorParseErrorKind<'_>> for FinanalizeError {
