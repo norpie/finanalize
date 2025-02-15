@@ -17,8 +17,7 @@ struct TitleTaskInpput {
 
 #[derive(Debug, Deserialize)]
 struct TitleTaskOutput {
-    output: Option<String>,
-    error: Option<String>,
+    title: String,
 }
 
 pub struct TitleJob;
@@ -51,16 +50,8 @@ impl Job for TitleJob {
         };
         let title_output: TitleTaskOutput = title_task.run(llm, &title_input).await?;
 
-        // TODO: check if title_output.error is None, return with error
-        if let Some(err) = title_output.error {
-            return Err(FinanalizeError::TaskExecutionError(err));
-        }
-
         let report_title = ReportTitle {
-            title: title_output
-                .output
-                .clone()
-                .unwrap_or_else(|| "Default Title".to_string()),
+            title: title_output.title.clone(),
         };
 
         let sdb_title: SurrealDBTitle = db
