@@ -45,9 +45,14 @@ impl Job for ScrapeTopResultsJob {
             .bind(("report", report.id.clone()))
             .await?.take::<Vec<SurrealDBSourceURL>>(0)?;
         // Scrape the top results from the source urls
-        for sdb_url in db_source_urls {
+        for sdb_url in db_source_urls.into_iter().take(10) {
+            let scrape_res = scrape_page(sdb_url.url).await;
+            if let Err(e) = scrape_res {
+                eprintln!("Error scraping page: {}", e);
+                continue;
+            }
             let scraped_content = ScrapedContent {
-                content: scrape_page(sdb_url.url).await?,
+                content: scrape_res.unwrap(),
             };
             // Save the scraped data to the database
             let sdb_scraped_content: SurrealDBScrapedContent = db
