@@ -2,20 +2,10 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Spinner from '$lib/components/spinner.svelte';
 
-	import { request } from '$lib/request';
-
-	import { onMount } from 'svelte';
-	import type User from '../models/user';
 	import { goto } from '$app/navigation';
+	import { user } from '$lib/store';
 
-	let user: User | undefined | null = $state<User>();
-
-	onMount(async () => {
-		user = (await request<User>('GET', 'v1/protected/me', true)).result;
-		if (user === undefined) {
-			user = null;
-		}
-	});
+    $inspect($user);
 </script>
 
 <div class="landing-page-wrapper min-h-screen bg-black text-white">
@@ -35,11 +25,11 @@
 		<div class="flex gap-2">
 			<!-- Existing Button Logic -->
 			<div class="button-wrapper mt-8 flex justify-center">
-				{#if user}
+				{#if $user}
 					<Button onclick={() => goto('/dashboard')} class="bg-purple-700 hover:bg-purple-600"
 						>Dashboard</Button
 					>
-				{:else if user === null}
+				{:else if $user === null}
 					<Button onclick={() => goto('/login')} class="mr-2  bg-gray-600 hover:bg-purple-600"
 						>Login</Button
 					>
@@ -47,7 +37,7 @@
 					<Button onclick={() => goto('/register')} class="bg-purple-700 hover:bg-purple-600"
 						>Sign Up</Button
 					>
-				{:else if user === undefined}
+				{:else if $user === undefined}
 					<Button><Spinner color="purple" /></Button>
 				{/if}
 			</div>
@@ -69,9 +59,9 @@
 					<h3 class="mb-2 text-xl font-medium">Our Trained Finanalize Bot</h3>
 					<p class="text-gray-400">Get insights from our advanced AI-driven bot.</p>
 					<p class="mt-4 hidden text-gray-300">
-						Our Finanalize Bot uses state-of-the-art AI algorithms to analyze financial data and provide
-						you with actionable insights. Whether you're looking for trends, anomalies, or detailed
-						reports, our bot has you covered.
+						Our Finanalize Bot uses state-of-the-art AI algorithms to analyze financial data and
+						provide you with actionable insights. Whether you're looking for trends, anomalies, or
+						detailed reports, our bot has you covered.
 					</p>
 				</div>
 				<div

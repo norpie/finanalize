@@ -19,11 +19,11 @@
 		status: string;
 	}
 
-    let reports: Report[] = $state([]);
+	let reports: Report[] = $state([]);
 
-    function boop(page: number) {
-        console.log(page);
-    }
+	function boop(page: number) {
+		console.log(page);
+	}
 
 	// async function getPage(page: number) {
 	// 	let size = currentPage?.size ?? defaultSize;
@@ -31,26 +31,28 @@
 	// 	currentPage = (await get<ReportPage>(query)).result;
 	// }
 
-    function formatDate(date: Date): string {
-	    return date.toISOString().split('T')[0];
+	function formatDate(date: Date): string {
+		return date.toISOString().split('T')[0];
 	}
 
-	let newReportSubject: string = $state("")
-    let dialogOpen = $state(false);
+	let newReportSubject: string = $state('');
+	let dialogOpen = $state(false);
 
 	async function newReport() {
-        dialogOpen = false;
-        let newReport = (await post<Report>("v1/protected/reports", {
-                user_input: newReportSubject
-            })).result;
-        if (!newReport) {
-            toast.error("Failed to create new report");
-        }
-        goto(`/reports/${newReport.id}`);
-    }
+		dialogOpen = false;
+		let newReport = (
+			await post<Report>('v1/protected/reports', {
+				user_input: newReportSubject
+			})
+		).result;
+		if (!newReport) {
+			toast.error('Failed to create new report');
+		}
+		goto(`/reports/${newReport.id}`);
+	}
 
 	onMount(async () => {
-		reports = (await get<Report[]>("v1/protected/reports?page=0&perPage=20")).result;
+		reports = (await get<Report[]>('v1/protected/reports?page=0&perPage=20')).result;
 	});
 </script>
 
