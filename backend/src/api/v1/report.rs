@@ -5,7 +5,7 @@ use crate::prelude::FinanalizeError;
 use crate::prelude::*;
 use crate::rabbitmq::PUBLISHER;
 use actix_web::http::StatusCode;
-use actix_web::web::{Data, Json, Path};
+use actix_web::web::{self, Data, Json, Path};
 use actix_web::{get, post, Responder};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
@@ -152,7 +152,7 @@ struct UserReportPage {
 pub async fn get_reports(
     user: SurrealDBUser,
     db: Data<SurrealDb>,
-    page: Json<UserReportPage>,
+    page: web::Query<UserReportPage>,
 ) -> Result<impl Responder> {
     let mut response = db
         .query(
