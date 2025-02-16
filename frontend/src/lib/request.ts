@@ -1,8 +1,7 @@
 import { goto } from "$app/navigation";
 import type Result from "../models/result";
 
-// TODO: Get the URL from the environment
-const url = "http://localhost:8080/api";
+const url = import.meta.env.VITE_BACKEND_URL;
 
 function formatEndpoint(path: string): string {
     return `${url}/${path}`;
