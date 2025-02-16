@@ -8,8 +8,7 @@ use actix_web::{
     App, HttpServer, Responder,
 };
 use api::{
-    v1::auth::{login, logout, me, refresh, register},
-    v1::report::{create_report, get_report, get_reports},
+    v1::{auth::{login, logout, me, refresh, register}, report::{create_report, get_report, get_reports, retry}},
     ApiResponse,
 };
 use auth_middleware::Auth;
@@ -91,6 +90,7 @@ async fn main() -> Result<()> {
                     .service(logout)
                     .service(me)
                     .service(create_report)
+                    .service(retry)
                     .service(get_report)
                     .service(get_reports),
             )
