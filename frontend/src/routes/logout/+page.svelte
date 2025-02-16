@@ -5,10 +5,12 @@
     import { post } from '$lib/request';
     import { toast } from 'svelte-sonner';
     import { onMount } from 'svelte';
+    import { user } from '$lib/store';
 
     async function logout() {
         await post('v1/protected/logout', {});
         toast.success('Logged out');
+        user.set(null);
         localStorage.removeItem('token');
         goto('/login');
     }
