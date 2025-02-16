@@ -5,6 +5,9 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Progress } from '$lib/components/ui/progress/index.js';
+	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
+
+	import * as Card from '$lib/components/ui/card/index.js';
 
 	import Spinner from '$lib/components/spinner.svelte';
 
@@ -36,10 +39,10 @@
 		sources: { url: string }[] | undefined;
 	}
 
+	const startStatuses = ['Pending'];
 	const endStatuses = ['Invalid', 'Done'];
 
 	const knownStatuses = [
-		'Pending',
 		'Validation',
 		'GenerateTitle',
 		'GenerateSectionHeadings',
@@ -51,6 +54,30 @@
 
 	function progress(status: string) {
 		return (knownStatuses.indexOf(status) / knownStatuses.length) * 100;
+	}
+
+	function statusColor(status: string) {
+		if (startStatuses.includes(status)) {
+			return 'bg-grey-500';
+		} else if (knownStatuses.includes(status)) {
+			return 'bg-yellow-500';
+		} else if (status === 'Done') {
+			return 'bg-green-500';
+		} else if (status === 'Invalid') {
+			return 'bg-red-500';
+		} else {
+			return 'bg-blue-500';
+		}
+	}
+
+	function verdictColor(verdict: string) {
+		if (verdict === 'Valid') {
+			return 'bg-green-500';
+		} else if (verdict === 'Invalid') {
+			return 'bg-red-500';
+		} else {
+			return 'bg-yellow-500';
+		}
 	}
 
 	let created_at = $state(new Date());
@@ -99,44 +126,70 @@
 	<Button onclick={retry}>Retry</Button>
 </div>
 {#if report}
-	<div class="m-4 mb-4 p-4">
-		<h1 class="text-center text-2xl font-bold">{report.title ?? 'Untitled Report'}</h1>
-		<div id="badges" class="flex flex-wrap gap-2">
-			<Badge>{report.report.status}</Badge>
-			<Badge>N/A Credits</Badge>
-			<Badge>{created_at}</Badge>
-			<Badge>Verdict: {verdict}</Badge>
+	<div class="flex flex-row">
+		<div class="m-4 mb-4 max-w-[50%] p-4">
+			<h1 class="text-center text-2xl font-bold">{report.title ?? 'Untitled Report'}</h1>
+			<div id="badges" class="flex flex-wrap gap-2">
+				<Badge class={statusColor(report.report.status)}>{report.report.status}</Badge>
+				<Badge>N/A Credits</Badge>
+				<Badge>{created_at}</Badge>
+				<Badge class={verdictColor(verdict)}>Verdict: {verdict}</Badge>
+			</div>
+			<p>Requested subject: {report.report.user_input}</p>
+			{#if verdict == 'Invalid'}
+				<p>Verdict: {verdict}</p>
+				<p>Justification: {report.verdict?.justification}</p>
+			{/if}
+			{#if report.report.status !== 'Done' && report.report.status !== 'Invalid'}
+				<Progress value={progress(report.report.status)} max={100} class="mb-4 w-[100%]" />
+			{/if}
+			{#if report.headings}
+				<Card.Root>
+					<Card.Content class="p-4">
+						{#each report.headings as heading, i (i)}
+							<h3 class="mb-4 text-lg font-bold">{heading.heading}</h3>
+							{#each heading.paragraphs as paragraph, j (j)}
+								<p class="mb-4">{paragraph}</p>
+							{/each}
+						{/each}
+					</Card.Content>
+				</Card.Root>
+			{/if}
 		</div>
-		<p>Requested subject: {report.report.user_input}</p>
-		{#if verdict == 'Invalid'}
-			<p>Verdict: {verdict}</p>
-			<p>Justification: {report.verdict?.justification}</p>
-		{/if}
-		{#if report.report.status !== 'Done' && report.report.status !== 'Invalid'}
-			<Progress value={progress(report.report.status)} max={100} class="w-[60%]" />
-		{/if}
-		<h2 class="mb-4 text-xl font-bold">Justification: {report.verdict?.justification}</h2>
-		<h2 class="mb-4 text-xl font-bold">Headings:</h2>
-		{#if report.headings}
-			{#each report.headings as heading, i (i)}
-				<h3 class="mb-4 text-lg font-bold">{heading.heading}</h3>
-				{#each heading.paragraphs as paragraph, j (j)}
-					<p class="mb-4">{paragraph}</p>
-				{/each}
-			{/each}
-		{/if}
-		<h2 class="mb-4 text-xl font-bold">Searches:</h2>
-		{#if report.searches}
-			{#each report.searches as search, i (i)}
-				<p class="mb-4">{search.query}</p>
-			{/each}
-		{/if}
-		<h2 class="mb-4 text-xl font-bold">Sources:</h2>
-		{#if report.sources}
-			{#each report.sources as source, i (i)}
-				<p class="mb-4">{source.url}</p>
-			{/each}
-		{/if}
+		<div class="max-w-[50%] p-4">
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Search Queries</Card.Title>
+				</Card.Header>
+				<Card.Content>
+					{#if report.searches}
+						<ScrollArea>
+							<ul class="list-inside list-disc">
+								{#each report.searches as search, i (i)}
+									<li>{search.query}</li>
+								{/each}
+							</ul>
+						</ScrollArea>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Sources</Card.Title>
+				</Card.Header>
+				<Card.Content>
+					{#if report.sources}
+						<ScrollArea>
+							<ul class="list-inside list-disc">
+								{#each report.sources as source, i (i)}
+									<li>{source.url}</li>
+								{/each}
+							</ul>
+						</ScrollArea>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		</div>
 	</div>
 {:else}
 	<div class="flex h-screen w-full items-center justify-center">
