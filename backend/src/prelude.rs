@@ -51,8 +51,6 @@ pub enum FinanalizeError {
     #[error("Fantoccini error: {0}")]
     FantocciniNewSession(#[from] fantoccini::error::NewSessionError),
 
-    #[error("Anyhow error: {0}")]
-    Anyhow(#[from] anyhow::Error),
     #[error("SurrealDB error: {0}")]
     SurrealDB(#[from] surrealdb::Error),
     #[error("JWT error: {0}")]
