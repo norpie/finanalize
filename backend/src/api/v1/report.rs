@@ -138,7 +138,7 @@ pub async fn retry(
         .publish_report_status(ReportStatusEvent::from(Report::from(report.clone())))
         .await?;
 
-    Ok("Refreshing report")
+    Ok(ApiResponse::new("OK"))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
