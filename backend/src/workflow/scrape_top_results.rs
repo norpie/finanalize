@@ -39,18 +39,14 @@ impl Job for ScrapeTopResultsJob {
         _browser: BrowserWrapper,
     ) -> Result<()> {
         // Get the source url's from the database, and scrape them using the custom scraper.rs
-        let mut db_source_urls = db
+        let db_source_urls = db
             .query(
-                "SELECT ->has_source_url->source_url as source_urls FROM $report FETCH source_urls",
+                "SELECT * FROM (SELECT ->has_search_result->search_result as urls FROM $report FETCH urls)[0].urls",
             )
             .bind(("report", report.id.clone()))
-            .await?;
-        let sdb_source_urls: Vec<SurrealDBSourceURL> = db_source_urls
-            .take::<Option<Vec<SurrealDBSourceURL>>>("source_urls")?
-            .ok_or(FinanalizeError::NotFound)?;
-
+            .await?.take::<Vec<SurrealDBSourceURL>>(0)?;
         // Scrape the top results from the source urls
-        for sdb_url in sdb_source_urls {
+        for sdb_url in db_source_urls {
             let scraped_content = ScrapedContent {
                 content: scrape_page(sdb_url.url).await?,
             };
@@ -60,8 +56,8 @@ impl Job for ScrapeTopResultsJob {
                 .content(scraped_content)
                 .await?
                 .ok_or(FinanalizeError::UnableToAddScrapedUrl)?;
-            db.query("RELATE $source_url ->has_scraped_content-> $scraped_content")
-                .bind(("source_url", sdb_url.id.clone()))
+            db.query("RELATE $report ->has_scraped_content-> $scraped_content")
+                .bind(("report", report.id.clone()))
                 .bind(("scraped_content", sdb_scraped_content.id.clone()))
                 .await?;
         }
