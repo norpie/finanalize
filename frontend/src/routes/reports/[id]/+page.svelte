@@ -51,11 +51,7 @@
 		'GenerateSearchQueries',
 		'SearchQueries',
 		'ScrapeTopResults'
-	];
-
-	function progress(status: string) {
-		return (knownStatuses.indexOf(status) / knownStatuses.length) * 100;
-	}
+	]
 
 	function statusColor(status: string) {
 		if (startStatuses.includes(status)) {
@@ -69,6 +65,10 @@
 		} else {
 			return 'bg-blue-500';
 		}
+	};
+
+	function progress(status: string) {
+		return (knownStatuses.indexOf(status) / knownStatuses.length) * 100;
 	}
 
 	function verdictColor(verdict: string) {
