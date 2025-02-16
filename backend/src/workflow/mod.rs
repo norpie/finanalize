@@ -71,8 +71,12 @@ pub async fn run_next_job(
     let job = status.job();
     println!("Running job: {:?}", status);
     job.run(&report, db.clone(), llm, search, browser).await?;
+    report = db
+        .select(("report", report_id))
+        .await?
+        .ok_or(FinanalizeError::ReportNotFound)?;
     println!("Job completed successfully");
-    let Some(next) = status.next() else {
+    let Some(next) = report.status.next() else {
         println!("No more jobs to run");
         return Ok(ReportStatus::Done);
     };
