@@ -26,12 +26,13 @@ async function request<T>(method: string, endpoint: string, dontRedirect?: boole
             }
             console.log("Token expired");
             return {
+                result: null,
                 error: "Token expired",
             };
         }
 
         localStorage.setItem('token', tokenResult.result.access_token);
-        return request(method, endpoint, body);
+        return request(method, endpoint, dontRedirect, body);
     }
 
     return await response.json();
