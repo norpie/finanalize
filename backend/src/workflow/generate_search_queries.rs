@@ -120,7 +120,7 @@ impl Job for SearchGenerationJob {
 mod tests {
     use surrealdb::sql::Thing;
 
-    use crate::{db, llm::ollama::Ollama, models::ReportCreation, scraper, search::SearxNG};
+    use crate::{db, llm::ollama::Ollama, models::ReportCreation, search::SearxNG};
 
     use super::*;
 

@@ -68,7 +68,7 @@ impl Job for TitleJob {
 
 #[cfg(test)]
 mod tests {
-    use crate::{db, llm::ollama::Ollama, models::ReportCreation, scraper, search::SearxNG};
+    use crate::{db, llm::ollama::Ollama, models::ReportCreation, search::SearxNG};
 
     use super::*;
 

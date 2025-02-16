@@ -38,7 +38,7 @@ impl Job for ScrapeTopResultsJob {
         _search: Arc<dyn SearchEngine>,
     ) -> Result<()> {
         // Get the source url's from the database, and scrape them using the custom scraper.rs
-        let mut db_source_urls = db
+        let db_source_urls = db
             .query(
                 "SELECT * FROM (SELECT ->has_search_result->search_result as urls FROM $report FETCH urls)[0].urls",
             )
@@ -70,7 +70,7 @@ mod tests {
     use crate::llm::ollama::Ollama;
     use crate::models::{ReportCreation, SurrealDBReport};
     use crate::search::SearxNG;
-    use crate::{db, scraper};
+    use crate::db;
     use serde::Serialize;
 
     #[derive(Debug, Deserialize, Serialize)]
