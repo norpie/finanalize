@@ -8,7 +8,10 @@ use actix_web::{
     App, HttpServer, Responder,
 };
 use api::{
-    v1::{auth::{login, logout, me, refresh, register}, report::{create_report, get_report, get_reports, retry}},
+    v1::{
+        auth::{login, logout, me, refresh, register},
+        report::{create_report, get_report, get_reports, retry},
+    },
     ApiResponse,
 };
 use auth_middleware::Auth;
@@ -48,7 +51,6 @@ async fn main() -> Result<()> {
     let token_factory: TokenFactory = "secret".into();
     let llm: Arc<dyn LLMApi> = Arc::new(Ollama::default());
     let search = Arc::new(SearxNG::new("http://localhost:8081"));
-    scraper::setup_browser().await?;
     RabbitMQPublisher::setup().await?;
     let db_clone = db.clone();
 
@@ -56,12 +58,9 @@ async fn main() -> Result<()> {
     tokio::spawn(async move {
         let db = db.clone();
         let llm = llm.clone();
-        let browser = scraper::INSTANCE.get().unwrap().clone();
         let search = search.clone();
         let consumer = rabbitmq::RabbitMQConsumer::new().await?;
-        consumer
-            .consume_report_status(db, llm, search, browser)
-            .await
+        consumer.consume_report_status(db, llm, search).await
     });
     HttpServer::new(move || {
         let cors = Cors::default()

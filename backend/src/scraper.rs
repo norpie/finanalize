@@ -1,67 +1,55 @@
-use crate::prelude::*;
-use chromiumoxide::{Browser, BrowserConfig, Handler};
-use futures_util::StreamExt;
-use once_cell::sync::OnceCell;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
-use tokio::spawn;
-use tokio::sync::Mutex;
-use tokio::time::{sleep, timeout};
 
-#[derive(Debug, Clone)]
-pub struct BrowserWrapper {
-    browser: Arc<Browser>,
-    handler: Arc<Mutex<Handler>>,
+use crate::prelude::*;
+use fantoccini::{Client, ClientBuilder};
+use headless_chrome::LaunchOptions;
+use serde::Serialize;
+use serde_json::json;
+use tokio::sync::OnceCell;
+
+pub static BROWSER: OnceCell<Client> = OnceCell::const_new();
+
+pub async fn get_or_init_browser() -> Result<Client> {
+    if BROWSER.get().is_none() {
+        BROWSER
+            .set(
+                ClientBuilder::native()
+                    .capabilities(
+                        json!({
+                            "moz:firefoxOptions": {
+                                "args": ["--headless"]
+                            }
+                        })
+                        .as_object()
+                        .unwrap()
+                        .clone(),
+                    )
+                    .connect("http://localhost:4444")
+                    .await?,
+            )
+            .map_err(|_| FinanalizeError::NotFound)?;
+        println!("Browser initialized");
+    }
+    println!("Returning browser");
+    Ok(BROWSER.get().unwrap().clone())
 }
 
-pub static INSTANCE: OnceCell<BrowserWrapper> = OnceCell::new();
+#[derive(Serialize)]
+struct Capabilities {
+    #[serde(rename = "moz:firefoxOptions")]
+    firefox_options: FFOptions,
+}
 
-pub async fn setup_browser() -> Result<()> {
-    let browser_config = BrowserConfig::builder().no_sandbox().build().unwrap();
-    let (browser, handler) = Browser::launch(browser_config).await?;
-    let wrapper = BrowserWrapper {
-        browser: Arc::new(browser),
-        handler: Arc::new(Mutex::new(handler)),
-    };
-    INSTANCE.set(wrapper).unwrap();
-    Ok(())
+#[derive(Serialize)]
+struct FFOptions {
+    args: Vec<String>,
 }
 
 pub async fn scrape_page(url: String) -> Result<String> {
-    let wrapper = INSTANCE.get().unwrap();
-    let browser = wrapper.browser.clone();
-    let handler = wrapper.handler.clone();
-    let handle = spawn(async move {
-        let mut locked_handler = handler.lock().await;
-        loop {
-            if let Ok(Some(_event)) = timeout(Duration::from_secs(2), locked_handler.next()).await {
-                continue;
-            } else {
-                dbg!("No event for 2 seconds, breaking...");
-                break;
-            }
-        }
-    });
-    let page = browser.new_page(url).await?;
-    page.enable_stealth_mode().await?;
-    page.wait_for_navigation().await?;
-    let timeout = Duration::from_secs(2);
-    let deadline = Instant::now() + timeout;
-
-    while Instant::now() < deadline {
-        sleep(Duration::from_millis(100)).await;
-        let result = page.evaluate("document.readyState").await;
-        if let Ok(res) = result {
-            if let Some(value) = res.value() {
-                if value == "complete" {
-                    break;
-                }
-            }
-        }
-    }
-    let content = page.content().await?;
-    handle.await.ok();
-    Ok(content)
+    let c = get_or_init_browser().await?;
+    c.goto(&url).await?;
+    let source = c.source().await?;
+    Ok(source)
 }
 
 #[cfg(test)]
@@ -71,11 +59,9 @@ mod test {
     #[tokio::test]
     #[ignore = "Depends on external service"]
     async fn test_scrape_page() {
-        setup_browser().await.unwrap();
-        sleep(Duration::from_secs(2)).await;
-        let url = "https://example.com".to_string();
+        let url = "https://github.com".to_string();
         let result: String = scrape_page(url).await.unwrap().to_string();
-        println!("{}", result);
-        assert!(result.contains("Example Domain"));
+        get_or_init_browser().await.unwrap().close().await.unwrap();
+        assert!(result.contains("GitHub"));
     }
 }

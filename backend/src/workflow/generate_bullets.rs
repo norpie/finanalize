@@ -4,7 +4,6 @@ use crate::llm::LLMApi;
 use crate::models::SurrealDBReport;
 use crate::prelude::*;
 use crate::prompting;
-use crate::scraper::BrowserWrapper;
 use crate::search::SearchEngine;
 use crate::tasks::Task;
 use async_trait::async_trait;
@@ -58,7 +57,6 @@ impl Job for GenerateBulletsJob {
         db: SurrealDb,
         llm: Arc<dyn LLMApi>,
         _search: Arc<dyn SearchEngine>,
-        _browser: BrowserWrapper,
     ) -> Result<()> {
         let prompt = prompting::get_prompt(db.clone(), "paragraph".into()).await?;
         let mut db_titles = db
@@ -110,10 +108,10 @@ impl Job for GenerateBulletsJob {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::db;
     use crate::llm::ollama::Ollama;
     use crate::models::{ReportCreation, SurrealDBReport};
     use crate::search::SearxNG;
-    use crate::{db, scraper};
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
     struct TestSDBTitle {
@@ -138,8 +136,6 @@ mod tests {
         let db = db::connect().await.unwrap();
         let llm = Arc::new(Ollama::default());
         let search = Arc::new(SearxNG::new("http://localhost:8081"));
-        scraper::setup_browser().await.unwrap();
-        let browser = scraper::INSTANCE.get().unwrap().clone();
         let creation = ReportCreation::new("Apple 2025 Q4 outlook".into());
         let report: SurrealDBReport = db
             .create("report")
@@ -160,11 +156,11 @@ mod tests {
             .unwrap();
         let headings = vec![
             Heading {
-                report_section_heading: "Introduction".to_string(),
+                heading: "Introduction".to_string(),
                 description: "A brief introduction to the report.".to_string(),
             },
             Heading {
-                report_section_heading: "iPhone".to_string(),
+                heading: "iPhone".to_string(),
                 description: "Information about the new iPhone model.".to_string(),
             },
         ];
@@ -183,6 +179,6 @@ mod tests {
         }
 
         let job = GenerateBulletsJob;
-        job.run(&report, db, llm, search, browser).await.unwrap();
+        job.run(&report, db, llm, search).await.unwrap();
     }
 }

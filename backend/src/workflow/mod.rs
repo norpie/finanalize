@@ -47,7 +47,7 @@
 use std::sync::Arc;
 
 use crate::{
-    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, scraper::BrowserWrapper,
+    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*,
     search::SearchEngine,
 };
 
@@ -59,7 +59,6 @@ pub async fn run_next_job(
     db: SurrealDb,
     llm: Arc<dyn LLMApi>,
     search: Arc<dyn SearchEngine>,
-    browser: BrowserWrapper,
 ) -> Result<ReportStatus> {
     let mut report: SurrealDBReport = db
         .select(("report", report_id))
@@ -70,7 +69,7 @@ pub async fn run_next_job(
     println!("Current status: {:?}", status);
     let job = status.job();
     println!("Running job: {:?}", status);
-    job.run(&report, db.clone(), llm, search, browser).await?;
+    job.run(&report, db.clone(), llm, search).await?;
     report = db
         .select(("report", report_id))
         .await?
@@ -111,7 +110,6 @@ pub trait Job: Send + Sync + 'static {
         db: SurrealDb,
         llm: Arc<dyn LLMApi>,
         search: Arc<dyn SearchEngine>,
-        browser: BrowserWrapper,
     ) -> Result<()>;
 }
 
@@ -205,7 +203,7 @@ mod nop {
     use async_trait::async_trait;
 
     use crate::{
-        db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, scraper::BrowserWrapper,
+        db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*,
         search::SearchEngine,
     };
 
@@ -221,7 +219,6 @@ mod nop {
             _db: SurrealDb,
             _llm: Arc<dyn LLMApi>,
             _search: Arc<dyn SearchEngine>,
-            _browser: BrowserWrapper,
         ) -> Result<()> {
             Ok(())
         }
