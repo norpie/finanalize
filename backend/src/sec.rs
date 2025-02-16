@@ -1,31 +1,17 @@
 use reqwest;
 use serde::{Deserialize, Serialize};
-use actix_web::{get, web, HttpResponse, Responder};
 use tokio::time::{sleep, Duration};
 
 #[derive(Debug, Deserialize, Serialize)]
-struct FilingData {
-    cik: String,
-    ticker: Option<String>,
-    filings: Filings,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Filings {
-    recent: RecentFilings,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
 struct RecentFilings {
-    form: Vec<String>,
-    #[serde(rename = "filingDate")] // Matches JSON field in raw document
-    filing_date: Vec<String>,
-    #[serde(rename = "primaryDocument")] // Matches JSON field
+    #[serde(rename = "primaryDocument")]
     primary_document: Vec<String>,
-    #[serde(rename = "accessionNumber")] // Matches JSON field
+    #[serde(rename = "accessionNumber")]
     accession_number: Vec<String>,
+    form: Vec<String>, 
 }
 
+/// Fetches the CIK (Central Index Key) for a given stock ticker
 async fn get_cik_from_ticker(ticker: &str) -> Option<String> {
     let url = "https://www.sec.gov/files/company_tickers.json";
     let user_agent = "FinAnalizeBot/1.0 (nguijoel.bryana@student.ehb.be)";
@@ -40,9 +26,7 @@ async fn get_cik_from_ticker(ticker: &str) -> Option<String> {
         .await
         .ok()?;
 
-    dbg!(&response); // Debug output for JSON response
-
-    let companies = response.as_object()?; // JSON is an object (hashmap geen array)
+    let companies = response.as_object()?;
 
     for (_key, company) in companies.iter() {
         if let (Some(cik_str), Some(company_ticker)) =
@@ -57,8 +41,9 @@ async fn get_cik_from_ticker(ticker: &str) -> Option<String> {
     None
 }
 
-async fn get_latest_filings(cik: &str) -> Option<FilingData> {
-    sleep(Duration::from_secs(1)).await;   
+/// Fetches only the relevant SEC filing data for a given CIK, filtering by Form 10-K
+async fn get_latest_filing_links(cik: &str) -> Option<Vec<String>> {
+    sleep(Duration::from_secs(1)).await;
     let url = format!("https://data.sec.gov/submissions/CIK{}.json", cik);
     let user_agent = "FinAnalizeBot/1.0 (nguijoel.bryana@student.ehb.be)";
 
@@ -69,25 +54,40 @@ async fn get_latest_filings(cik: &str) -> Option<FilingData> {
         .await
         .ok()?;
 
-    let text = response.text().await.ok()?; // Get raw response as text
+    let text = response.text().await.ok()?;
+    let filings: serde_json::Value = serde_json::from_str(&text).ok()?;
 
+    let recent = filings.get("filings")?.get("recent")?;
+    let documents: RecentFilings = serde_json::from_value(recent.clone()).ok()?;
 
-    let filings: FilingData = serde_json::from_str(&text).ok()?; // Try to deserialize
-    Some(filings)
-}
+    let base_url = "https://www.sec.gov/Archives/edgar/data";
+    let mut links = Vec::new();
 
-#[get("/api/v1/sec/{ticker}")]
-pub async fn fetch_sec_filings(path: web::Path<String>) -> impl Responder {
-    let ticker = path.into_inner();
-    
-    match get_cik_from_ticker(&ticker).await {
-        Some(cik) => {
-            match get_latest_filings(&cik).await {
-                Some(data) => HttpResponse::Ok().json(data),
-                None => HttpResponse::InternalServerError().body("Error retrieving filings"),
+    // de filter voor Form 10-K filings en de laatste 3 pakken
+    for (i, form) in documents.form.iter().enumerate() {
+        if form == "10-K" {
+            if let Some(doc) = documents.primary_document.get(i) {
+                if let Some(acc_num) = documents.accession_number.get(i) {
+                    let clean_acc_num = acc_num.replace("-", "");
+                    let link = format!("{}/{}/{}/{}", base_url, cik, clean_acc_num, doc);
+                    links.push(link);
+                }
             }
         }
-        None => HttpResponse::NotFound().body("Ticker not found"),
+    }
+
+    Some(links.into_iter().take(3).collect())
+}
+
+/// Fetches the SEC filing links for a given ticker
+pub async fn get_sec_filing_links(ticker: &str) -> Result<Vec<String>, String> {
+    let cik = get_cik_from_ticker(ticker).await.ok_or("Ticker not found")?;
+    let links = get_latest_filing_links(&cik).await.ok_or("Error retrieving filings")?;
+
+    if links.is_empty() {
+        Err("No filings found".to_string())
+    } else {
+        Ok(links)
     }
 }
 
@@ -96,48 +96,44 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn test_get_cik_from_ticker() -> Result<(), Box<dyn std::error::Error>> {
-        let json_str = r#"
-        {
-            "0": {"cik_str": 320193, "ticker": "AAPL", "title": "Apple Inc."},
-            "1": {"cik_str": 1045810, "ticker": "NVDA", "title": "NVIDIA CORP"},
-            "2": {"cik_str": 789019, "ticker": "MSFT", "title": "MICROSOFT CORP"}
-        }
-        "#;
-    
-        let response: serde_json::Value = serde_json::from_str(json_str)?;
-        let companies = response.as_object().ok_or("JSON is not an object")?;
-    
-        let mut cik = None;
-        for (_key, company) in companies.iter() {
-            if let (Some(cik_str), Some(company_ticker)) =
-                (company.get("cik_str").and_then(|v| v.as_u64()), company.get("ticker").and_then(|v| v.as_str()))
-            {
-                if company_ticker.eq_ignore_ascii_case("AAPL") {
-                    cik = Some(format!("{:0>10}", cik_str));
-                    break;
-                }
-            }
-        }
-        
-        // Print output for debugging
-        println!("Extracted CIK: {:?}", cik);
-
+    async fn test_get_cik_from_ticker() {
+        let ticker = "AAPL";
+        let cik = get_cik_from_ticker(ticker).await;
+        println!("Extracted CIK for {}: {:?}", ticker, cik);
         assert_eq!(cik, Some("0000320193".to_string()));
-        Ok(())
     }
 
     #[tokio::test]
-    async fn test_get_latest_filings() {
-        let cik = "0000320193"; // CIK for Apple
-        let filings = get_latest_filings(cik).await;
-        
-        // Print output to see the actual filings
-        println!("Latest Filings: {:?}", filings);
+    async fn test_get_latest_filing_links() {
+        let cik = "0000320193";
+        let links = get_latest_filing_links(cik).await;
+        println!("Latest Filing Links: {:?}", links);
+        assert!(links.is_some() && !links.unwrap().is_empty());
+    }
 
-        assert!(filings.is_some());
+    #[tokio::test]
+    async fn test_get_sec_filing_links() {
+        let ticker = "AAPL";
+        let result = get_sec_filing_links(ticker).await;
+
+        match &result {
+            Ok(links) => {
+                // Print the first 3 Form 10-K links
+                let limited_links: Vec<_> = links.iter().take(3).collect();
+                println!("SEC Filing Links for {} (first 3 Form 10-K): {:?}", ticker, limited_links);
+                assert!(!links.is_empty());
+            }
+            Err(err) => {
+                println!("Error: {}", err);
+                assert!(false, "Test failed due to error");
+            }
+        }
     }
 }
+
+
+
+
 
 
 
