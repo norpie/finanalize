@@ -4,6 +4,7 @@
 	import * as Pagination from '$lib/components/ui/pagination/index.js';
 	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { Badge } from '$lib/components/ui/badge/index.js';
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import { get, post } from '$lib/request';
@@ -23,6 +24,33 @@
 
 	function boop(page: number) {
 		console.log(page);
+	}
+
+	const startStatuses = ['Pending'];
+	const endStatuses = ['Invalid', 'Done'];
+
+	const knownStatuses = [
+		'Validation',
+		'GenerateTitle',
+		'GenerateSectionHeadings',
+		'GenerateParagraphBullets',
+		'GenerateSearchQueries',
+		'SearchQueries',
+		'ScrapeTopResults'
+	];
+
+	function statusColor(status: string) {
+		if (startStatuses.includes(status)) {
+			return 'bg-grey-500';
+		} else if (knownStatuses.includes(status)) {
+			return 'bg-yellow-500';
+		} else if (status === 'Done') {
+			return 'bg-green-500';
+		} else if (status === 'Invalid') {
+			return 'bg-red-500';
+		} else {
+			return 'bg-blue-500';
+		}
 	}
 
 	// async function getPage(page: number) {
@@ -82,7 +110,9 @@
 				<Table.Body>
 					{#each reports as report, i (i)}
 						<Table.Row onclick={() => goto(`/reports/${report.id}`)}>
-							<Table.Cell class="font-medium">{report.status}</Table.Cell>
+							<Table.Cell class="font-medium"
+								><Badge class={statusColor(report.status)}>{report.status}</Badge></Table.Cell
+							>
 							<Table.Cell>{formatDate(new Date(report.created_at))}</Table.Cell>
 							<Table.Cell>{report.user_input}</Table.Cell>
 							<Table.Cell class="text-right"
