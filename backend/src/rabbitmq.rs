@@ -120,9 +120,16 @@ impl RabbitMQConsumer {
             let Ok(mut report_status) = serde_json::from_str::<ReportStatusEvent>(&message) else {
                 return Ok(());
             };
-            let Ok(status) =
-                workflow::run_next_job(&report_status.report_id, db, llm, search, browser).await
-            else {
+            if report_status.status == ReportStatus::Done
+                || report_status.status == ReportStatus::Invalid
+            {
+                println!("No more jobs to run, quiting");
+                return Ok(());
+            }
+            let result =
+                workflow::run_next_job(&report_status.report_id, db, llm, search, browser).await;
+            let Ok(status) = result else {
+                dbg!(result.unwrap_err());
                 return Ok(());
             };
             if status == ReportStatus::Done || status == ReportStatus::Invalid {
