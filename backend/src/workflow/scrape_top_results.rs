@@ -1,10 +1,10 @@
 use super::Job;
-use crate::db::SurrealDb;
 use crate::llm::LLMApi;
 use crate::models::SurrealDBReport;
 use crate::prelude::*;
-use crate::scraper::{scrape_page, BrowserWrapper};
+use crate::scraper::scrape_page;
 use crate::search::SearchEngine;
+use crate::{db::SurrealDb, scraper::get_or_init_browser};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -36,10 +36,9 @@ impl Job for ScrapeTopResultsJob {
         db: SurrealDb,
         _llm: Arc<dyn LLMApi>,
         _search: Arc<dyn SearchEngine>,
-        _browser: BrowserWrapper,
     ) -> Result<()> {
         // Get the source url's from the database, and scrape them using the custom scraper.rs
-        let db_source_urls = db
+        let mut db_source_urls = db
             .query(
                 "SELECT * FROM (SELECT ->has_search_result->search_result as urls FROM $report FETCH urls)[0].urls",
             )
@@ -61,6 +60,7 @@ impl Job for ScrapeTopResultsJob {
                 .bind(("scraped_content", sdb_scraped_content.id.clone()))
                 .await?;
         }
+        get_or_init_browser().await?.close().await?;
         Ok(())
     }
 }
@@ -90,8 +90,6 @@ mod tests {
         let db = db::connect().await.unwrap();
         let llm = Arc::new(Ollama::default());
         let search = Arc::new(SearxNG::new("http://localhost:8081"));
-        scraper::setup_browser().await.unwrap();
-        let browser = scraper::INSTANCE.get().unwrap().clone();
         let creation = ReportCreation::new("Apple 2025 Q4 outlook".into());
         let report: SurrealDBReport = db
             .create("report")
@@ -120,7 +118,7 @@ mod tests {
                 .unwrap();
         }
         ScrapeTopResultsJob
-            .run(&report, db, llm, search, browser)
+            .run(&report, db, llm, search)
             .await
             .unwrap();
     }
