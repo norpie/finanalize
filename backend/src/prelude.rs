@@ -1,4 +1,5 @@
 use derive_more::derive::Display;
+use fantoccini::error::{CmdError, NewSessionError};
 use selectors::parser::SelectorParseErrorKind;
 use thiserror::Error;
 
@@ -47,9 +48,9 @@ pub enum FinanalizeError {
     Join(#[from] tokio::task::JoinError),
 
     #[error("Fantoccini error: {0}")]
-    FantocciniCmd(#[from] fantoccini::error::CmdError),
+    FantocciniCmd(String),
     #[error("Fantoccini error: {0}")]
-    FantocciniNewSession(#[from] fantoccini::error::NewSessionError),
+    FantocciniNewSession(String),
 
     #[error("SurrealDB error: {0}")]
     SurrealDB(#[from] surrealdb::Error),
@@ -77,6 +78,23 @@ pub enum FinanalizeError {
     ParseError(String),
     #[error("Missing report title")]
     MissingReportTitle,
+}
+
+
+    // #[error("Fantoccini error: {0}")]
+    // FantocciniCmd(#[from] fantoccini::error::CmdError),
+    // #[error("Fantoccini error: {0}")]
+    // FantocciniNewSession(#[from] fantoccini::error::NewSessionError),
+impl From<CmdError> for FinanalizeError {
+    fn from(error: CmdError) -> Self {
+        FinanalizeError::FantocciniCmd(format!("{:?}", error)) // Convert to FinanalizeError::FantocciniCmd
+    }
+}
+
+impl From<NewSessionError> for FinanalizeError {
+    fn from(error: NewSessionError) -> Self {
+        FinanalizeError::FantocciniNewSession(format!("{:?}", error)) // Convert to FinanalizeError::FantocciniNewSession
+    }
 }
 
 impl From<SelectorParseErrorKind<'_>> for FinanalizeError {
