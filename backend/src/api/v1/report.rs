@@ -154,22 +154,18 @@ pub async fn get_reports(
     db: Data<SurrealDb>,
     page: web::Query<UserReportPage>,
 ) -> Result<impl Responder> {
-    let mut response = db
+    Ok(ApiResponse::new(db
         .query(
-            "SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports)[0].reports ORDER BY created_at DESC LIMIT $perPage START $start;",
+            "SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports)[0].reports ORDER BY created_at DESC LIMIT $perPage START $start",
         )
         .bind(("user", user.id.clone()))
         .bind(("perPage", page.per_page))
         .bind(("start", page.page * page.per_page))
-        .await?;
-    let Some(report_query) = response.take::<Option<ReportQuery>>(0)? else {
-        return Ok(ApiResponse::error(
-            StatusCode::NOT_FOUND,
-            "Report not found".into(),
-        ));
-    };
-    let reports: Vec<Report> = report_query.reports.into_iter().map(|r| r.into()).collect();
-    Ok(ApiResponse::new(reports))
+        .await?
+        .take::<Vec<SurrealDBReport>>(0)?
+        .into_iter()
+        .map(Report::from)
+        .collect::<Vec<Report>>()))
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
