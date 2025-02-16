@@ -15,7 +15,7 @@ use tokio::sync::OnceCell;
 
 #[derive(Debug)]
 pub struct RabbitMQPublisher {
-    connection: Connection,
+    // connection: Connection,
     channel: Channel,
     queue: Queue,
 }
@@ -39,7 +39,7 @@ impl RabbitMQPublisher {
 
         PUBLISHER
             .set(Arc::new(Self {
-                connection,
+                // connection,
                 channel,
                 queue,
             }))
