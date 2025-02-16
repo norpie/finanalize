@@ -156,7 +156,7 @@ pub async fn get_reports(
 ) -> Result<impl Responder> {
     let mut response = db
         .query(
-            "SELECT ->has->report as reports FROM $user LIMIT $perPage START $start FETCH reports",
+            "SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports)[0].reports ORDER BY created_at DESC LIMIT $perPage START $start;",
         )
         .bind(("user", user.id.clone()))
         .bind(("perPage", page.per_page))
