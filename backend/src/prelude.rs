@@ -78,11 +78,10 @@ pub enum FinanalizeError {
     MissingReportTitle,
 }
 
-
-    // #[error("Fantoccini error: {0}")]
-    // FantocciniCmd(#[from] fantoccini::error::CmdError),
-    // #[error("Fantoccini error: {0}")]
-    // FantocciniNewSession(#[from] fantoccini::error::NewSessionError),
+// #[error("Fantoccini error: {0}")]
+// FantocciniCmd(#[from] fantoccini::error::CmdError),
+// #[error("Fantoccini error: {0}")]
+// FantocciniNewSession(#[from] fantoccini::error::NewSessionError),
 impl From<CmdError> for FinanalizeError {
     fn from(error: CmdError) -> Self {
         FinanalizeError::FantocciniCmd(format!("{:?}", error)) // Convert to FinanalizeError::FantocciniCmd

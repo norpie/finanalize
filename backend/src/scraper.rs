@@ -1,4 +1,3 @@
-
 use crate::prelude::*;
 use fantoccini::{Client, ClientBuilder};
 use serde::Serialize;

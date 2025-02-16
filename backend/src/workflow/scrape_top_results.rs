@@ -67,10 +67,10 @@ impl Job for ScrapeTopResultsJob {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::db;
     use crate::llm::ollama::Ollama;
     use crate::models::{ReportCreation, SurrealDBReport};
     use crate::search::SearxNG;
-    use crate::db;
     use serde::Serialize;
 
     #[derive(Debug, Deserialize, Serialize)]
