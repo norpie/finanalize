@@ -2,7 +2,8 @@ use crate::api::ApiResponse;
 use crate::db::SurrealDb;
 use crate::models::{Report, ReportCreation, ReportStatusEvent, SurrealDBReport, SurrealDBUser};
 use crate::prelude::FinanalizeError;
-use crate::rabbitmq::{RabbitMQPublisher, PUBLISHER};
+use crate::prelude::*;
+use crate::rabbitmq::PUBLISHER;
 use actix_web::http::StatusCode;
 use actix_web::web::{Data, Json, Path};
 use actix_web::{get, post, Responder};
@@ -19,7 +20,7 @@ pub async fn create_report(
     user: SurrealDBUser,
     db: Data<SurrealDb>,
     report_creation: Json<ReportCreationLight>,
-) -> Result<impl Responder, FinanalizeError> {
+) -> Result<impl Responder> {
     let report_creation = ReportCreation::new(report_creation.user_input.clone());
     let report: SurrealDBReport = db
         .create("report")
@@ -32,8 +33,44 @@ pub async fn create_report(
         .await?;
     let created_report: Report = Report::from(report.clone());
     let report_status_event: ReportStatusEvent = ReportStatusEvent::from(created_report.clone());
-    PUBLISHER.get().unwrap().publish_report_status(report_status_event).await?;
+    PUBLISHER
+        .get()
+        .unwrap()
+        .publish_report_status(report_status_event)
+        .await?;
     Ok(ApiResponse::new(created_report))
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Verdict {
+    pub valid: bool,
+    pub justification: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Heading {
+    pub heading: String,
+    pub paragraphs: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Query {
+    pub query: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Source {
+    pub url: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct FullReport {
+    pub report: Report,
+    pub verdict: Option<Verdict>,
+    pub title: Option<String>,
+    pub headings: Vec<Heading>,
+    pub searches: Vec<Query>,
+    pub sources: Vec<Source>,
 }
 
 #[get("/reports/{report_id}")]
@@ -41,21 +78,67 @@ pub async fn get_report(
     user: SurrealDBUser,
     db: Data<SurrealDb>,
     report_id: Path<String>,
-) -> Result<impl Responder, FinanalizeError> {
-    let report_thing: Thing = ("report", report_id.as_str()).into();
-    let mut response = db
+) -> Result<impl Responder> {
+    let report = db
         .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
         .bind(("user", user.id))
-        .bind(("report", report_thing))
+        .bind(("report", Thing::from(("report", report_id.as_str()))))
+        .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
+
+    let verdict = db
+        .query("SELECT * FROM (SELECT ->has_verdict->report_verdict as verdicts FROM $report FETCH verdicts).verdicts[0];")
+        .bind(("report", report.id.clone()))
+        .await?.take::<Option<Verdict>>(0)?;
+
+    let title = db
+        .query("SELECT * FROM (SELECT ->has_title->report_title as titles FROM $report FETCH titles).titles[0]")
+        .bind(("report", report.id.clone()))
+        .await?.take::<Option<String>>((0, "title"))?;
+
+    let headings = db
+        .query("SELECT * FROM (SELECT ->has_paragraph->paragraph as paragraphs FROM $report FETCH paragraphs)[0].paragraphs")
+        .bind(("report", report.id.clone()))
+        .await?.take::<Vec<Heading>>(0)?;
+
+    let searches = db
+        .query("SELECT * FROM (SELECT ->has_search_query->search_query as searches FROM $report FETCH searches)[0].searches")
+        .bind(("report", report.id.clone()))
+        .await?.take::<Vec<Query>>(0)?;
+
+    let sources = db
+        .query("SELECT * FROM (SELECT ->has_search_result->search_result as sources FROM $report FETCH sources)[0].sources")
+        .bind(("report", report.id.clone()))
+        .await?.take::<Vec<Source>>(0)?;
+
+    Ok(ApiResponse::new(FullReport {
+        report: Report::from(report),
+        verdict,
+        title,
+        headings,
+        searches,
+        sources,
+    }))
+}
+
+#[post("/reports/{report_id}/retry")]
+pub async fn retry(
+    report_id: Path<String>,
+    user: SurrealDBUser,
+    db: Data<SurrealDb>,
+) -> Result<impl Responder> {
+    let report = db
+        .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
+        .bind(("user", user.id))
+        .bind(("report", Thing::from(("report", report_id.as_str()))))
+        .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
+
+    PUBLISHER
+        .get()
+        .unwrap()
+        .publish_report_status(ReportStatusEvent::from(Report::from(report.clone())))
         .await?;
-    let Some(query) = response.take::<Option<SurrealDBReport>>(0)? else {
-        return Ok(ApiResponse::error(
-            StatusCode::NOT_FOUND,
-            "Report not found".into(),
-        ));
-    };
-    let report = query.clone();
-    Ok(ApiResponse::new(Report::from(report)))
+
+    Ok("Refreshing report")
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -70,7 +153,7 @@ pub async fn get_reports(
     user: SurrealDBUser,
     db: Data<SurrealDb>,
     page: Json<UserReportPage>,
-) -> Result<impl Responder, FinanalizeError> {
+) -> Result<impl Responder> {
     let mut response = db
         .query(
             "SELECT ->has->report as reports FROM $user LIMIT $perPage START $start FETCH reports",
