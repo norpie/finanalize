@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-use crate::{models::SurrealDBReport, prelude::*, prompting, tasks::Task};
+use crate::{models::SurrealDBReport, prelude::*, prompting, tasks::Task, workflow::ReportStatus};
 
 use std::sync::Arc;
 
@@ -23,7 +23,7 @@ struct ValidationTaskOutput {
 
 pub struct ValidationJob;
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct ReportVerdict {
     justification: String,
     valid: bool,
@@ -59,9 +59,19 @@ impl Job for ValidationJob {
         };
         let sdb_verdict: SurrealDBVerdict = db
             .create("report_verdict")
-            .content(verdict)
+            .content(verdict.clone())
             .await?
             .ok_or(FinanalizeError::UnableToCreateReportVerdict)?;
+        let mut report = report.clone();
+        if !verdict.valid {
+            report.status = ReportStatus::Invalid;
+        }
+        let report: SurrealDBReport = db
+            .update(("report", report.id.id.to_string().as_str()))
+            .content(report)
+            .await?
+            .ok_or(FinanalizeError::UnableToUpdateReport)?;
+        dbg!(&report);
         db.query("RELATE $report -> has_verdict -> $verdict")
             .bind(("report", report.id.clone()))
             .bind(("verdict", sdb_verdict.id))
