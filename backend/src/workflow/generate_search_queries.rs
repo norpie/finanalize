@@ -13,9 +13,9 @@ use crate::{db::SurrealDb, llm::LLMApi, scraper::BrowserWrapper, search::SearchE
 use super::Job;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct ParagraphDetail {
+struct HeadingDetail {
     heading: String,
-    paragraph: Vec<String>,
+    paragraphs: Vec<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -23,24 +23,19 @@ struct SearchGenerationTaskInput {
     #[serde(rename = "currentDate")]
     current_date: String,
     headings: String,
-    paragraphs: String,
+    #[serde(rename = "firstHeading")]
+    first_heading: String,
 }
 
 #[derive(Debug, Deserialize)]
 struct HeadingQueries {
     heading: String,
-    queries: Vec<String>,
-}
-
-#[derive(Debug, Deserialize)]
-struct ParagraphQueries {
-    bullet: String,
-    queries: Vec<String>,
+    search_queries: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
 struct SearchGenerationTaskOutput {
-    queries: Vec<HeadingQueries>,
+    headings: Vec<HeadingQueries>,
 }
 
 #[derive(Debug, Serialize)]
@@ -70,7 +65,7 @@ impl Job for SearchGenerationJob {
         let search_generation_task = Task::new(&prompt);
         let date = Utc::now().format("%Y-%m-%d").to_string();
 
-        let paragraphs: Vec<ParagraphDetail> = db
+        let paragraphs: Vec<HeadingDetail> = db
             .query(
                 "SELECT * FROM (SELECT ->has_paragraph->paragraph as paragraphs FROM \
                  $report)[0].paragraphs;",
@@ -78,11 +73,6 @@ impl Job for SearchGenerationJob {
             .bind(("report", report.id.clone()))
             .await?
             .take(0)?;
-
-        let mut headings: Vec<String> = vec![];
-        for paragraph in paragraphs.iter() {
-            headings.push(paragraph.heading.clone());
-        }
 
         fn ser<T: Serialize>(obj: T) -> Result<String> {
             let mut buf = Vec::new();
@@ -92,13 +82,12 @@ impl Job for SearchGenerationJob {
             Ok(String::from_utf8(buf)?)
         }
 
-        let headings_json = ser(&headings)?;
-        let paragraphs_json = ser(&paragraphs)?;
+        let headings_json = ser(&paragraphs)?;
 
         let search_generation_input = SearchGenerationTaskInput {
             current_date: date,
             headings: headings_json,
-            paragraphs: paragraphs_json,
+            first_heading: paragraphs[0].heading.clone(),
         };
 
         let output: SearchGenerationTaskOutput = search_generation_task
@@ -106,8 +95,8 @@ impl Job for SearchGenerationJob {
             .await?;
 
         let mut all_queries = vec![];
-        for heading in output.queries {
-            for query in heading.queries {
+        for heading in output.headings {
+            for query in heading.search_queries {
                 all_queries.push(SearchQuery { query });
             }
         }
