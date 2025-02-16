@@ -6,7 +6,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
-	import { get, post, request } from '$lib/request';
+	import { get, post } from '$lib/request';
 	import { onMount } from 'svelte';
 	import Spinner from '$lib/components/spinner.svelte';
 	import { toast } from 'svelte-sonner';
@@ -30,6 +30,10 @@
 	// 	const query = `v1/reports/?page=${page}&size=${size}`;
 	// 	currentPage = (await get<ReportPage>(query)).result;
 	// }
+
+    function formatDate(date: Date): string {
+	    return date.toISOString().split('T')[0];
+	}
 
 	let newReportSubject: string = $state("")
     let dialogOpen = $state(false);
@@ -77,7 +81,7 @@
 					{#each reports as report, i (i)}
 						<Table.Row onclick={() => goto(`/reports/${report.id}`)}>
 							<Table.Cell class="font-medium">{report.status}</Table.Cell>
-							<Table.Cell>{new Date(report.created_at)}</Table.Cell>
+							<Table.Cell>{formatDate(new Date(report.created_at))}</Table.Cell>
 							<Table.Cell>{report.user_input}</Table.Cell>
 							<Table.Cell class="text-right"
 								>{#if report.cost}{report.cost} Credits{:else}Unavailable{/if}</Table.Cell
