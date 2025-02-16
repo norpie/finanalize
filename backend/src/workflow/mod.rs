@@ -47,8 +47,7 @@
 use std::sync::Arc;
 
 use crate::{
-    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*,
-    search::SearchEngine,
+    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, search::SearchEngine,
 };
 
 use async_trait::async_trait;
@@ -203,8 +202,7 @@ mod nop {
     use async_trait::async_trait;
 
     use crate::{
-        db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*,
-        search::SearchEngine,
+        db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, search::SearchEngine,
     };
 
     use super::Job;
