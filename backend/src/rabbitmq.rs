@@ -3,7 +3,6 @@ use std::sync::Arc;
 use crate::db::SurrealDb;
 use crate::llm::LLMApi;
 use crate::models::ReportStatusEvent;
-use crate::scraper::BrowserWrapper;
 use crate::search::SearchEngine;
 use crate::workflow::ReportStatus;
 use crate::{prelude::*, workflow};
@@ -98,7 +97,6 @@ impl RabbitMQConsumer {
         db: SurrealDb,
         llm: Arc<dyn LLMApi>,
         search: Arc<dyn SearchEngine>,
-        browser: BrowserWrapper,
     ) -> Result<()> {
         let consumer = self
             .channel
@@ -114,7 +112,6 @@ impl RabbitMQConsumer {
             db: SurrealDb,
             llm: Arc<dyn LLMApi>,
             search: Arc<dyn SearchEngine>,
-            browser: BrowserWrapper,
         ) -> Result<()> {
             let message = String::from_utf8_lossy(&delivery.data);
             let Ok(mut report_status) = serde_json::from_str::<ReportStatusEvent>(&message) else {
@@ -126,8 +123,7 @@ impl RabbitMQConsumer {
                 println!("No more jobs to run, quiting");
                 return Ok(());
             }
-            let result =
-                workflow::run_next_job(&report_status.report_id, db, llm, search, browser).await;
+            let result = workflow::run_next_job(&report_status.report_id, db, llm, search).await;
             let Ok(status) = result else {
                 dbg!(result.unwrap_err());
                 return Ok(());
@@ -148,16 +144,8 @@ impl RabbitMQConsumer {
             let db = db.clone();
             let llm = llm.clone();
             let search = search.clone();
-            let browser = browser.clone();
             async move {
-                let result = consume(
-                    &delivery,
-                    db.clone(),
-                    llm.clone(),
-                    search.clone(),
-                    browser.clone(),
-                )
-                .await;
+                let result = consume(&delivery, db.clone(), llm.clone(), search.clone()).await;
                 if result.is_err() {
                     panic!("{}", result.unwrap_err());
                 }

@@ -6,7 +6,7 @@ use crate::{models::SurrealDBReport, prelude::*, prompting, tasks::Task, workflo
 
 use std::sync::Arc;
 
-use crate::{db::SurrealDb, llm::LLMApi, scraper::BrowserWrapper, search::SearchEngine};
+use crate::{db::SurrealDb, llm::LLMApi, search::SearchEngine};
 
 use super::Job;
 
@@ -44,7 +44,6 @@ impl Job for ValidationJob {
         db: SurrealDb,
         llm: Arc<dyn LLMApi>,
         _search: Arc<dyn SearchEngine>,
-        _browser: BrowserWrapper,
     ) -> Result<()> {
         let prompt = prompting::get_prompt(db.clone(), "validation".into()).await?;
         let validation_task = Task::new(&prompt);
@@ -92,8 +91,6 @@ mod tests {
         let db = db::connect().await.unwrap();
         let llm = Arc::new(Ollama::default());
         let search = Arc::new(SearxNG::new("http://localhost:8081"));
-        scraper::setup_browser().await.unwrap();
-        let browser = scraper::INSTANCE.get().unwrap().clone();
         let creation = ReportCreation::new("Apple 2025 Q4 outlook".into());
         let report: SurrealDBReport = db
             .create("report")
@@ -103,6 +100,6 @@ mod tests {
             .unwrap();
         dbg!(&report);
         let job = ValidationJob;
-        job.run(&report, db, llm, search, browser).await.unwrap();
+        job.run(&report, db, llm, search).await.unwrap();
     }
 }

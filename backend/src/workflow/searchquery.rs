@@ -1,5 +1,5 @@
 use super::Job;
-use crate::{db::SurrealDb, llm::LLMApi, scraper::BrowserWrapper, search::SearchEngine};
+use crate::{db::SurrealDb, llm::LLMApi, search::SearchEngine};
 use crate::{models::SurrealDBReport, prelude::*};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -37,7 +37,6 @@ impl Job for SearchQueriesJob {
         db: SurrealDb,
         _llm: Arc<dyn LLMApi>,
         search: Arc<dyn SearchEngine>,
-        _browser: BrowserWrapper,
     ) -> Result<()> {
         // Step 1: Retrieve search queries
         let queries: Vec<SDBSearchQuery> = db
@@ -84,8 +83,6 @@ mod tests {
         env::set_var("OLLAMA_BASE_URL", "http://10.147.17.202:11434");
         let db = db::connect().await.unwrap();
         let search = Arc::new(SearxNG::new("http://localhost:8081"));
-        scraper::setup_browser().await.unwrap();
-        let browser = scraper::INSTANCE.get().unwrap().clone();
         let creation = ReportCreation::new("Apple 2025 Q4 outlook".into());
         let report: SurrealDBReport = db
             .create("report")
@@ -120,14 +117,8 @@ mod tests {
 
         // Run the job
         let job = SearchQueriesJob;
-        job.run(
-            &report,
-            db.clone(),
-            Arc::new(Ollama::default()),
-            search,
-            browser,
-        )
-        .await
-        .unwrap();
+        job.run(&report, db.clone(), Arc::new(Ollama::default()), search)
+            .await
+            .unwrap();
     }
 }

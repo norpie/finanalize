@@ -43,6 +43,16 @@ pub enum FinanalizeError {
     #[error("FromUtf8 error: {0}")]
     Utf8(#[from] std::string::FromUtf8Error),
 
+    #[error("Tokio error: {0}")]
+    Join(#[from] tokio::task::JoinError),
+
+    #[error("Fantoccini error: {0}")]
+    FantocciniCmd(#[from] fantoccini::error::CmdError),
+    #[error("Fantoccini error: {0}")]
+    FantocciniNewSession(#[from] fantoccini::error::NewSessionError),
+
+    #[error("Anyhow error: {0}")]
+    Anyhow(#[from] anyhow::Error),
     #[error("SurrealDB error: {0}")]
     SurrealDB(#[from] surrealdb::Error),
     #[error("JWT error: {0}")]
@@ -57,8 +67,6 @@ pub enum FinanalizeError {
     Reqwest(#[from] reqwest::Error),
     #[error("Handlebars error: {0}")]
     Handlebars(#[from] handlebars::RenderError),
-    #[error("CdpError error: {0}")]
-    CdpError(#[from] chromiumoxide::error::CdpError),
     #[error("Polars error: {0}")]
     Polars(#[from] polars::prelude::PolarsError),
     #[error("Xlsl error: {0}")]

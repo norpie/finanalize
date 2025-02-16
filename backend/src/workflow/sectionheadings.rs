@@ -6,7 +6,7 @@ use surrealdb::sql::Thing;
 use super::Job;
 use crate::{
     db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, prompting,
-    scraper::BrowserWrapper, search::SearchEngine, tasks::Task, workflow::title::SurrealDBTitle,
+    search::SearchEngine, tasks::Task, workflow::title::SurrealDBTitle,
 };
 
 #[derive(Debug, Serialize)]
@@ -51,7 +51,6 @@ impl Job for GenerateSectionHeadingsJob {
         db: SurrealDb,
         llm: Arc<dyn LLMApi>,
         _search: Arc<dyn SearchEngine>,
-        _browser: BrowserWrapper,
     ) -> Result<()> {
         // Fetch prompt and prepare the input
         let prompt = prompting::get_prompt(db.clone(), "heading".into()).await?;
@@ -105,7 +104,7 @@ impl Job for GenerateSectionHeadingsJob {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{db, llm::ollama::Ollama, models::ReportCreation, scraper, search::SearxNG};
+    use crate::{db, llm::ollama::Ollama, models::ReportCreation, search::SearxNG};
     use std::env;
 
     #[tokio::test]
@@ -115,8 +114,6 @@ mod tests {
         let db = db::connect().await.unwrap();
         let llm = Arc::new(Ollama::default());
         let search = Arc::new(SearxNG::new("http://localhost:8081"));
-        scraper::setup_browser().await.unwrap();
-        let browser = scraper::INSTANCE.get().unwrap().clone();
 
         let creation = ReportCreation::new("Test Report Title".into());
         let report: SurrealDBReport = db
@@ -127,6 +124,6 @@ mod tests {
             .unwrap();
 
         let job = GenerateSectionHeadingsJob;
-        job.run(&report, db, llm, search, browser).await.unwrap();
+        job.run(&report, db, llm, search).await.unwrap();
     }
 }
