@@ -103,7 +103,7 @@
 					<Table.Row>
 						<Table.Head class="w-[100px]">Status</Table.Head>
 						<Table.Head class="w-[100px]">Date</Table.Head>
-						<Table.Head>Title</Table.Head>
+						<Table.Head>User's Input</Table.Head>
 						<Table.Head class="text-right">Cost</Table.Head>
 					</Table.Row>
 				</Table.Header>
