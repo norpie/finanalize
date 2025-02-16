@@ -9,6 +9,7 @@ use crate::search::SearchEngine;
 use crate::tasks::Task;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
+use serde_json::ser::PrettyFormatter;
 use std::sync::Arc;
 use surrealdb::sql::Thing;
 
@@ -22,7 +23,7 @@ struct GenerateBulletsInput {
 }
 #[derive(Debug, Serialize, Deserialize)]
 struct GenerateBulletsOutput {
-    paragraphs: Vec<Paragraph>,
+    headings: Vec<Paragraph>,
 }
 
 // Prompt structs
@@ -30,6 +31,7 @@ struct GenerateBulletsOutput {
 struct Title {
     title: String,
 }
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Heading {
     heading: String,
@@ -38,14 +40,14 @@ struct Heading {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Paragraph {
     heading: String,
-    paragraph: Vec<String>,
+    paragraphs: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct SurrealDBParagraph {
     id: Thing,
     heading: String,
-    paragraph: Vec<String>,
+    paragraphs: Vec<String>,
 }
 
 #[async_trait]
@@ -73,15 +75,23 @@ impl Job for GenerateBulletsJob {
         let title: &Title = titles.first().ok_or(FinanalizeError::NotFound)?;
         let headings = db_section_headings.take::<Vec<Heading>>(0)?;
 
+        fn ser<T: Serialize>(obj: T) -> Result<String> {
+            let mut buf = Vec::new();
+            let formatter = PrettyFormatter::with_indent(b"    ");
+            let mut ser = serde_json::Serializer::with_formatter(&mut buf, formatter);
+            obj.serialize(&mut ser)?;
+            Ok(String::from_utf8(buf)?)
+        }
+
         let gen_bullets_task = Task::new(&prompt);
         let gen_bullets_input = GenerateBulletsInput {
             message,
             title: title.title.clone(),
-            headings: serde_json::to_string_pretty(&headings)?,
+            headings: ser(headings)?,
         };
         let gen_bullets_output: GenerateBulletsOutput =
             gen_bullets_task.run(llm, &gen_bullets_input).await?;
-        let gen_paragraphs = gen_bullets_output.paragraphs;
+        let gen_paragraphs = gen_bullets_output.headings;
         for paragraph in gen_paragraphs.iter() {
             let sdb_paragraph: SurrealDBParagraph = db
                 .create("paragraph")
