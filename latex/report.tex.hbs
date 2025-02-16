@@ -25,13 +25,19 @@
 ]{CSSullivanBusinessReport}
 % All required packages and configuration are included in the CSSullivanBusinessReport.cls file (normally).
 %\usepackage{biblatex}
-%\addbibresource{sample.bib} % BibLaTeX bibliography file, should be created through the LLM.
 
 %----------------------------------------------------------------------------------------
 %	REPORT INFORMATION
 %----------------------------------------------------------------------------------------
 
-    \include{components/report_information}
+
+\reporttitle{ {{ report_title }} } % The report title to appear on the title page and page headers, do not create manual new lines here as this will carry over to page headers
+
+\reportsubtitle{ {{ report_subtitle }} } % Report subtitle, include new lines if needed
+
+\reportdate{\today} % Report date, include new lines for additional information if needed
+
+\rightheadercontent{\includegraphics[width=1.5cm, height=1.5cm]{image.png}} % The content in the right header, you may want to add your own company logo or use your company/department name or leave this command empty for no right header content
 
 %----------------------------------------------------------------------------------------
 
@@ -41,78 +47,39 @@
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-    \include{components/titlepage}
+    \include{readymade/titlepage.tex}
     \newpage
 
 %----------------------------------------------------------------------------------------
 %	DISCLAIMER/COPYRIGHT PAGE
 %----------------------------------------------------------------------------------------
 
-    \include{components/disclaimer}
+    \include{readymade/disclaimer.tex}
     \newpage
 
 %----------------------------------------------------------------------------------------
 %	TABLE OF CONTENTS
 %----------------------------------------------------------------------------------------
 
-    \include{components/tableofcontents}
+    \include{readymade/tableofcontents.tex}
     \newpage
 
 %----------------------------------------------------------------------------------------
-%	SECTIONS
+%	DOCUMENT BODY (SECTIONS, FIGURES, TABLES, LISTS, QUOTATIONS, CITATIONS, LINKS, EQUATIONS)
 %----------------------------------------------------------------------------------------
 
-    \include{components/sections}
-
-%----------------------------------------------------------------------------------------
-%	QUOTATIONS
-%----------------------------------------------------------------------------------------
-
-    \include{components/quotations}
-
-%----------------------------------------------------------------------------------------
-%	TABLES
-%----------------------------------------------------------------------------------------
-
-    \include{components/tables}
-
-%----------------------------------------------------------------------------------------
-%	FIGURES
-%----------------------------------------------------------------------------------------
-
-    \include{components/figures}
-
-%----------------------------------------------------------------------------------------
-%	LISTS
-%----------------------------------------------------------------------------------------
-
-    \include{components/lists}
-
-%----------------------------------------------------------------------------------------
-%	REFERENCING CITATIONS
-%----------------------------------------------------------------------------------------
-
-    \include{components/citations}
-
-%----------------------------------------------------------------------------------------
-%	LINKS
-%----------------------------------------------------------------------------------------
-
-    \include{components/links}
-
-%----------------------------------------------------------------------------------------
-%	EQUATIONS
-%----------------------------------------------------------------------------------------
-
-    \include{components/equations}
+\begin{fullwidth} % Use the whole page width
+{{#each components}}
+    \{{{command}}}{ {{{ args }}} }
+{{/each}}
+\end{fullwidth}
 
 %----------------------------------------------------------------------------------------
 %	 REFERENCES/BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
     \newpage
-    \include{components/bibliography}
-
+    \include{readymade/bibliography.tex}
 %----------------------------------------------------------------------------------------
 
 \end{document}
