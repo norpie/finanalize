@@ -15,7 +15,7 @@ impl<'a> Task<'a> {
     pub async fn run<T, U>(&self, api: Arc<dyn LLMApi>, input: &T) -> Result<U>
     where
         T: Serialize,
-        U: DeserializeOwned,
+        U: DeserializeOwned + std::fmt::Debug,
     {
         let prompt = Handlebars::default().render_template(self.0, input)?;
         let generated = api.generate(prompt.clone()).await?;
@@ -26,6 +26,7 @@ impl<'a> Task<'a> {
         let value: Value = serde_json::from_str(&json)?;
         dbg!(&value);
         let output: U = serde_json::from_value(value)?;
+        dbg!(&output);
         Ok(output)
     }
 
