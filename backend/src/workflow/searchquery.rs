@@ -74,7 +74,7 @@ impl Job for SearchQueriesJob {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{db, llm::ollama::Ollama, models::ReportCreation, scraper, search::SearxNG};
+    use crate::{db, llm::ollama::Ollama, models::ReportCreation, search::SearxNG};
     use std::env;
 
     #[tokio::test]
