@@ -58,9 +58,13 @@ impl Job for SearchQueriesJob {
                 let created: SDBSearchResult = db
                     .create("search_result")
                     .content(search_result)
-                    .await
-                    .unwrap()
-                    .unwrap();
+                    .await?
+                    .ok_or(FinanalizeError::InternalServerError)?;
+
+                db.query("RELATE $report -> has_search_result -> $result")
+                    .bind(("report", report.id.clone()))
+                    .bind(("result", created.id.clone()))
+                    .await?;
             }
         }
 
