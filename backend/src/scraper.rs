@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::prelude::*;
 use fantoccini::{Client, ClientBuilder};
-use headless_chrome::LaunchOptions;
 use serde::Serialize;
 use serde_json::json;
 use tokio::sync::OnceCell;
