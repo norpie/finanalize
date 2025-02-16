@@ -6,6 +6,7 @@
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Progress } from '$lib/components/ui/progress/index.js';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
+	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
 
 	import * as Card from '$lib/components/ui/card/index.js';
 
@@ -143,18 +144,27 @@
 			{#if report.report.status !== 'Done' && report.report.status !== 'Invalid'}
 				<Progress value={progress(report.report.status)} max={100} class="mb-4 w-[100%]" />
 			{/if}
-			{#if report.headings}
-				<Card.Root>
-					<Card.Content class="p-4">
+			<Card.Root>
+				<Card.Content class="p-4">
+					{#if report.headings && report.headings.length !== 0}
 						{#each report.headings as heading, i (i)}
 							<h3 class="mb-4 text-lg font-bold">{heading.heading}</h3>
 							{#each heading.paragraphs as paragraph, j (j)}
 								<p class="mb-4">{paragraph}</p>
 							{/each}
 						{/each}
-					</Card.Content>
-				</Card.Root>
-			{/if}
+					{:else}
+						{#each Array(3) as _, i}
+							<Skeleton class="mb-2 h-6 w-[500px] p-6" />
+							{#each Array(3) as _, j}
+								<Skeleton class="mb-1 h-4 w-[300px] p-4" />
+								<Skeleton class="mb-1 h-4 w-[250px] p-4" />
+								<Skeleton class="mb-1 h-4 w-[200px] p-4" />
+							{/each}
+						{/each}
+					{/if}
+				</Card.Content>
+			</Card.Root>
 		</div>
 		<div class="max-w-[50%] p-4">
 			<Card.Root>
@@ -162,7 +172,7 @@
 					<Card.Title>Search Queries</Card.Title>
 				</Card.Header>
 				<Card.Content>
-					{#if report.searches}
+					{#if report.searches && report.searches.length !== 0}
 						<ScrollArea>
 							<ul class="list-inside list-disc">
 								{#each report.searches as search, i (i)}
@@ -170,6 +180,12 @@
 								{/each}
 							</ul>
 						</ScrollArea>
+					{:else}
+						{#each Array(3) as _, i}
+							<Skeleton class="mb-1 h-4 w-[300px] p-4" />
+							<Skeleton class="mb-1 h-4 w-[250px] p-4" />
+							<Skeleton class="mb-1 h-4 w-[200px] p-4" />
+						{/each}
 					{/if}
 				</Card.Content>
 			</Card.Root>
@@ -178,7 +194,7 @@
 					<Card.Title>Sources</Card.Title>
 				</Card.Header>
 				<Card.Content>
-					{#if report.sources}
+					{#if report.sources && report.sources.length !== 0}
 						<ScrollArea>
 							<ul class="list-inside list-disc">
 								{#each report.sources as source, i (i)}
@@ -186,6 +202,12 @@
 								{/each}
 							</ul>
 						</ScrollArea>
+					{:else}
+						{#each Array(3) as _, i}
+							<Skeleton class="mb-1 h-4 w-[300px] p-4" />
+							<Skeleton class="mb-1 h-4 w-[250px] p-4" />
+							<Skeleton class="mb-1 h-4 w-[200px] p-4" />
+						{/each}
 					{/if}
 				</Card.Content>
 			</Card.Root>
