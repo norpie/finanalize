@@ -61,6 +61,13 @@ mod sectionheadings;
 mod title;
 mod validation;
 
+#[derive(Debug, Serialize, Deserialize)]
+struct WorkflowStatusUpdate {
+    report_id: String,
+    last_job_type: JobType,
+    last_job_output_json: String,
+}
+
 mod job;
 
 pub async fn run_next_job(
