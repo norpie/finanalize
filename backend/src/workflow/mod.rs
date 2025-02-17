@@ -61,6 +61,8 @@ mod sectionheadings;
 mod title;
 mod validation;
 
+mod job;
+
 pub async fn run_next_job(
     report_id: &String,
     db: SurrealDb,
