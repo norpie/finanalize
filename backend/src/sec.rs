@@ -132,7 +132,7 @@ mod tests {
             }
             Err(err) => {
                 println!("Error: {}", err);
-                assert!(false, "Test failed due to error");
+                panic!("Failed to fetch SEC filing links");
             }
         }
     }
