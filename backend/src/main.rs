@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use crate::prelude::*;
 use actix_cors::Cors;
 use actix_web::{
@@ -16,9 +14,7 @@ use api::{
 };
 use auth_middleware::Auth;
 use jwt::TokenFactory;
-use llm::{ollama::Ollama, LLMApi};
 use rabbitmq::RabbitMQPublisher;
-use search::SearxNG;
 
 mod api;
 mod auth_middleware;
@@ -49,20 +45,18 @@ mod workflow;
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenvy::from_filename(".env").ok();
+    env_logger::init();
     let db = db::connect().await?;
     let token_factory: TokenFactory = "secret".into();
-    let llm: Arc<dyn LLMApi> = Arc::new(Ollama::default());
-    let search = Arc::new(SearxNG::new("http://localhost:8081"));
     RabbitMQPublisher::setup().await?;
     let db_clone = db.clone();
 
     // Initialize the RabbiAtMQ consumer background task
     tokio::spawn(async move {
-        let db = db.clone();
-        let llm = llm.clone();
-        let search = search.clone();
-        let consumer = rabbitmq::RabbitMQConsumer::new().await?;
-        consumer.consume_report_status(db, llm, search).await
+        rabbitmq::RabbitMQConsumer::new()
+            .await?
+            .consume_report_status()
+            .await
     });
     HttpServer::new(move || {
         let cors = Cors::default()
