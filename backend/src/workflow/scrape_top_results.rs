@@ -1,10 +1,10 @@
 use super::Job;
+use crate::db::SurrealDb;
 use crate::llm::LLMApi;
 use crate::models::SurrealDBReport;
 use crate::prelude::*;
 use crate::scraper::scrape_page;
 use crate::search::SearchEngine;
-use crate::{db::SurrealDb, scraper::get_or_init_browser};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
