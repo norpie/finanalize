@@ -20,8 +20,6 @@ use llm::{ollama::Ollama, LLMApi};
 use rabbitmq::RabbitMQPublisher;
 use search::SearxNG;
 
-
-
 mod api;
 mod auth_middleware;
 mod db;
@@ -41,11 +39,11 @@ mod rag;
 mod scraper;
 #[allow(dead_code)]
 mod search;
+mod sec;
 #[allow(dead_code)]
 mod tasks;
 #[allow(dead_code)]
 mod workflow;
-mod sec;
 
 #[tokio::main]
 async fn main() -> Result<()> {
