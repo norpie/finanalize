@@ -8,7 +8,7 @@ struct RecentFilings {
     primary_document: Vec<String>,
     #[serde(rename = "accessionNumber")]
     accession_number: Vec<String>,
-    form: Vec<String>, 
+    form: Vec<String>,
 }
 
 /// Fetches the CIK (Central Index Key) for a given stock ticker
@@ -29,9 +29,10 @@ async fn get_cik_from_ticker(ticker: &str) -> Option<String> {
     let companies = response.as_object()?;
 
     for (_key, company) in companies.iter() {
-        if let (Some(cik_str), Some(company_ticker)) =
-            (company.get("cik_str")?.as_u64(), company.get("ticker")?.as_str())
-        {
+        if let (Some(cik_str), Some(company_ticker)) = (
+            company.get("cik_str")?.as_u64(),
+            company.get("ticker")?.as_str(),
+        ) {
             if company_ticker.eq_ignore_ascii_case(ticker) {
                 return Some(format!("{:0>10}", cik_str));
             }
@@ -81,8 +82,12 @@ async fn get_latest_filing_links(cik: &str) -> Option<Vec<String>> {
 
 /// Fetches the SEC filing links for a given ticker
 pub async fn get_sec_filing_links(ticker: &str) -> Result<Vec<String>, String> {
-    let cik = get_cik_from_ticker(ticker).await.ok_or("Ticker not found")?;
-    let links = get_latest_filing_links(&cik).await.ok_or("Error retrieving filings")?;
+    let cik = get_cik_from_ticker(ticker)
+        .await
+        .ok_or("Ticker not found")?;
+    let links = get_latest_filing_links(&cik)
+        .await
+        .ok_or("Error retrieving filings")?;
 
     if links.is_empty() {
         Err("No filings found".to_string())
@@ -120,7 +125,10 @@ mod tests {
             Ok(links) => {
                 // Print the first 3 Form 10-K links
                 let limited_links: Vec<_> = links.iter().take(3).collect();
-                println!("SEC Filing Links for {} (first 3 Form 10-K): {:?}", ticker, limited_links);
+                println!(
+                    "SEC Filing Links for {} (first 3 Form 10-K): {:?}",
+                    ticker, limited_links
+                );
                 assert!(!links.is_empty());
             }
             Err(err) => {
@@ -130,10 +138,3 @@ mod tests {
         }
     }
 }
-
-
-
-
-
-
-
