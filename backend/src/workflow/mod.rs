@@ -58,7 +58,7 @@ pub async fn run_next_job(
     db: SurrealDb,
     llm: Arc<dyn LLMApi>,
     search: Arc<dyn SearchEngine>,
-) -> Result<ReportStatus> {
+) -> Result<JobType> {
     let mut report: SurrealDBReport = db
         .select(("report", report_id))
         .await?
@@ -76,7 +76,7 @@ pub async fn run_next_job(
     println!("Job completed successfully");
     let Some(next) = report.status.next() else {
         println!("No more jobs to run");
-        return Ok(ReportStatus::Done);
+        return Ok(JobType::Done);
     };
     report.status = next;
     println!("Updating report status to: {:?}", next);
@@ -113,7 +113,7 @@ pub trait Job: Send + Sync + 'static {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-pub enum ReportStatus {
+pub enum JobType {
     Pending,
     Validation,
     GenerateTitle,
@@ -140,57 +140,57 @@ pub enum ReportStatus {
     Done,
 }
 
-impl ReportStatus {
+impl JobType {
     /// Advances the job type to the next step in the workflow.
     ///
     /// # Returns
     /// - `Some(JobType)` if the current state is not `Done`
     /// - `None` if the current state is `Done`, as there are no more steps.
-    pub fn next(&self) -> Option<ReportStatus> {
+    pub fn next(&self) -> Option<JobType> {
         match self {
-            ReportStatus::Pending => Some(ReportStatus::Validation),
-            ReportStatus::Validation => Some(ReportStatus::GenerateTitle),
-            ReportStatus::GenerateTitle => Some(ReportStatus::GenerateSectionHeadings),
-            ReportStatus::GenerateSectionHeadings => Some(ReportStatus::GenerateParagraphBullets),
-            ReportStatus::GenerateParagraphBullets => Some(ReportStatus::GenerateSearchQueries),
-            ReportStatus::GenerateSearchQueries => Some(ReportStatus::SearchQueries),
-            ReportStatus::SearchQueries => Some(ReportStatus::ScrapeTopResults),
-            ReportStatus::ScrapeTopResults => Some(ReportStatus::Done),
+            JobType::Pending => Some(JobType::Validation),
+            JobType::Validation => Some(JobType::GenerateTitle),
+            JobType::GenerateTitle => Some(JobType::GenerateSectionHeadings),
+            JobType::GenerateSectionHeadings => Some(JobType::GenerateParagraphBullets),
+            JobType::GenerateParagraphBullets => Some(JobType::GenerateSearchQueries),
+            JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
+            JobType::SearchQueries => Some(JobType::ScrapeTopResults),
+            JobType::ScrapeTopResults => Some(JobType::Done),
             // ReportStatus::ScrapeTopResults => Some(ReportStatus::ExtractContent),
-            ReportStatus::ExtractContent => Some(ReportStatus::ExtractStructuredData),
-            ReportStatus::ExtractStructuredData => Some(ReportStatus::ChunkText),
-            ReportStatus::ChunkText => Some(ReportStatus::RAGPrepareChunks),
-            ReportStatus::RAGPrepareChunks => Some(ReportStatus::GenerateBulletTexts),
-            ReportStatus::GenerateBulletTexts => Some(ReportStatus::CombineBulletsIntoParagraph),
-            ReportStatus::CombineBulletsIntoParagraph => Some(ReportStatus::AssembleSectionContent),
-            ReportStatus::AssembleSectionContent => Some(ReportStatus::AddCitations),
-            ReportStatus::AddCitations => Some(ReportStatus::IdentifyVisualizationNeeds),
-            ReportStatus::IdentifyVisualizationNeeds => Some(ReportStatus::GenerateVisualizations),
-            ReportStatus::GenerateVisualizations => Some(ReportStatus::FinalizeSection),
-            ReportStatus::FinalizeSection => Some(ReportStatus::CompileSections),
-            ReportStatus::CompileSections => Some(ReportStatus::GeneratePDFReport),
-            ReportStatus::GeneratePDFReport => Some(ReportStatus::Done),
-            ReportStatus::Invalid => None,
-            ReportStatus::Done => None,
+            JobType::ExtractContent => Some(JobType::ExtractStructuredData),
+            JobType::ExtractStructuredData => Some(JobType::ChunkText),
+            JobType::ChunkText => Some(JobType::RAGPrepareChunks),
+            JobType::RAGPrepareChunks => Some(JobType::GenerateBulletTexts),
+            JobType::GenerateBulletTexts => Some(JobType::CombineBulletsIntoParagraph),
+            JobType::CombineBulletsIntoParagraph => Some(JobType::AssembleSectionContent),
+            JobType::AssembleSectionContent => Some(JobType::AddCitations),
+            JobType::AddCitations => Some(JobType::IdentifyVisualizationNeeds),
+            JobType::IdentifyVisualizationNeeds => Some(JobType::GenerateVisualizations),
+            JobType::GenerateVisualizations => Some(JobType::FinalizeSection),
+            JobType::FinalizeSection => Some(JobType::CompileSections),
+            JobType::CompileSections => Some(JobType::GeneratePDFReport),
+            JobType::GeneratePDFReport => Some(JobType::Done),
+            JobType::Invalid => None,
+            JobType::Done => None,
         }
     }
 
     pub fn job(&self) -> Box<dyn Job> {
         match self {
-            ReportStatus::Pending => Box::new(nop::NopJob),
-            ReportStatus::Validation => Box::new(validation::ValidationJob),
-            ReportStatus::GenerateTitle => Box::new(title::TitleJob),
-            ReportStatus::GenerateSectionHeadings => {
+            JobType::Pending => Box::new(nop::NopJob),
+            JobType::Validation => Box::new(validation::ValidationJob),
+            JobType::GenerateTitle => Box::new(title::TitleJob),
+            JobType::GenerateSectionHeadings => {
                 Box::new(sectionheadings::GenerateSectionHeadingsJob)
             }
-            ReportStatus::GenerateParagraphBullets => {
+            JobType::GenerateParagraphBullets => {
                 Box::new(generate_bullets::GenerateBulletsJob)
             }
-            ReportStatus::GenerateSearchQueries => {
+            JobType::GenerateSearchQueries => {
                 Box::new(generate_search_queries::SearchGenerationJob)
             }
-            ReportStatus::SearchQueries => Box::new(searchquery::SearchQueriesJob),
-            ReportStatus::ScrapeTopResults => Box::new(scrape_top_results::ScrapeTopResultsJob),
+            JobType::SearchQueries => Box::new(searchquery::SearchQueriesJob),
+            JobType::ScrapeTopResults => Box::new(scrape_top_results::ScrapeTopResultsJob),
             _ => Box::new(nop::NopJob),
         }
     }

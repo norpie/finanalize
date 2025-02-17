@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-use crate::workflow::ReportStatus;
+use crate::workflow::JobType;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -47,7 +47,7 @@ impl From<SurrealDBUser> for FrontendUser {
 pub struct SurrealDBReport {
     pub id: Thing,
     pub user_input: String,
-    pub status: ReportStatus,
+    pub status: JobType,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -67,7 +67,7 @@ impl From<SurrealDBReport> for Report {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportStatusEvent {
     pub report_id: String,
-    pub status: ReportStatus,
+    pub status: JobType,
 }
 
 impl From<Report> for ReportStatusEvent {
@@ -83,7 +83,7 @@ impl From<Report> for ReportStatusEvent {
 pub struct Report {
     pub id: String,
     pub user_input: String,
-    pub status: ReportStatus,
+    pub status: JobType,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -91,7 +91,7 @@ pub struct Report {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportCreation {
     pub user_input: String,
-    pub status: ReportStatus,
+    pub status: JobType,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -101,7 +101,7 @@ impl ReportCreation {
         let now = Utc::now();
         ReportCreation {
             user_input,
-            status: ReportStatus::Pending,
+            status: JobType::Pending,
             created_at: now,
             updated_at: now,
         }
