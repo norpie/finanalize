@@ -1,4 +1,7 @@
-This tool extracts the company name from a user's message and validates whether the company meets the criteria for financial analysis. The company must be publicly traded, listed on either the NASDAQ or NYSE, and be a Fortune 500 company. If the company meets all three conditions, the tool returns a true value. If the company fails to meet any of the conditions, the tool returns a false value along with an error message specifying which condition was not met.
+This tool extracts the company name from a user's message and validates whether the company meets the criteria for
+financial analysis. The company must be publicly traded and listed on either the NASDAQ or NYSE. If the company meets
+these two conditions, the tool returns a true value. If the company fails to meet any of the conditions, the tool
+returns a false value along with an error message specifying which condition was not met.
 
 
 The following are complete examples of the input and output:
@@ -7,7 +10,7 @@ The following are complete examples of the input and output:
     <Input>
     ```json
     {
-        "message": "Analyse Tesla stock performance"
+        "message": "Analyse Tesla stock performance",
     }
     ```
     </Input>
@@ -15,7 +18,7 @@ The following are complete examples of the input and output:
     <Output>
     ```json
     {
-        "valid": true
+        "valid": true,
     }
     ```
 </Example>
@@ -24,7 +27,7 @@ The following are complete examples of the input and output:
     <Input>
     ```json
     {
-        "message": "Tell me about bitcoin"
+        "message": "Tell me about bitcoin",
     }
     ```
     </Input>
@@ -66,10 +69,101 @@ The following are complete examples of the input and output:
     <Output>
     ```json
     {
+<<<<<<< Updated upstream
         "valid": false
         "error": "Giga LLC is not listed on the Nasdaq or NYSE."
+=======
+        "valid": "false""error": "Giga LLC is not listed on the Nasdaq or NYSE."
+>>>>>>> Stashed changes
     }
     ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "How is Microsoft performing on the NASDAQ?"
+    }
+    ```
+    </Input>
+    <Output>
+    ```json
+    {
+        "valid": true
+    }
+    ```
+    </Output>
+</Example>
+
+<Example> 
+    <Input> 
+    ```json 
+    {
+    "message": "Review SpaceX investment opportunities"
+    } 
+    ``` 
+    </Input> 
+    <Output> 
+    ```json 
+    {
+    "valid": "false",
+    "error": "SpaceX is not publicly traded on the NASDAQ or NYSE."
+    } 
+    ``` 
+    </Output> 
+</Example>
+
+<Example> 
+    <Input> 
+    ```json 
+    {
+    "message": "Analyze the performance of Berkshire Hathaway Class A shares"
+    } 
+    ``` 
+    </Input> 
+    <Output> 
+    ```json 
+    {
+        "valid": true
+    } 
+    ``` 
+    </Output> 
+</Example>
+
+<Example> 
+    <Input> 
+    ```json 
+    {
+        "message": "Check OpenAI stock price"
+    } 
+    ``` 
+    </Input> 
+    <Output> 
+    ```json 
+    {
+        "valid": "false",
+        "error": "OpenAI is not publicly traded on NASDAQ or NYSE."
+    } 
+    ``` 
+    </Output> 
+</Example>
+
+<Example> 
+    <Input> 
+    ```json 
+    {
+        "message": "Forecast the market performance of Alphabet (GOOGL)"
+    } 
+    ``` 
+    </Input> 
+    <Output> 
+    ```json 
+    {
+        "valid": true
+    } 
+``` 
+    </Output> 
 </Example>
 
 <Input>
