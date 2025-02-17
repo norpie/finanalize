@@ -1,63 +1,59 @@
 use std::sync::Arc;
 
 use crate::{
-    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, search::SearchEngine,
+    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, rabbitmq::PUBLISHER,
+    search::SearchEngine,
 };
 
 use async_trait::async_trait;
+use lapin::{message::Delivery, options::BasicPublishOptions, BasicProperties, Channel};
+use log::info;
 use serde::{Deserialize, Serialize};
 
-mod generate_bullets;
-mod generate_search_queries;
-mod scrape_top_results;
-mod searchquery;
-mod sectionheadings;
-mod title;
-mod validation;
+//mod generate_bullets;
+//mod generate_search_queries;
+//mod scrape_top_results;
+//mod searchquery;
+//mod sectionheadings;
+//mod title;
+//mod validation;
 
 #[derive(Debug, Serialize, Deserialize)]
-struct WorkflowStatusUpdate {
-    report_id: String,
-    last_job_type: JobType,
-    last_job_output_json: String,
+pub struct WorkflowStatusUpdate {
+    pub report_id: String,
+    pub last_job_type: JobType,
+    pub last_job_output_json: String,
 }
 
 mod job;
 
-pub async fn run_next_job(
-    report_id: &String,
-    db: SurrealDb,
-    llm: Arc<dyn LLMApi>,
-    search: Arc<dyn SearchEngine>,
-) -> Result<JobType> {
-    let mut report: SurrealDBReport = db
-        .select(("report", report_id))
-        .await?
-        .ok_or(FinanalizeError::ReportNotFound)?;
-    println!("Running job for report: {}", report.id.id);
-    let status = report.status;
-    println!("Current status: {:?}", status);
-    let job = status.job();
-    println!("Running job: {:?}", status);
-    job.run(&report, db.clone(), llm, search).await?;
-    report = db
-        .select(("report", report_id))
-        .await?
-        .ok_or(FinanalizeError::ReportNotFound)?;
-    println!("Job completed successfully");
-    let Some(next) = report.status.next() else {
-        println!("No more jobs to run");
-        return Ok(JobType::Done);
+pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Result<()> {
+    let workflow_status_update: WorkflowStatusUpdate = serde_json::from_slice(&delivery.data)?;
+    // TODO: Run next job
+    let Some(next_type) = workflow_status_update.last_job_type.next() else {
+        info!("No more jobs to run for report {}", workflow_status_update.report_id);
+        return Ok(());
     };
-    report.status = next;
-    println!("Updating report status to: {:?}", next);
-    let report: SurrealDBReport = db
-        .update(("report", report.id.id.to_string()))
-        .content(report)
-        .await?
-        .ok_or(FinanalizeError::UnableToUpdateReport)?;
-    println!("Report updated successfully");
-    Ok(report.status)
+    let next_job = next_type.job();
+    // TODO: Check if workflow is done after the job
+
+    // If it's not done, publish the next job
+    let publisher = PUBLISHER.get().unwrap();
+    publisher
+        .channel
+        .basic_publish(
+            "",
+            publisher.queue.name().as_str(),
+            BasicPublishOptions::default(),
+            serde_json::to_string(&workflow_status_update)?.as_bytes(),
+            BasicProperties::default(),
+        )
+        .await?;
+    // Acknowledge the message
+    channel
+        .basic_ack(delivery.delivery_tag, Default::default())
+        .await?;
+    Ok(())
 }
 
 #[async_trait]
@@ -111,85 +107,56 @@ pub enum JobType {
     Done,
 }
 
-impl JobType {
-    /// Advances the job type to the next step in the workflow.
-    ///
-    /// # Returns
-    /// - `Some(JobType)` if the current state is not `Done`
-    /// - `None` if the current state is `Done`, as there are no more steps.
-    pub fn next(&self) -> Option<JobType> {
-        match self {
-            JobType::Pending => Some(JobType::Validation),
-            JobType::Validation => Some(JobType::GenerateTitle),
-            JobType::GenerateTitle => Some(JobType::GenerateSectionHeadings),
-            JobType::GenerateSectionHeadings => Some(JobType::GenerateParagraphBullets),
-            JobType::GenerateParagraphBullets => Some(JobType::GenerateSearchQueries),
-            JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
-            JobType::SearchQueries => Some(JobType::ScrapeTopResults),
-            JobType::ScrapeTopResults => Some(JobType::Done),
-            // ReportStatus::ScrapeTopResults => Some(ReportStatus::ExtractContent),
-            JobType::ExtractContent => Some(JobType::ExtractStructuredData),
-            JobType::ExtractStructuredData => Some(JobType::ChunkText),
-            JobType::ChunkText => Some(JobType::RAGPrepareChunks),
-            JobType::RAGPrepareChunks => Some(JobType::GenerateBulletTexts),
-            JobType::GenerateBulletTexts => Some(JobType::CombineBulletsIntoParagraph),
-            JobType::CombineBulletsIntoParagraph => Some(JobType::AssembleSectionContent),
-            JobType::AssembleSectionContent => Some(JobType::AddCitations),
-            JobType::AddCitations => Some(JobType::IdentifyVisualizationNeeds),
-            JobType::IdentifyVisualizationNeeds => Some(JobType::GenerateVisualizations),
-            JobType::GenerateVisualizations => Some(JobType::FinalizeSection),
-            JobType::FinalizeSection => Some(JobType::CompileSections),
-            JobType::CompileSections => Some(JobType::GeneratePDFReport),
-            JobType::GeneratePDFReport => Some(JobType::Done),
-            JobType::Invalid => None,
-            JobType::Done => None,
-        }
-    }
-
-    pub fn job(&self) -> Box<dyn Job> {
-        match self {
-            JobType::Pending => Box::new(nop::NopJob),
-            JobType::Validation => Box::new(validation::ValidationJob),
-            JobType::GenerateTitle => Box::new(title::TitleJob),
-            JobType::GenerateSectionHeadings => {
-                Box::new(sectionheadings::GenerateSectionHeadingsJob)
-            }
-            JobType::GenerateParagraphBullets => {
-                Box::new(generate_bullets::GenerateBulletsJob)
-            }
-            JobType::GenerateSearchQueries => {
-                Box::new(generate_search_queries::SearchGenerationJob)
-            }
-            JobType::SearchQueries => Box::new(searchquery::SearchQueriesJob),
-            JobType::ScrapeTopResults => Box::new(scrape_top_results::ScrapeTopResultsJob),
-            _ => Box::new(nop::NopJob),
-        }
-    }
-}
-
-mod nop {
-    use std::sync::Arc;
-
-    use async_trait::async_trait;
-
-    use crate::{
-        db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, search::SearchEngine,
-    };
-
-    use super::Job;
-
-    pub struct NopJob;
-
-    #[async_trait]
-    impl Job for NopJob {
-        async fn run(
-            &self,
-            _report: &SurrealDBReport,
-            _db: SurrealDb,
-            _llm: Arc<dyn LLMApi>,
-            _search: Arc<dyn SearchEngine>,
-        ) -> Result<()> {
-            Ok(())
-        }
-    }
-}
+// impl JobType {
+//     /// Advances the job type to the next step in the workflow.
+//     ///
+//     /// # Returns
+//     /// - `Some(JobType)` if the current state is not `Done`
+//     /// - `None` if the current state is `Done`, as there are no more steps.
+//     pub fn next(&self) -> Option<JobType> {
+//         match self {
+//             JobType::Pending => Some(JobType::Validation),
+//             JobType::Validation => Some(JobType::GenerateTitle),
+//             JobType::GenerateTitle => Some(JobType::GenerateSectionHeadings),
+//             JobType::GenerateSectionHeadings => Some(JobType::GenerateParagraphBullets),
+//             JobType::GenerateParagraphBullets => Some(JobType::GenerateSearchQueries),
+//             JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
+//             JobType::SearchQueries => Some(JobType::ScrapeTopResults),
+//             JobType::ScrapeTopResults => Some(JobType::Done),
+//             // ReportStatus::ScrapeTopResults => Some(ReportStatus::ExtractContent),
+//             JobType::ExtractContent => Some(JobType::ExtractStructuredData),
+//             JobType::ExtractStructuredData => Some(JobType::ChunkText),
+//             JobType::ChunkText => Some(JobType::RAGPrepareChunks),
+//             JobType::RAGPrepareChunks => Some(JobType::GenerateBulletTexts),
+//             JobType::GenerateBulletTexts => Some(JobType::CombineBulletsIntoParagraph),
+//             JobType::CombineBulletsIntoParagraph => Some(JobType::AssembleSectionContent),
+//             JobType::AssembleSectionContent => Some(JobType::AddCitations),
+//             JobType::AddCitations => Some(JobType::IdentifyVisualizationNeeds),
+//             JobType::IdentifyVisualizationNeeds => Some(JobType::GenerateVisualizations),
+//             JobType::GenerateVisualizations => Some(JobType::FinalizeSection),
+//             JobType::FinalizeSection => Some(JobType::CompileSections),
+//             JobType::CompileSections => Some(JobType::GeneratePDFReport),
+//             JobType::GeneratePDFReport => Some(JobType::Done),
+//             JobType::Invalid => None,
+//             JobType::Done => None,
+//         }
+//     }
+//
+//     pub fn job(&self) -> Box<dyn Job> {
+//         match self {
+//             JobType::Pending => Box::new(nop::NopJob),
+//             JobType::Validation => Box::new(validation::ValidationJob),
+//             JobType::GenerateTitle => Box::new(title::TitleJob),
+//             JobType::GenerateSectionHeadings => {
+//                 Box::new(sectionheadings::GenerateSectionHeadingsJob)
+//             }
+//             JobType::GenerateParagraphBullets => Box::new(generate_bullets::GenerateBulletsJob),
+//             JobType::GenerateSearchQueries => {
+//                 Box::new(generate_search_queries::SearchGenerationJob)
+//             }
+//             JobType::SearchQueries => Box::new(searchquery::SearchQueriesJob),
+//             JobType::ScrapeTopResults => Box::new(scrape_top_results::ScrapeTopResultsJob),
+//             _ => Box::new(nop::NopJob),
+//         }
+//     }
+// }
