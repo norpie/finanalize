@@ -53,6 +53,14 @@ use crate::{
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
+mod generate_bullets;
+mod generate_search_queries;
+mod scrape_top_results;
+mod searchquery;
+mod sectionheadings;
+mod title;
+mod validation;
+
 pub async fn run_next_job(
     report_id: &String,
     db: SurrealDb,
@@ -222,11 +230,3 @@ mod nop {
         }
     }
 }
-
-mod generate_bullets;
-mod generate_search_queries;
-mod scrape_top_results;
-mod searchquery;
-mod sectionheadings;
-mod title;
-mod validation;
