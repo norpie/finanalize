@@ -40,6 +40,8 @@ mod sec;
 mod tasks;
 #[allow(dead_code)]
 mod workflow;
+#[allow(dead_code)]
+mod latex;
 
 #[tokio::main]
 async fn main() -> Result<()> {
