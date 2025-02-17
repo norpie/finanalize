@@ -4,7 +4,7 @@ use crate::db::SurrealDb;
 use crate::llm::LLMApi;
 use crate::models::ReportStatusEvent;
 use crate::search::SearchEngine;
-use crate::workflow::ReportStatus;
+use crate::workflow::JobType;
 use crate::{prelude::*, workflow};
 use futures_util::TryStreamExt;
 use lapin::message::Delivery;
@@ -117,8 +117,8 @@ impl RabbitMQConsumer {
             let Ok(mut report_status) = serde_json::from_str::<ReportStatusEvent>(&message) else {
                 return Ok(());
             };
-            if report_status.status == ReportStatus::Done
-                || report_status.status == ReportStatus::Invalid
+            if report_status.status == JobType::Done
+                || report_status.status == JobType::Invalid
             {
                 println!("No more jobs to run, quiting");
                 return Ok(());
@@ -128,7 +128,7 @@ impl RabbitMQConsumer {
                 dbg!(result.unwrap_err());
                 return Ok(());
             };
-            if status == ReportStatus::Done || status == ReportStatus::Invalid {
+            if status == JobType::Done || status == JobType::Invalid {
                 println!("No more jobs to run, quiting");
                 return Ok(());
             }
@@ -161,7 +161,7 @@ impl RabbitMQConsumer {
 
 #[cfg(test)]
 mod tests {
-    use workflow::ReportStatus;
+    use workflow::JobType;
 
     use super::*;
     use crate::models::ReportStatusEvent;
@@ -173,7 +173,7 @@ mod tests {
         let publisher = PUBLISHER.get().unwrap();
         let message = ReportStatusEvent {
             report_id: "123".to_string(),
-            status: ReportStatus::Pending,
+            status: JobType::Pending,
         };
         let result = publisher.publish_report_status(message).await.unwrap();
         assert_eq!(result, "Report status published successfully");

@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-use crate::{models::SurrealDBReport, prelude::*, prompting, tasks::Task, workflow::ReportStatus};
+use crate::{models::SurrealDBReport, prelude::*, prompting, tasks::Task, workflow::JobType};
 
 use std::sync::Arc;
 
@@ -63,7 +63,7 @@ impl Job for ValidationJob {
             .ok_or(FinanalizeError::UnableToCreateReportVerdict)?;
         let mut report = report.clone();
         if !verdict.valid {
-            report.status = ReportStatus::Invalid;
+            report.status = JobType::Invalid;
         }
         let report: SurrealDBReport = db
             .update(("report", report.id.id.to_string().as_str()))
