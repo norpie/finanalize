@@ -87,13 +87,11 @@
 <div class="flex flex-1 flex-col gap-4 p-4">
 	<Dialog.Root bind:open={dialogOpen}>
 		<Dialog.Trigger>New Report</Dialog.Trigger>
+		<Dialog.Header>New Report</Dialog.Header>
 		<Dialog.Content>
-			<Dialog.Header>
-				<Dialog.Title>What is the subject of your report?</Dialog.Title>
-
-				<Textarea bind:value={newReportSubject} />
-				<Button onclick={newReport}>Submit</Button>
-			</Dialog.Header>
+			<Dialog.Title>What is the subject of your report?</Dialog.Title>
+			<Textarea class="mt-4 resize-none" bind:value={newReportSubject} />
+			<Button onclick={newReport}>Submit</Button>
 		</Dialog.Content>
 	</Dialog.Root>
 	<div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
