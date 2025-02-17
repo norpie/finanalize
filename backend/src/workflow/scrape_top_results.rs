@@ -65,7 +65,7 @@ impl Job for ScrapeTopResultsJob {
                 .bind(("scraped_content", sdb_scraped_content.id.clone()))
                 .await?;
         }
-        get_or_init_browser().await?.close().await?;
+        // get_or_init_browser().await?.close().await?;
         Ok(())
     }
 }
