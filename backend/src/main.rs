@@ -39,6 +39,7 @@ mod rag;
 mod scraper;
 #[allow(dead_code)]
 mod search;
+#[allow(dead_code)]
 mod sec;
 #[allow(dead_code)]
 mod tasks;
