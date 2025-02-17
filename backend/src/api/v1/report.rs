@@ -1,9 +1,10 @@
 use crate::api::ApiResponse;
 use crate::db::SurrealDb;
-use crate::models::{Report, ReportCreation, ReportStatusEvent, SurrealDBReport, SurrealDBUser};
+use crate::models::{Report, ReportCreation, SurrealDBReport, SurrealDBUser};
 use crate::prelude::FinanalizeError;
 use crate::prelude::*;
 use crate::rabbitmq::PUBLISHER;
+use crate::workflow::{JobType, WorkflowStatusUpdate};
 use actix_web::web::{self, Data, Json, Path};
 use actix_web::{get, post, Responder};
 use serde::{Deserialize, Serialize};
@@ -31,11 +32,22 @@ pub async fn create_report(
         .bind(("report", report.id.clone()))
         .await?;
     let created_report: Report = Report::from(report.clone());
-    let report_status_event: ReportStatusEvent = ReportStatusEvent::from(created_report.clone());
+    let workflow_status_update = WorkflowStatusUpdate {
+        report_id: report.id.id.to_string(),
+        last_job_type: JobType::Pending,
+        last_job_output_json: "".to_string(),
+    };
     PUBLISHER
         .get()
         .unwrap()
-        .publish_report_status(report_status_event)
+        .channel
+        .basic_publish(
+            "",
+            "report_status",
+            Default::default(),
+            serde_json::to_string(&workflow_status_update)?.as_bytes(),
+            Default::default(),
+        )
         .await?;
     Ok(ApiResponse::new(created_report))
 }
@@ -121,22 +133,18 @@ pub async fn get_report(
 
 #[post("/reports/{report_id}/retry")]
 pub async fn retry(
-    report_id: Path<String>,
-    user: SurrealDBUser,
-    db: Data<SurrealDb>,
+    _report_id: Path<String>,
+    _user: SurrealDBUser,
+    _db: Data<SurrealDb>,
 ) -> Result<impl Responder> {
-    let report = db
-        .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
-        .bind(("user", user.id))
-        .bind(("report", Thing::from(("report", report_id.as_str()))))
-        .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
-
-    PUBLISHER
-        .get()
-        .unwrap()
-        .publish_report_status(ReportStatusEvent::from(Report::from(report.clone())))
-        .await?;
-
+    // let report = db
+    //     .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
+    //     .bind(("user", user.id))
+    //     .bind(("report", Thing::from(("report", report_id.as_str()))))
+    //     .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
+    //
+    // // TODO: Implement retry logic
+    //
     Ok(ApiResponse::new("OK"))
 }
 
