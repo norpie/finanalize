@@ -1,23 +1,16 @@
 use std::sync::Arc;
 
-use crate::db::SurrealDb;
-use crate::llm::LLMApi;
-use crate::models::ReportStatusEvent;
-use crate::search::SearchEngine;
-use crate::workflow::JobType;
 use crate::{prelude::*, workflow};
 use futures_util::TryStreamExt;
-use lapin::message::Delivery;
-use lapin::options::{BasicConsumeOptions, BasicPublishOptions, QueueDeclareOptions};
+use lapin::options::{BasicConsumeOptions, QueueDeclareOptions};
 use lapin::types::FieldTable;
-use lapin::{BasicProperties, Channel, Connection, ConnectionProperties, Queue};
+use lapin::{Channel, Connection, ConnectionProperties, Queue};
 use tokio::sync::OnceCell;
 
 #[derive(Debug)]
 pub struct RabbitMQPublisher {
-    // connection: Connection,
-    channel: Channel,
-    queue: Queue,
+    pub channel: Channel,
+    pub queue: Queue,
 }
 
 pub static PUBLISHER: OnceCell<Arc<RabbitMQPublisher>> = OnceCell::const_new();
@@ -37,29 +30,8 @@ impl RabbitMQPublisher {
             )
             .await?;
 
-        PUBLISHER
-            .set(Arc::new(Self {
-                // connection,
-                channel,
-                queue,
-            }))
-            .unwrap();
-
+        PUBLISHER.set(Arc::new(Self { channel, queue })).unwrap();
         Ok(())
-    }
-
-    pub async fn publish_report_status(&self, message: ReportStatusEvent) -> Result<String> {
-        let message = serde_json::to_string(&message)?;
-        self.channel
-            .basic_publish(
-                "",
-                self.queue.name().as_str(),
-                BasicPublishOptions::default(),
-                message.as_bytes(),
-                BasicProperties::default(),
-            )
-            .await?;
-        Ok("Report status published successfully".to_string())
     }
 }
 
@@ -92,12 +64,7 @@ impl RabbitMQConsumer {
         })
     }
 
-    pub async fn consume_report_status(
-        &self,
-        db: SurrealDb,
-        llm: Arc<dyn LLMApi>,
-        search: Arc<dyn SearchEngine>,
-    ) -> Result<()> {
+    pub async fn consume_report_status(&self) -> Result<()> {
         let consumer = self
             .channel
             .basic_consume(
@@ -107,82 +74,14 @@ impl RabbitMQConsumer {
                 FieldTable::default(),
             )
             .await?;
-        async fn consume(
-            delivery: &Delivery,
-            db: SurrealDb,
-            llm: Arc<dyn LLMApi>,
-            search: Arc<dyn SearchEngine>,
-        ) -> Result<()> {
-            let message = String::from_utf8_lossy(&delivery.data);
-            let Ok(mut report_status) = serde_json::from_str::<ReportStatusEvent>(&message) else {
-                return Ok(());
-            };
-            if report_status.status == JobType::Done
-                || report_status.status == JobType::Invalid
-            {
-                println!("No more jobs to run, quiting");
-                return Ok(());
-            }
-            let result = workflow::run_next_job(&report_status.report_id, db, llm, search).await;
-            let Ok(status) = result else {
-                dbg!(result.unwrap_err());
-                return Ok(());
-            };
-            if status == JobType::Done || status == JobType::Invalid {
-                println!("No more jobs to run, quiting");
-                return Ok(());
-            }
-            report_status.status = status;
-            PUBLISHER
-                .get()
-                .unwrap()
-                .publish_report_status(report_status)
-                .await?;
-            Ok(())
-        }
-        let messages = consumer.try_for_each(|delivery| {
-            let db = db.clone();
-            let llm = llm.clone();
-            let search = search.clone();
-            async move {
-                let result = consume(&delivery, db.clone(), llm.clone(), search.clone()).await;
-                if result.is_err() {
-                    panic!("{}", result.unwrap_err());
+        Ok(consumer
+            .try_for_each(|delivery| async move {
+                let res = workflow::consume_report_status(&self.channel, &delivery).await;
+                if res.is_err() {
+                    println!("Error consuming message: {:?}", res.unwrap_err());
                 }
-                self.channel
-                    .basic_ack(delivery.delivery_tag, Default::default())
-                    .await?;
                 Ok(())
-            }
-        });
-        Ok(messages.await?)
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use workflow::JobType;
-
-    use super::*;
-    use crate::models::ReportStatusEvent;
-
-    #[tokio::test]
-    #[ignore = "Depends on extenal service"]
-    async fn test_rabbitmq_publisher() {
-        RabbitMQPublisher::setup().await.unwrap();
-        let publisher = PUBLISHER.get().unwrap();
-        let message = ReportStatusEvent {
-            report_id: "123".to_string(),
-            status: JobType::Pending,
-        };
-        let result = publisher.publish_report_status(message).await.unwrap();
-        assert_eq!(result, "Report status published successfully");
-    }
-
-    #[tokio::test]
-    #[ignore = "Depends on extenal service"]
-    async fn test_rabbitmq_consumer() {
-        // let consumer = RabbitMQConsumer::new().await.unwrap();
-        // consumer.consume_report_status().await.unwrap();
+            })
+            .await?)
     }
 }
