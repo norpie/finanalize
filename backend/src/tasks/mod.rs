@@ -4,7 +4,7 @@ use crate::{llm::LLMApi, prelude::*};
 use handlebars::Handlebars;
 use log::{debug, error, info, warn};
 use serde::{de::DeserializeOwned, Serialize};
-use serde_json::{error::Category, Value};
+use serde_json::Value;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum RetryStrategy {
