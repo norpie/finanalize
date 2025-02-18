@@ -3,6 +3,7 @@ use fantoccini::error::{CmdError, NewSessionError};
 use selectors::parser::SelectorParseErrorKind;
 use thiserror::Error;
 
+pub type StdResult<T, E> = std::result::Result<T, E>;
 pub type Result<T> = std::result::Result<T, FinanalizeError>;
 
 #[derive(Debug, Error)]
@@ -18,6 +19,9 @@ pub enum FinanalizeError {
     #[error("Missing prompt: {0}")]
     MissingPrompt(String),
 
+    #[error("Some retry logic generated the following errors: {0:#?}")]
+    MultipleErrors(Vec<FinanalizeError>),
+
     #[error("LLM API error: {0}")]
     LlmApi(String),
 
@@ -27,6 +31,8 @@ pub enum FinanalizeError {
     Env(#[from] std::env::VarError),
     #[error("FromUtf8 error: {0}")]
     Utf8(#[from] std::string::FromUtf8Error),
+    #[error("Parse error: {0}")]
+    ParseError(String),
 
     #[error("Tokio error: {0}")]
     Join(#[from] tokio::task::JoinError),
@@ -56,8 +62,6 @@ pub enum FinanalizeError {
     Excel(#[from] calamine::XlsxError),
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
-    #[error("Parse error: {0}")]
-    ParseError(String),
 }
 
 // #[error("Fantoccini error: {0}")]
