@@ -17,22 +17,6 @@ pub enum FinanalizeError {
     InternalServerError,
     #[error("Missing prompt: {0}")]
     MissingPrompt(String),
-    #[error("Trying to perform job on non-existing report")]
-    ReportNotFound,
-    #[error("Unable to create report verdict")]
-    UnableToCreateReportVerdict,
-    #[error("Unable to update report")]
-    UnableToUpdateReport,
-    #[error("Unable to create report title")]
-    UnableToCreateReportTitle,
-    #[error("Unable to create bullets for heading")]
-    UnableToGenerateBullets,
-    #[error("Unable to add scraped url")]
-    UnableToAddScrapedUrl,
-    #[error("Unable to create heading url")]
-    UnableToCreateSectionHeading,
-    #[error("Unable to save search query")]
-    UnableToSaveSearchQuery,
 
     #[error("LLM API error: {0}")]
     LlmApi(String),
@@ -74,8 +58,6 @@ pub enum FinanalizeError {
     LopdfError(#[from] lopdf::Error),
     #[error("Parse error: {0}")]
     ParseError(String),
-    #[error("Missing report title")]
-    MissingReportTitle,
 }
 
 // #[error("Fantoccini error: {0}")]

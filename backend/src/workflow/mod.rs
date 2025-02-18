@@ -34,7 +34,7 @@ pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Re
         info!("No more jobs to run for report {}", workflow_status_update.report_id);
         return Ok(());
     };
-    let next_job = next_type.job();
+    let _next_job = next_type.job();
     // TODO: Check if workflow is done after the job
 
     // If it's not done, publish the next job
