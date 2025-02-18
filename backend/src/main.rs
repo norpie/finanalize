@@ -24,6 +24,8 @@ mod db;
 mod extractors;
 mod jwt;
 #[allow(dead_code)]
+mod latex;
+#[allow(dead_code)]
 mod llm;
 mod models;
 mod prelude;
@@ -40,8 +42,6 @@ mod sec;
 mod tasks;
 #[allow(dead_code)]
 mod workflow;
-#[allow(dead_code)]
-mod latex;
 
 #[tokio::main]
 async fn main() -> Result<()> {
