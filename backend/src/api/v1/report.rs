@@ -137,13 +137,13 @@ pub async fn retry(
     _user: SurrealDBUser,
     _db: Data<SurrealDb>,
 ) -> Result<impl Responder> {
-    // let report = db
+    // let _report = db
     //     .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
     //     .bind(("user", user.id))
     //     .bind(("report", Thing::from(("report", report_id.as_str()))))
     //     .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
     //
-    // // TODO: Implement retry logic
+    // TODO: Implement retry logic
     //
     Ok(ApiResponse::new("OK"))
 }
