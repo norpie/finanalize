@@ -1,7 +1,11 @@
 use std::sync::Arc;
 
 use crate::{
-    db::SurrealDb, llm::LLMApi, models::SurrealDBReport, prelude::*, rabbitmq::PUBLISHER,
+    db::{SurrealDb, DB},
+    llm::LLMApi,
+    models::SurrealDBReport,
+    prelude::*,
+    rabbitmq::PUBLISHER,
     search::SearchEngine,
 };
 
@@ -9,6 +13,7 @@ use async_trait::async_trait;
 use lapin::{message::Delivery, options::BasicPublishOptions, BasicProperties, Channel};
 use log::info;
 use serde::{Deserialize, Serialize};
+use surrealdb::sql::Thing;
 
 //mod generate_bullets;
 //mod generate_search_queries;
@@ -18,29 +23,58 @@ use serde::{Deserialize, Serialize};
 //mod title;
 //mod validation;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct WorkflowStatusUpdate {
-    pub report_id: String,
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct WorkflowState {
+    pub id: String,
     pub last_job_type: JobType,
-    pub last_job_output_json: String,
+    pub state: String,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct SDBWorkflowState {
+    pub id: Thing,
+    pub last_job_type: JobType,
+    pub state: String,
+}
+
+impl From<SDBWorkflowState> for WorkflowState {
+    fn from(sdb: SDBWorkflowState) -> Self {
+        Self {
+            id: sdb.id.id.to_string(),
+            last_job_type: sdb.last_job_type,
+            state: sdb.state,
+        }
+    }
 }
 
 mod job;
 
 pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Result<()> {
-    let workflow_status_update: WorkflowStatusUpdate = serde_json::from_slice(&delivery.data)?;
-    // TODO: Run next job
-    let Some(next_type) = workflow_status_update.last_job_type.next() else {
-        info!(
-            "No more jobs to run for report {}",
-            workflow_status_update.report_id
-        );
+    let workflow_state: WorkflowState = serde_json::from_slice(&delivery.data)?;
+    let Some(next_type) = workflow_state.last_job_type.next() else {
+        info!("No more jobs to run for report {}", workflow_state.id);
         return Ok(());
     };
-    let _next_job = next_type.job();
-    // TODO: Check if workflow is done after the job
-
+    let Some(next_job) = next_type.job() else {
+        info!("No job for type {:?}", next_type);
+        return Ok(());
+    };
+    info!(
+        "Running job {:?} for report {}",
+        next_type, workflow_state.id
+    );
+    let mut output = next_job.run(workflow_state).await?;
+    info!("Job {:?} for report {} completed", next_type, output.id);
+    output.last_job_type = next_type;
     // If it's not done, publish the next job
+    let saved: SDBWorkflowState = DB
+        .get()
+        .unwrap()
+        .upsert(("workflow_state", &output.id))
+        .content(output)
+        .await?
+        .ok_or(FinanalizeError::NotFound)?;
+    info!("Saved workflow state for report {}", saved.id);
     let publisher = PUBLISHER.get().unwrap();
     publisher
         .channel
@@ -48,7 +82,7 @@ pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Re
             "",
             publisher.queue.name().as_str(),
             BasicPublishOptions::default(),
-            serde_json::to_string(&workflow_status_update)?.as_bytes(),
+            serde_json::to_string(&WorkflowState::from(saved))?.as_bytes(),
             BasicProperties::default(),
         )
         .await?;
