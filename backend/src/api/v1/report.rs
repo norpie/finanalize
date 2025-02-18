@@ -4,7 +4,7 @@ use crate::models::{Report, ReportCreation, SurrealDBReport, SurrealDBUser};
 use crate::prelude::FinanalizeError;
 use crate::prelude::*;
 use crate::rabbitmq::PUBLISHER;
-use crate::workflow::{JobType, WorkflowStatusUpdate};
+use crate::workflow::{JobType, WorkflowState};
 use actix_web::web::{self, Data, Json, Path};
 use actix_web::{get, post, Responder};
 use serde::{Deserialize, Serialize};
@@ -32,10 +32,10 @@ pub async fn create_report(
         .bind(("report", report.id.clone()))
         .await?;
     let created_report: Report = Report::from(report.clone());
-    let workflow_status_update = WorkflowStatusUpdate {
-        report_id: report.id.id.to_string(),
+    let workflow_status_update = WorkflowState {
+        id: report.id.id.to_string(),
         last_job_type: JobType::Pending,
-        last_job_output_json: "".to_string(),
+        state: "{}".to_string(),
     };
     PUBLISHER
         .get()

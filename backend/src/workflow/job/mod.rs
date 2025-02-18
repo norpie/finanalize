@@ -1,11 +1,11 @@
 use crate::prelude::*;
 use async_trait::async_trait;
 
-use super::JobType;
+use super::{JobType, WorkflowState};
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
-    async fn run(&self, input: String) -> Result<String>;
+    async fn run(&self, input: WorkflowState) -> Result<WorkflowState>;
 }
 
 impl JobType {
@@ -50,12 +50,13 @@ mod tests {
 
     #[async_trait]
     impl Job for TestJob {
-        async fn run(&self, input: String) -> Result<String> {
-            let input: TestJobInput = serde_json::from_str(&input)?;
+        async fn run(&self, mut input: WorkflowState) -> Result<WorkflowState> {
+            let state_input: TestJobInput = serde_json::from_str(&input.state)?;
             let res = TestJobOutput {
-                test: input.test.to_uppercase(),
+                test: state_input.test.to_uppercase(),
             };
-            Ok(serde_json::to_string(&res)?)
+            input.state = serde_json::to_string(&res)?;
+            Ok(input)
         }
     }
 
@@ -65,14 +66,17 @@ mod tests {
             test: "hello".to_string(),
         };
 
+        let input_state = WorkflowState {
+            id: "aslhdasdf".into(),
+            last_job_type: JobType::Pending,
+            state: serde_json::to_string(&input).unwrap(),
+        };
+
         let expected_output = TestJobOutput {
             test: "HELLO".to_string(),
         };
         assert_eq!(
-            TestJob
-                .run(serde_json::to_string(&input).unwrap())
-                .await
-                .unwrap(),
+            TestJob.run(input_state).await.unwrap().state,
             serde_json::to_string(&expected_output).unwrap()
         );
     }
