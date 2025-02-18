@@ -13,6 +13,7 @@ use api::{
     ApiResponse,
 };
 use auth_middleware::Auth;
+use db::DB;
 use jwt::TokenFactory;
 use rabbitmq::RabbitMQPublisher;
 
@@ -47,6 +48,7 @@ async fn main() -> Result<()> {
     dotenvy::from_filename(".env").ok();
     env_logger::init();
     let db = db::connect().await?;
+    DB.set(db.clone()).unwrap();
     let token_factory: TokenFactory = "secret".into();
     RabbitMQPublisher::setup().await?;
     let db_clone = db.clone();

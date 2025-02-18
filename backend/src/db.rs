@@ -3,8 +3,12 @@ use surrealdb::{
     opt::auth::Root,
     Surreal,
 };
+use tokio::sync::OnceCell;
 
 use crate::prelude::*;
+
+pub static DB: OnceCell<SurrealDb> = OnceCell::const_new();
+
 pub type SurrealDb = Surreal<Client>;
 
 pub async fn connect() -> Result<SurrealDb> {
