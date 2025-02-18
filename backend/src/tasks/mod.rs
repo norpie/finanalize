@@ -2,14 +2,54 @@ use std::sync::Arc;
 
 use crate::{llm::LLMApi, prelude::*};
 use handlebars::Handlebars;
+use log::{debug, error, info, warn};
 use serde::{de::DeserializeOwned, Serialize};
-use serde_json::Value;
+use serde_json::{error::Category, Value};
 
-pub struct Task<'a>(&'a str);
+#[derive(Debug, PartialEq, Eq)]
+pub enum RetryStrategy {
+    None,
+    Count(usize),
+    UntilSuccess,
+}
+
+/// The fix strategy to apply when the output is not valid JSON.
+///
+/// Types:
+///     - RemoveTrailingAlphanumeric: Remove the trailing alphanumeric characters before the last
+///     closing brace
+///     - RemoveTrailingComma: Remove the trailing comma at the end of the JSON
+///     - InsertClosedBrace: Keep inserting closing braces until the JSON is valid (max 3)
+#[derive(Debug, PartialEq, Eq)]
+pub enum FixStrategy {
+    RemoveTrailingAlphanumeric,
+    RemoveTrailingComma,
+    InsertClosedBrace,
+}
+
+pub struct Task<'a> {
+    prompt: &'a str,
+    retry_strategy: RetryStrategy,
+    fix_strategies: Vec<FixStrategy>,
+}
 
 impl<'a> Task<'a> {
     pub fn new(template: &'a str) -> Self {
-        Self(template)
+        Self {
+            prompt: template,
+            retry_strategy: RetryStrategy::None,
+            fix_strategies: Vec::new(),
+        }
+    }
+
+    pub fn with_retry_strategy(mut self, strategy: RetryStrategy) -> Self {
+        self.retry_strategy = strategy;
+        self
+    }
+
+    pub fn with_fix_strategies(mut self, strategies: Vec<FixStrategy>) -> Self {
+        self.fix_strategies = strategies;
+        self
     }
 
     pub async fn run<T, U>(&self, api: Arc<dyn LLMApi>, input: &T) -> Result<U>
@@ -17,17 +57,107 @@ impl<'a> Task<'a> {
         T: Serialize,
         U: DeserializeOwned + std::fmt::Debug,
     {
-        let prompt = Handlebars::default().render_template(self.0, input)?;
+        let prompt = Handlebars::default().render_template(self.prompt, input)?;
+        info!(
+            "Starting task with retry strategy: {:?}",
+            self.retry_strategy
+        );
+        match self.retry_strategy {
+            RetryStrategy::None => self.try_run(api, prompt).await,
+            RetryStrategy::Count(count) => {
+                let mut errors = Vec::new();
+                for i in 0..count {
+                    let res = self.try_run::<U>(api.clone(), prompt.clone()).await;
+                    match res {
+                        Ok(value) => return Ok(value),
+                        Err(err) => {
+                            warn!("Task failed with: {}, retrying: {}/{}", &err, i + 1, count);
+                            errors.push(err);
+                        }
+                    }
+                }
+                Err(FinanalizeError::MultipleErrors(errors))
+            }
+            RetryStrategy::UntilSuccess => loop {
+                let res = self.try_run::<U>(api.clone(), prompt.clone()).await;
+                match res {
+                    Ok(value) => return Ok(value),
+                    Err(err) => {
+                        error!("Task failed, retrying indefinetly: {}", err);
+                    }
+                }
+            },
+        }
+    }
+
+    async fn try_run<U>(&self, api: Arc<dyn LLMApi>, prompt: String) -> Result<U>
+    where
+        U: DeserializeOwned + std::fmt::Debug,
+    {
+        debug!("Starting generation.");
         let generated = api.generate(prompt.clone()).await?;
+        info!("Generated");
         let full = format!("{}{}", prompt, generated);
-        println!("full: {}", full);
+        debug!("Parsing output.");
         let json = self.parse_output(&full)?;
-        println!("json: {}", json);
-        let value: Value = serde_json::from_str(&json)?;
-        dbg!(&value);
-        let output: U = serde_json::from_value(value)?;
-        dbg!(&output);
-        Ok(output)
+        info!("Parsed output");
+        debug!("Deserializing output.");
+        self.deserialize_output(json)
+    }
+
+    fn deserialize_output<U>(&self, json: String) -> Result<U>
+    where
+        U: DeserializeOwned + std::fmt::Debug,
+    {
+        debug!("Deserializing output into value.");
+        let value: Value = self.deserialize_into_value(json)?;
+        debug!("Deserializing value into struct.");
+        Ok(serde_json::from_value(value)?)
+    }
+
+    fn deserialize_into_value(&self, mut json: String) -> Result<Value> {
+        if self
+            .fix_strategies
+            .contains(&FixStrategy::RemoveTrailingAlphanumeric)
+        {
+            debug!("Removing trailing alphanumeric characters.");
+            json = json
+                .chars()
+                .rev()
+                .skip_while(|c| c.is_alphanumeric())
+                .collect::<String>();
+        }
+
+        if self
+            .fix_strategies
+            .contains(&FixStrategy::RemoveTrailingComma)
+        {
+            debug!("Removing trailing comma.");
+            json = json.trim_end_matches(',').to_string();
+        }
+
+        if !self
+            .fix_strategies
+            .contains(&FixStrategy::InsertClosedBrace)
+        {
+            info!("Skipping inserting closing brace.");
+            return Ok(serde_json::from_str(&json)?);
+        }
+
+        let mut errors = Vec::new();
+        for i in 0..3 {
+            let res: StdResult<Value, serde_json::Error> = serde_json::from_str(&json);
+            match res {
+                Ok(value) => return Ok(value),
+                Err(err) => {
+                    json.push('}');
+                    warn!("Failed to parse JSON, retrying: {}/3", i + 1);
+                    errors.push(err.into());
+                }
+            }
+        }
+        error!("Failed to parse JSON after 3 retries.");
+        Err(FinanalizeError::MultipleErrors(errors))
     }
 
     fn parse_output(&self, output: &str) -> Result<String> {
@@ -47,7 +177,7 @@ impl<'a> Task<'a> {
     }
 
     fn prompt_template(&self) -> String {
-        self.0.to_string()
+        self.prompt.to_string()
     }
 }
 
