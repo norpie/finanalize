@@ -31,7 +31,10 @@ pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Re
     let workflow_status_update: WorkflowStatusUpdate = serde_json::from_slice(&delivery.data)?;
     // TODO: Run next job
     let Some(next_type) = workflow_status_update.last_job_type.next() else {
-        info!("No more jobs to run for report {}", workflow_status_update.report_id);
+        info!(
+            "No more jobs to run for report {}",
+            workflow_status_update.report_id
+        );
         return Ok(());
     };
     let _next_job = next_type.job();
