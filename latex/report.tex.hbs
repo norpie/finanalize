@@ -15,19 +15,19 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %----------------------------------------------------------------------------------------
-%	CLASS, PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%    CLASS, PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
 %----------------------------------------------------------------------------------------
 
-    \documentclass[
-    report, % Paper size, use either a4paper or letterpaper
-    12pt, % Default font size, the components is designed to look good at 12pt so it's best not to change this
+\documentclass[
+report, % Paper size, use either a4paper or letterpaper
+12pt, % Default font size, the components is designed to look good at 12pt so it's best not to change this
 %unnumberedsections, % Uncomment for no section numbering
 ]{CSSullivanBusinessReport}
 % All required packages and configuration are included in the CSSullivanBusinessReport.cls file (normally).
 %\usepackage{biblatex}
 
 %----------------------------------------------------------------------------------------
-%	REPORT INFORMATION
+%    REPORT INFORMATION
 %----------------------------------------------------------------------------------------
 
 
@@ -44,42 +44,44 @@
 \begin{document}
 
 %----------------------------------------------------------------------------------------
-%	TITLE PAGE
+%    TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-    \include{readymade/titlepage.tex}
-    \newpage
+\include{readymade/titlepage.tex}
+\newpage
 
 %----------------------------------------------------------------------------------------
-%	DISCLAIMER/COPYRIGHT PAGE
+%    DISCLAIMER/COPYRIGHT PAGE
 %----------------------------------------------------------------------------------------
 
-    \include{readymade/disclaimer.tex}
-    \newpage
+\include{readymade/disclaimer.tex}
+\newpage
 
 %----------------------------------------------------------------------------------------
-%	TABLE OF CONTENTS
+%    TABLE OF CONTENTS
 %----------------------------------------------------------------------------------------
 
-    \include{readymade/tableofcontents.tex}
-    \newpage
+\begin{twothirdswidth} % Content in this environment to be at two-thirds of the whole page width
+\tableofcontents % Output the table of contents, automatically generated from the section commands used in the document
+\end{twothirdswidth}
+\newpage
 
 %----------------------------------------------------------------------------------------
-%	DOCUMENT BODY (SECTIONS, FIGURES, TABLES, LISTS, QUOTATIONS, CITATIONS, LINKS, EQUATIONS)
+%    DOCUMENT BODY (SECTIONS, FIGURES, TABLES, LISTS, QUOTATIONS, CITATIONS, LINKS, EQUATIONS)
 %----------------------------------------------------------------------------------------
 
 \begin{fullwidth} % Use the whole page width
 {{#each components}}
-    {{{command}}}{ {{{ args }}} }
+    {{{command}}} {{{ args }}}
 {{/each}}
 \end{fullwidth}
 
 %----------------------------------------------------------------------------------------
-%	 REFERENCES/BIBLIOGRAPHY
+%     REFERENCES/BIBLIOGRAPHY
 %----------------------------------------------------------------------------------------
 
-    \newpage
-    \include{readymade/bibliography.tex}
+\newpage
+% \include{readymade/bibliography.tex}
 %----------------------------------------------------------------------------------------
 
 \end{document}

@@ -139,7 +139,7 @@
 \fancyhead[R]{\rightheadercontent} % Right header
 
 \fancyfoot[L]{} % Left footer
-\fancyfoot[C]{\thepage~of \pageref{LastPage}} % Center footer
+\fancyfoot[C]{\thepage} % Center footer
 \fancyfoot[R]{} % Right footer
 
 \usepackage{calc} % Allows arithmetic in LaTeX commands
