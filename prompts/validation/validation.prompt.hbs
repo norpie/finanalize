@@ -3,6 +3,20 @@ financial analysis. The company must be publicly traded and listed on either the
 these two conditions, the tool returns a true value. If the company fails to meet any of the conditions, the tool
 returns a false value along with an error message specifying which condition was not met.
 
+Output schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "valid": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "valid"
+  ]
+}
+```
 
 The following are complete examples of the input and output:
 
@@ -10,125 +24,17 @@ The following are complete examples of the input and output:
     <Input>
     ```json
     {
-        "message": "Analyse Tesla stock performance",
+        "message": "Analyse Tesla stock performance"
     }
     ```
     </Input>
 
-    <Output>
-    ```json
-    {
-        "valid": true,
-    }
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Tell me about bitcoin",
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-    {
-        "valid": false
-    }
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Is it a good time to invest in gold?"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-    {
-        "valid": false
-    }
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Analyse Giga LLC for me"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-    {
-<<<<<<< Updated upstream
-        "valid": false
-        "error": "Giga LLC is not listed on the Nasdaq or NYSE."
-=======
-        "valid": "false""error": "Giga LLC is not listed on the Nasdaq or NYSE."
->>>>>>> Stashed changes
-    }
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "How is Microsoft performing on the NASDAQ?"
-    }
-    ```
-    </Input>
     <Output>
     ```json
     {
         "valid": true
     }
     ```
-    </Output>
-</Example>
-
-<Example> 
-    <Input> 
-    ```json 
-    {
-    "message": "Review SpaceX investment opportunities"
-    } 
-    ``` 
-    </Input> 
-    <Output> 
-    ```json 
-    {
-    "valid": "false",
-    "error": "SpaceX is not publicly traded on the NASDAQ or NYSE."
-    } 
-    ``` 
-    </Output> 
-</Example>
-
-<Example> 
-    <Input> 
-    ```json 
-    {
-    "message": "Analyze the performance of Berkshire Hathaway Class A shares"
-    } 
-    ``` 
-    </Input> 
-    <Output> 
-    ```json 
-    {
-        "valid": true
-    } 
-    ``` 
-    </Output> 
 </Example>
 
 <Example> 
@@ -142,27 +48,10 @@ The following are complete examples of the input and output:
     <Output> 
     ```json 
     {
-        "valid": "false",
+        "valid": false,
         "error": "OpenAI is not publicly traded on NASDAQ or NYSE."
     } 
     ``` 
-    </Output> 
-</Example>
-
-<Example> 
-    <Input> 
-    ```json 
-    {
-        "message": "Forecast the market performance of Alphabet (GOOGL)"
-    } 
-    ``` 
-    </Input> 
-    <Output> 
-    ```json 
-    {
-        "valid": true
-    } 
-``` 
     </Output> 
 </Example>
 
