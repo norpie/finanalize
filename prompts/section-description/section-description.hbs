@@ -1,0 +1,39 @@
+Generate a precise, data-focused 3-4 line description for each financial analysis heading based on the given query. Each description should explain what data or metrics to analyze.
+
+Output schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "descriptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": ["section", "description"]
+      }
+    }
+  },
+  "required": ["descriptions"]
+}
+```
+
+
+<Input>
+```json
+{ 
+    "sections": "{{sections}}"
+} 
+```
+</Input>
+
+<Output>
+```json
+{
