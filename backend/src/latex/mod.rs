@@ -12,7 +12,7 @@ pub enum LatexComponent {
     Citation(Citation),
     List(List),
     Link(Link),
-    Equation(Equation),
+    // Equation(Equation),
 }
 
 pub struct Section {
@@ -30,7 +30,8 @@ pub struct Figure {
 
 pub struct Table {
     caption: String,
-    data: Vec<Vec<String>>,
+    rows: Vec<Vec<String>>,
+    columns: Vec<String>,
 }
 
 pub struct Quotation {
@@ -54,9 +55,9 @@ pub struct Link {
     url: String,
 }
 
-pub struct Equation {
-    equation: String,
-}
+// pub struct Equation {
+//     equation: String,
+// }
 
 #[derive(Serialize)]
 pub struct LatexCommand {
@@ -173,53 +174,87 @@ pub fn get_commands(components: Vec<LatexComponent>) -> Result<Vec<LatexCommand>
             }
             LatexComponent::Table(table) => {
                 commands.push(LatexCommand {
-                    command: r"\begin{table}".to_string(),
+                    command: r"\begin{table}[H]".to_string(),
                     args: "".to_string(),
                 });
                 commands.push(LatexCommand {
-                    command: r"\centering".to_string(),
+                    command: format!(r"\caption{{{}}}", table.caption.clone()),
                     args: "".to_string(),
                 });
                 commands.push(LatexCommand {
-                    command: r"\begin{tabular}".to_string(),
+                    command:
+                        r"\begin{tabular}{L{0.35\linewidth} L{0.38\linewidth} L{0.16\linewidth}}"
+                            .to_string(),
                     args: "".to_string(),
                 });
-                for row in table.data.iter() {
-                    let row_str = row.join(" & ");
-                    commands.push(LatexCommand {
-                        command: row_str,
-                        args: r"\\ \hline".to_string(),
-                    });
-                }
+                commands.push(LatexCommand {
+                    command: r"\toprule".to_string(),
+                    args: "".to_string(),
+                });
+                commands.push(format_command(table, true));
+                commands.push(LatexCommand {
+                    command: r"\midrule".to_string(),
+                    args: "".to_string(),
+                });
+                commands.push(format_command(table, false));
+                commands.push(LatexCommand {
+                    command: r"\bottomrule".to_string(),
+                    args: "".to_string(),
+                });
                 commands.push(LatexCommand {
                     command: r"\end{tabular}".to_string(),
                     args: "".to_string(),
                 });
                 commands.push(LatexCommand {
-                    command: r"\caption".to_string(),
-                    args: table.caption.clone(),
-                });
-                commands.push(LatexCommand {
                     command: r"\end{table}".to_string(),
                     args: "".to_string(),
                 });
-            }
-
-            LatexComponent::Equation(equation) => {
-                commands.push(LatexCommand {
-                    command: r"\begin{equation}".to_string(),
-                    args: "".to_string(),
-                });
-                commands.push(LatexCommand {
-                    command: equation.equation.clone(),
-                    args: "".to_string(),
-                });
-                commands.push(LatexCommand {
-                    command: r"\end{equation}".to_string(),
-                    args: "".to_string(),
-                });
-            }
+            } // LatexComponent::Equation(equation) => {
+              //     commands.push(LatexCommand {
+              //         command: r"\begin{equation}".to_string(),
+              //         args: "".to_string(),
+              //     });
+              //     commands.push(LatexCommand {
+              //         command: equation.equation.clone(),
+              //         args: "".to_string(),
+              //     });
+              //     commands.push(LatexCommand {
+              //         command: r"\end{equation}".to_string(),
+              //         args: "".to_string(),
+              //     });
+              // }
         }
     }
     Ok(commands)
+}
+
+fn format_command(table: &Table, is_column: bool) -> LatexCommand {
+    if is_column {
+        let formatted_data = table
+            .columns
+            .iter()
+            .map(|item| format!(r"\textbf{{{}}}", item))
+            .collect::<Vec<_>>()
+            .join(" & ");
+        LatexCommand {
+            command: formatted_data,
+            args: r" \\".to_string(),
+        }
+    } else {
+        let formatted_data = table
+            .rows
+            .iter()
+            .map(|row| {
+                row.iter()
+                    .map(|item| item.to_string())
+                    .collect::<Vec<_>>()
+                    .join(" & ")
+            })
+            .collect::<Vec<_>>()
+            .join(r" \\");
+        LatexCommand {
+            command: formatted_data,
+            args: r" \\".to_string(),
+        }
+    }
 }
