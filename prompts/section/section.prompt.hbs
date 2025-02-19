@@ -1,0 +1,192 @@
+Generate 5-7 structured headings for a financial analysis based on the given query. The headins should be clear, relevant, and cover key aspects such as market performance, risks, trends, and future outlook. Avoid unnecessary formatting. If no relevant topic is found, return an error
+
+Output schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "section": {
+            "type": "string"
+          }
+        },
+        "required": ["section"]
+      }
+    }
+  },
+  "required": ["sections"]
+}
+```
+
+The following are complete examples of the input and output:
+
+<Example>
+    <Input>
+    ```json
+    {
+
+        "message": "Analyse Tesla stock performance",
+        "title": "Tesla stock Analysis"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+{
+    "sections": [
+        {"section": "Company Overview and Market Position"},
+        {"section": "Stock Price Trends and Key Drivers"},
+        {"section": "Financial Performance: Revenue & Profitability"},
+        {"section": "Macroeconomic and Industry Impact"},
+        {"section": "Investment Risks and Challenges"},
+        {"section": "Growth Potential and Innovation Strategy"},
+        {"section": "Stock Forecast and Analyst Predictions"}
+    ]
+}
+
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Tell me about bitcoin",
+        "title": "Bitcoin insights"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+{
+    "sections": [
+        {"section": "Bitcoin: Technology and Use Cases"},
+        {"section": "Price History and Market Cycles"},
+        {"section": "Institutional Adoption and Regulation"},
+        {"section": "Comparing Bitcoin to Traditional Assets"},
+        {"section": "Security, Scalability, and Network Health"},
+        {"section": "Future Challenges and Innovations"},
+        {"section": "Predictions for Bitcoin's Long-Term Viability"}
+    ]
+}
+
+    ```
+</Example>
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Compare Apple and Microsoft stocks",
+        "title": "Apple vs Microsoft Stock Comparison"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+{
+    "sections": [
+        {"section": "Introduction to Apple and Microsoft"},
+        {"section": "Recent Stock Performance Comparison"},
+        {"section": "Key Financial Metrics: Revenue, P/E Ratio, EPS"},
+        {"section": "Risk and Volatility Analysis"},
+        {"section": "Industry Trends and Market Position"},
+        {"section": "Future Growth Potential"},
+        {"section": "Stock Performance Comparison Charts"}
+    ]
+}
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Is it a good time to invest in gold?",
+        "title": "Gold investment strategy"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+{
+    "sections": [
+        {"section": "Gold as an Asset: Safe Haven or Speculation?"},
+        {"section": "Historical Performance and Inflation Hedge"},
+        {"section": "Supply, Demand, and Central Bank Influence"},
+        {"section": "Comparing Gold to Stocks, Bonds, and Crypto"},
+        {"section": "Market Risks and Volatility Analysis"},
+        {"section": "Investment Strategies: When and How to Buy"},
+        {"section": "Future Outlook: Expert Predictions and Trends"}
+    ]
+}
+
+
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "Analyse Microsoft's stock performance over the last quarter",
+        "title": "Microsoft Stock Performance Analysis"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+{
+    "sections": [
+        {"section": "Overview of Microsoft Stock"},
+        {"section": "Recent Stock Performance"},
+        {"section": "Key Financial Metrics and Valuation"},
+        {"section": "Risk and Volatility Assessment"},
+        {"section": "Market Trends and Industry Impact"},
+        {"section": "Future Outlook for Microsoft's Stock"},
+        {"section": "Stock Performance Visualization"}
+    ]
+}
+
+
+
+    ```
+</Example>
+
+<Example>
+    <Input>
+    ```json
+    {
+        "message": "I study finance"
+    }
+    ```
+    </Input>
+
+    <Output>
+    ```json
+    {
+        "error": "No recognizable financial topic found in the message"
+    }
+    ```
+</Example>
+
+<Input>
+```json
+{
+    "message": "{{message}}",
+    "title": "{{title}}"
+}
+```
+</Input>
+
+<Output>
+```json
+{
