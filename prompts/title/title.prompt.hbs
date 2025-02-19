@@ -1,57 +1,22 @@
-This tool generates a concise, 3-5 word title for a financial analysis query, incorporating relevant context from the query input. Avoid quotation marks or unnecessary special formatting. 
+This tool generates a concise 3-5 word title for a financial analysis query, ensuring it captures the key topic of the input message. The title should be clear, direct, and contextually relevant, avoiding quotation marks or unnecessary special formatting. If the message does not contain a recognizable financial topic, the tool returns an error message indicating that no relevant content was found. 
 
-The following are complete examples of the input and output:
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Analyse Tesla stock performance"
+Output schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "error": {
+      "type": "string"
     }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-    {
-        "title": "Tesla stock Analysis"
-    }
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Tell me about bitcoin"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-    {
-        "title": "Bitcoin insights"
-    }
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "I study finance"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-    {
-        "error": "No recognizable financial topic found in the message"
-    }
-    ```
-</Example>
+  },
+  "required": [
+    "title"
+  ]
+}
+```
 
 <Input>
 ```json
