@@ -138,6 +138,26 @@ mod tests {
                 caption: "Test Caption".to_string(),
                 path: "image".to_string(),
             }),
+            LatexComponent::Table(Table {
+                caption: "Table caption".to_string(),
+                rows: vec![
+                    vec![
+                        "Row1Col1".to_string(),
+                        "Row1Col2".to_string(),
+                        "Row1Col3".to_string(),
+                    ],
+                    vec![
+                        "Row2Col1".to_string(),
+                        "Row2Col2".to_string(),
+                        "Row2Col3".to_string(),
+                    ],
+                ],
+                columns: vec![
+                    "Header1".to_string(),
+                    "Header2".to_string(),
+                    "Header3".to_string(),
+                ],
+            }),
         ];
         let commands = get_commands(components).unwrap();
         construct_report(
