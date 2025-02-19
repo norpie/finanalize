@@ -1,0 +1,29 @@
+This tool extracts the title from a given URL and a provided text snippet. It identifies the title within the given
+text.
+
+Output schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title"
+  ]
+}
+```
+<Input>
+```json
+{
+    "URL": "{{URL}}"
+    "snippet": "{{snippet}}"
+}
+```
+</Input>
+
+<Output>
+    ```json
+    {
