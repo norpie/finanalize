@@ -1,19 +1,19 @@
 use crate::prelude::*;
 use async_trait::async_trait;
-
-use super::ContentExtract;
+use super::{Content, ContentExtract};
 
 pub struct TextExtractor;
 
 #[async_trait]
 impl ContentExtract for TextExtractor {
-    async fn extract(&self, input: &str) -> Result<Vec<String>> {
+    async fn extract(&self, input: &str) -> Result<Vec<Content>> {
         let mut chunks = Vec::new();
         let mut current_chunk = String::new();
 
         for word in input.split_whitespace() {
             if current_chunk.len() + word.len() >= 512 {
-                chunks.push(current_chunk.clone());
+                // Wrap the chunk as `Content::Text` and push it to the vector
+                chunks.push(Content::Text(current_chunk.clone()));
                 current_chunk.clear();
             }
             if !current_chunk.is_empty() {
@@ -23,7 +23,7 @@ impl ContentExtract for TextExtractor {
         }
 
         if !current_chunk.is_empty() {
-            chunks.push(current_chunk);
+            chunks.push(Content::Text(current_chunk));
         }
 
         Ok(chunks)
@@ -47,9 +47,13 @@ mod tests {
         let extractor = TextExtractor;
         let chunks = extractor.extract(text).await.unwrap();
 
-        // Check that each chunk is at most 512 characters
+        // Check that each chunk is wrapped as `Content::Text`
         for chunk in &chunks {
-            assert!(chunk.len() <= 512, "Chunk exceeds 512 characters!");
+            if let Content::Text(text_chunk) = chunk {
+                assert!(text_chunk.len() <= 512, "Chunk exceeds 512 characters!");
+            } else {
+                panic!("Chunk is not wrapped as Content::Text");
+            }
         }
     }
 }
