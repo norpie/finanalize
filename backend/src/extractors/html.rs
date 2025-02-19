@@ -4,15 +4,14 @@ use scraper::{ElementRef, Html, Selector};
 use tokio::fs::File;
 use tokio::io::AsyncReadExt;
 use tokio::task;
-
-use super::text::TextExtractor;
 use super::ContentExtract;
+use super::Content;
 
 pub struct HTMLExtractor;
 
 #[async_trait]
 impl ContentExtract for HTMLExtractor {
-    async fn extract(&self, file_path: &str) -> Result<Vec<String>> {
+    async fn extract(&self, file_path: &str) -> Result<Vec<Content>> {
         let mut file = File::open(file_path).await.map_err(FinanalizeError::from)?;
         let mut buffer = String::new();
         file.read_to_string(&mut buffer)
@@ -20,33 +19,38 @@ impl ContentExtract for HTMLExtractor {
             .map_err(FinanalizeError::from)?;
 
         // Move parsing into a blocking thread to avoid `Send` issues
-        let extracted_text = task::spawn_blocking(move || {
+        let extracted_texts = task::spawn_blocking(move || {
             let document = Html::parse_document(&buffer);
 
             // Select all `div` and `article` elements inside `<body>`
             let selector = Selector::parse("body > div, body > article")
                 .map_err(|err| FinanalizeError::ParseError(format!("{:?}", err)))?;
 
-            let mut text = String::new();
+            let mut texts = vec![];
 
             for element in document.select(&selector) {
                 // Check if the element is NOT inside ignored tags
                 if !is_inside_ignored_section(element) {
-                    text.push_str(&element.text().collect::<Vec<_>>().join(" "));
-                    text.push('\n');
+                    let text = element.text().collect::<Vec<_>>().join(" ");
+                    if !text.is_empty() {
+                        texts.push(text);
+                    }
                 }
             }
 
-            if text.is_empty() {
+            if texts.is_empty() {
                 return Err(FinanalizeError::NotFound);
             }
 
-            Ok(text)
+            Ok(texts)
         })
         .await
-        .map_err(|_| FinanalizeError::InternalServerError)??; // Handle potential task panics
+        .map_err(|_| FinanalizeError::InternalServerError)??;
 
-        TextExtractor {}.extract(&extracted_text).await
+        // Wrap the extracted texts in `Content::Html` variants
+        let content = extracted_texts.into_iter().map(Content::Html).collect();
+
+        Ok(content)
     }
 }
 
@@ -89,28 +93,25 @@ mod tests {
         let file_path = "test.html";
         tokio::fs::write(file_path, test_html)
             .await
-            .expect("Kon test.html niet maken");
+            .expect("Could not create test.html");
 
         let extractor = HTMLExtractor;
         let result = extractor.extract(file_path).await.unwrap();
 
-        println!("Extracted text: {:?}", result);
+        println!("Extracted content: {:?}", result);
 
-        assert!(result.iter().any(|text| text.contains("Main Content")));
-        assert!(result
-            .iter()
-            .any(|text| text.contains("Another Important Section")));
+        // Check extracted content
+        assert!(result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Main Content"))));
+        assert!(result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Another Important Section"))));
 
         // Ensure unwanted elements are not included
-        assert!(!result.iter().any(|text| text.contains("Header Title")));
-        assert!(!result.iter().any(|text| text.contains("Navigation Links")));
-        assert!(!result.iter().any(|text| text.contains("Sidebar Content")));
-        assert!(!result
-            .iter()
-            .any(|text| text.contains("Footer Information")));
+        assert!(!result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Header Title"))));
+        assert!(!result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Navigation Links"))));
+        assert!(!result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Sidebar Content"))));
+        assert!(!result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Footer Information"))));
 
         tokio::fs::remove_file(file_path)
             .await
-            .expect("Kon test.html niet verwijderen");
+            .expect("Could not delete test.html");
     }
 }
