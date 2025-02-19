@@ -3,15 +3,24 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 pub mod csv;
-pub mod excel;
 pub mod html;
 pub mod pdf;
 pub mod text;
 
 #[async_trait]
 trait ContentExtract {
-    async fn extract(&self, file: &str) -> Result<Vec<String>>;
+    async fn extract(&self, file: &str) -> Result<Vec<Content>>;
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+pub enum Content {
+    Html(String),
+    Text(String),
+    Pdf(Vec<u8>),
+    Csv(String),
+    
+}
+
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Data {
