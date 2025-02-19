@@ -1,5 +1,4 @@
 use crate::latex::*;
-use crate::prelude::*;
 use handlebars::Handlebars;
 use serde::Serialize;
 use std::env;
@@ -46,6 +45,21 @@ pub fn construct_report(
     copy_latex_dir(&latex_dir, &tmp_dir)?;
     println!("Rendered LaTeX written to {}", output_path.display());
     // Compile the given report and other files into pdf using pdflatex
+    Command::new("pdflatex")
+        .arg("-output-directory")
+        .arg(&tmp_dir)
+        .arg(output_path)
+        .output()?;
+    Command::new("pdflatex")
+        .arg("-output-directory")
+        .arg(&tmp_dir)
+        .arg(output_path)
+        .output()?;
+    Command::new("pdflatex")
+        .arg("-output-directory")
+        .arg(&tmp_dir)
+        .arg(output_path)
+        .output()?;
     Command::new("pdflatex")
         .arg("-output-directory")
         .arg(&tmp_dir)
