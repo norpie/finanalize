@@ -16,8 +16,10 @@ pub enum FinanalizeError {
     // NotImplemented,
     #[error("Internal server error")]
     InternalServerError,
-    #[error("Missing prompt: {0}")]
-    MissingPrompt(String),
+    #[error("Missing prompt file: {0}")]
+    MissingPromptFile(String),
+    #[error("Missing prompt UTF-8: {0}")]
+    MissingPromptUTF8(String),
 
     #[error("Some retry logic generated the following errors: {0:#?}")]
     MultipleErrors(Vec<FinanalizeError>),
