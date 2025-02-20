@@ -3,6 +3,8 @@ use async_trait::async_trait;
 
 use super::{JobType, WorkflowState};
 
+mod validation;
+
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
     async fn run(&self, input: WorkflowState) -> Result<WorkflowState>;
