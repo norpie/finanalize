@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -69,7 +70,7 @@ impl LLMApi for Ollama {
             stream: false,
             raw: true,
         };
-        dbg!("requesting", &request);
+        debug!("Ollama request: {:?}", request.model);
         let value = self
             .client
             .post(format!("{}/api/generate", self.base_url))
@@ -78,7 +79,7 @@ impl LLMApi for Ollama {
             .await?
             .json::<Value>()
             .await?;
-        dbg!("response", &value);
+        debug!("Ollama response");
         Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
     }
 
