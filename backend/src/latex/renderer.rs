@@ -23,7 +23,7 @@ struct BibData {
 pub struct PdfReport {
     uuid: String,
     report_title: String,
-    report_path: String
+    report_path: String,
 }
 
 pub fn construct_report(
@@ -48,7 +48,8 @@ pub fn construct_report(
     let latex_dir = project_root.join("latex");
     let template_path = latex_dir.join("report.tex.hbs");
     // Define path where the rendered LaTeX will be written to
-    let output_path = &destination_folder.join(report_title.replace(" ", "_").to_lowercase() + ".tex");
+    let output_path =
+        &destination_folder.join(report_title.replace(" ", "_").to_lowercase() + ".tex");
     // Write the tex file from the template using handlebars
     let handlebars = Handlebars::new();
     let template = read_to_string(template_path)?;
@@ -59,17 +60,17 @@ pub fn construct_report(
     copy_latex_dir(&latex_dir, destination_folder)?;
     // Construct bib file
     construct_bib_file(sources, destination_folder)?;
-    // Compile 
+    // Compile
     compile_latex(output_path, destination_folder, false)?;
     compile_latex(output_path, destination_folder, true)?;
     compile_latex(output_path, destination_folder, false)?;
     compile_latex(output_path, destination_folder, false)?;
     // Cleanup destination folder as to only include the pdf
     cleanup_destination_folder(destination_folder)?;
-    Ok(PdfReport{
+    Ok(PdfReport {
         uuid,
         report_title,
-        report_path: output_path.to_str().unwrap().to_string()
+        report_path: output_path.to_str().unwrap().to_string(),
     })
 }
 
