@@ -47,11 +47,13 @@ mod workflow;
 async fn main() -> Result<()> {
     dotenvy::from_filename(".env").ok();
     env_logger::init();
+
+    let token_factory: TokenFactory = "secret".into();
+
     let db = db::connect().await?;
     DB.set(db.clone()).unwrap();
-    let token_factory: TokenFactory = "secret".into();
+
     RabbitMQPublisher::setup().await?;
-    let db_clone = db.clone();
 
     // Initialize the RabbiAtMQ consumer background task
     tokio::spawn(async move {
@@ -73,7 +75,7 @@ async fn main() -> Result<()> {
         App::new()
             .wrap(cors)
             .app_data(Data::new(token_factory.clone()))
-            .app_data(Data::new(db_clone.clone()))
+            .app_data(Data::new(db.clone()))
             .default_service(web::route().to(not_found))
             .service(
                 web::scope("/api/v1/auth")
