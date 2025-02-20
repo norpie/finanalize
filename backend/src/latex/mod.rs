@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use serde::Serialize;
+
 mod renderer;
 
 pub enum LatexComponent {
@@ -9,7 +10,7 @@ pub enum LatexComponent {
     Figure(Figure),
     Table(Table),
     Quotation(Quotation),
-    Citation(Citation),
+    Citation(String),
     List(List),
     Link(Link),
     // Equation(Equation),
@@ -40,7 +41,6 @@ pub struct Quotation {
 }
 
 pub struct Citation {
-    inline_text: String,
     source: String,
 }
 
@@ -59,6 +59,16 @@ pub struct Link {
 //     equation: String,
 // }
 
+#[derive(Serialize)]
+pub struct Source {
+    source_type: String,
+    citation_key: String,
+    author: String,
+    title: String,
+    year: i32,
+    journal: String,
+    url: String,
+}
 #[derive(Serialize)]
 pub struct LatexCommand {
     command: String,
@@ -87,9 +97,9 @@ pub fn get_commands(components: Vec<LatexComponent>) -> Result<Vec<LatexCommand>
                     args: text.clone(),
                 });
             }
-            LatexComponent::Citation(citation) => {
+            LatexComponent::Citation(citation_key) => {
                 commands.push(LatexCommand {
-                    command: format!(r"\textcite{{{}}}", citation.inline_text.clone()),
+                    command: format!(r"\textcite{{{}}}", citation_key.clone()),
                     args: "".to_string(),
                 });
             }
@@ -191,12 +201,12 @@ pub fn get_commands(components: Vec<LatexComponent>) -> Result<Vec<LatexCommand>
                     command: r"\toprule".to_string(),
                     args: "".to_string(),
                 });
-                commands.push(format_command(table, true));
+                commands.push(format_table_command(table, true));
                 commands.push(LatexCommand {
                     command: r"\midrule".to_string(),
                     args: "".to_string(),
                 });
-                commands.push(format_command(table, false));
+                commands.push(format_table_command(table, false));
                 commands.push(LatexCommand {
                     command: r"\bottomrule".to_string(),
                     args: "".to_string(),
@@ -228,7 +238,7 @@ pub fn get_commands(components: Vec<LatexComponent>) -> Result<Vec<LatexCommand>
     Ok(commands)
 }
 
-fn format_command(table: &Table, is_column: bool) -> LatexCommand {
+fn format_table_command(table: &Table, is_column: bool) -> LatexCommand {
     if is_column {
         let formatted_data = table
             .columns
