@@ -5,6 +5,7 @@ use std::env;
 use std::fs::*;
 use std::path::Path;
 use std::process::Command;
+use uuid::Uuid;
 
 #[derive(Serialize)]
 struct TemplateData {
@@ -17,12 +18,20 @@ struct TemplateData {
 struct BibData {
     sources: Vec<Source>,
 }
+
+#[derive(Debug)]
+pub struct PdfReport {
+    uuid: String,
+    report_title: String,
+    report_path: String
+}
+
 pub fn construct_report(
     sources: Vec<Source>,
     commands: Vec<LatexCommand>,
     report_title: String,
     report_subtitle: String,
-) -> Result<()> {
+) -> Result<PdfReport> {
     let data = TemplateData {
         report_title: report_title.clone(),
         report_subtitle: report_subtitle.clone(),
@@ -30,32 +39,38 @@ pub fn construct_report(
     };
     let backend_dir = env::current_dir()?;
     let project_root = backend_dir.parent().unwrap();
-    // Remove tmp dir and create it.
-    let tmp_dir = project_root.join("tmp");
-    remove_dir_all(&tmp_dir).ok();
-    if !tmp_dir.exists() {
-        create_dir_all(&tmp_dir)?;
-    }
+    let tmp_dir = env::temp_dir();
+    // Generate an uuid for the new pdf and create destination folder
+    let uuid = Uuid::new_v4().to_string();
+    let destination_folder = &tmp_dir.join(&uuid);
+    create_dir_all(destination_folder)?;
     // Retrieve latex path and template path
     let latex_dir = project_root.join("latex");
     let template_path = latex_dir.join("report.tex.hbs");
     // Define path where the rendered LaTeX will be written to
-    let output_path = &tmp_dir.join(report_title.replace(" ", "_").to_lowercase() + ".tex");
-    construct_bib_file(sources)?;
+    let output_path = &destination_folder.join(report_title.replace(" ", "_").to_lowercase() + ".tex");
+    // Write the tex file from the template using handlebars
     let handlebars = Handlebars::new();
     let template = read_to_string(template_path)?;
     let rendered_tex = handlebars.render_template(&template, &data)?;
     // Write the rendered LaTeX to a file on output_path
     write(output_path, rendered_tex)?;
     // Copy latex directory to tmp directory for compiling
-    copy_latex_dir(&latex_dir, &tmp_dir)?;
-    println!("Rendered LaTeX written to {}", output_path.display());
-    compile_latex(output_path, &tmp_dir, false)?;
-    compile_latex(output_path, &tmp_dir, true)?;
-    compile_latex(output_path, &tmp_dir, false)?;
-    compile_latex(output_path, &tmp_dir, false)?;
-    cleanup_tmp_dir(&tmp_dir)?;
-    Ok(())
+    copy_latex_dir(&latex_dir, destination_folder)?;
+    // Construct bib file
+    construct_bib_file(sources, destination_folder)?;
+    // Compile 
+    compile_latex(output_path, destination_folder, false)?;
+    compile_latex(output_path, destination_folder, true)?;
+    compile_latex(output_path, destination_folder, false)?;
+    compile_latex(output_path, destination_folder, false)?;
+    // Cleanup destination folder as to only include the pdf
+    cleanup_destination_folder(destination_folder)?;
+    Ok(PdfReport{
+        uuid,
+        report_title,
+        report_path: output_path.to_str().unwrap().to_string()
+    })
 }
 
 fn copy_latex_dir(latex_dir: &Path, output_dir: &Path) -> Result<()> {
@@ -72,26 +87,12 @@ fn copy_latex_dir(latex_dir: &Path, output_dir: &Path) -> Result<()> {
             copy(file_path, dest_path)?;
         }
     }
-    // Cleanup tmp directory so that only needed files for compiling are present
-    let tex_template = output_dir.join("report.tex.hbs");
-    let bib_template = output_dir.join("references.bib.hbs");
-    let gitkeep_file = output_dir.join(".gitkeep");
-    if tex_template.exists() {
-        remove_file(tex_template)?;
-    }
-    if bib_template.exists() {
-        remove_file(bib_template)?;
-    }
-    if gitkeep_file.exists() {
-        remove_file(gitkeep_file)?;
-    }
     Ok(())
 }
 
-fn construct_bib_file(sources: Vec<Source>) -> Result<()> {
+fn construct_bib_file(sources: Vec<Source>, destination_folder: &Path) -> Result<()> {
     let data = BibData { sources };
-    let tmp_dir = env::current_dir()?.parent().unwrap().join("tmp");
-    let bib_path = tmp_dir.join("references.bib");
+    let bib_path = destination_folder.join("references.bib");
     let template_path = env::current_dir()?
         .parent()
         .unwrap()
@@ -103,8 +104,8 @@ fn construct_bib_file(sources: Vec<Source>) -> Result<()> {
     Ok(())
 }
 
-fn cleanup_tmp_dir(tmp_dir: &Path) -> Result<()> {
-    for entry in read_dir(tmp_dir)? {
+fn cleanup_destination_folder(destination_folder: &Path) -> Result<()> {
+    for entry in read_dir(destination_folder)? {
         let entry = entry?;
         let path = entry.path();
         if path.is_dir() {
