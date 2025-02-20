@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 
 pub mod csv;
 pub mod html;
-pub mod pdf;
 pub mod text;
+pub mod md;
 
 #[async_trait]
 trait ContentExtract {
@@ -16,8 +16,8 @@ trait ContentExtract {
 pub enum Content {
     Html(String),
     Text(String),
-    Pdf(Vec<u8>),
     Csv(String),
+    MarkDown(String),
     
 }
 
