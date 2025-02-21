@@ -16,7 +16,7 @@ impl Job for SearchJob {
         }
         all_urls.sort();
         all_urls.dedup();
-        state.state.sources = Some(all_urls);
+        state.state.search_results = Some(all_urls);
         Ok(state)
     }
 }
@@ -83,10 +83,11 @@ mod tests {
                     .map(Into::into)
                     .collect(),
                 ),
+                search_results: None,
                 sources: None,
             },
         };
         let state = job.run(state).await.unwrap();
-        dbg!(state.state.sources.unwrap());
+        dbg!(state.state.search_results.unwrap());
     }
 }

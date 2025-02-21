@@ -110,6 +110,7 @@ mod tests {
                     vec!["Recommendation".into()],
                 ]),
                 searches: None,
+                search_results: None,
                 sources: None,
             },
         };
