@@ -33,8 +33,6 @@ mod rabbitmq;
 #[allow(dead_code)]
 mod rag;
 #[allow(dead_code)]
-mod scraper;
-#[allow(dead_code)]
 mod search;
 #[allow(dead_code)]
 mod sec;
