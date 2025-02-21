@@ -8,7 +8,6 @@ use crate::workflow::{JobType, WorkflowState};
 use actix_web::web::{self, Data, Json, Path};
 use actix_web::{get, post, Responder};
 use serde::{Deserialize, Serialize};
-use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ReportCreationLight {
