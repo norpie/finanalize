@@ -33,6 +33,7 @@ impl JobType {
             JobType::Pending => None,
             JobType::Validation => Some(Box::new(validation::ValidationJob)),
             JobType::GenerateTitle => Some(Box::new(title::TitleJob)),
+            JobType::GenerateSectionNames => Some(Box::new(section_names::SectionNamesJob)),
             _ => None,
         }
     }
