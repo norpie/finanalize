@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::{
     db::{SurrealDb, DB},
     llm::LLMApi,
-    models::SurrealDBReport,
+    models::{FullReport, SurrealDBReport},
     prelude::*,
     rabbitmq::PUBLISHER,
     search::SearchEngine,
@@ -27,14 +27,14 @@ use surrealdb::sql::Thing;
 pub struct WorkflowState {
     pub id: String,
     pub last_job_type: JobType,
-    pub state: String,
+    pub state: FullReport
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SDBWorkflowState {
     pub id: Thing,
     pub last_job_type: JobType,
-    pub state: String,
+    pub state: FullReport
 }
 
 impl From<SDBWorkflowState> for WorkflowState {
