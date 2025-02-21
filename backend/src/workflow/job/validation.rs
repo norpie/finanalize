@@ -64,6 +64,7 @@ mod tests {
                 validation: None,
                 title: None,
                 sections: None,
+                sub_sections: None,
             },
         };
         let new_state = job.run(state).await.unwrap();
@@ -86,6 +87,7 @@ mod tests {
                 validation: None,
                 title: None,
                 sections: None,
+                sub_sections: None,
             },
         };
         let new_state = job.run(state).await.unwrap();

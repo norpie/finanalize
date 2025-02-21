@@ -67,6 +67,7 @@ mod tests {
                 validation: None,
                 title: Some("State of Apple in 2025".into()),
                 sections: None,
+                sub_sections: None,
             },
         };
         job.run(state).await.unwrap().state.sections.unwrap();

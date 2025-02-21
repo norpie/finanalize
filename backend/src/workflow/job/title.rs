@@ -56,6 +56,7 @@ mod tests {
                 validation: None,
                 title: None,
                 sections: None,
+                sub_sections: None,
             },
         };
         job.run(state).await.unwrap().state.title.unwrap();
