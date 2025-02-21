@@ -8,6 +8,7 @@ pub mod title;
 pub mod section_names;
 pub mod sub_sections;
 pub mod search_queries;
+pub mod search_terms;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
@@ -15,26 +16,7 @@ pub trait Job: Send + Sync + 'static {
 }
 
 /*
-[
-    "background on apple company 2025",
-    "history of apple corporation 2025",
-    "origins of apple technology 2025",
-    "apple problem statement 2025",
-    "challenges faced by apple in 2025",
-    "issues affecting apple business in 2025",
-    "apple market size forecast 2025",
-    "growth projection for apple market 2025",
-    "expected apple market value 2025",
-    "apple market share analysis 2025",
-    "market position of apple in 2025",
-    "apple's share in global tech market 2025",
-    "revenue trends for apple 2025",
-    "apple financial performance revenue 2025",
-    "annual revenue forecast for apple 2025",
-    "profit analysis of apple 2025",
-    "net profit forecast for apple 2025",
-    "apple's profitability in 2025",
-]
+
  */
 
 impl JobType {
@@ -47,6 +29,7 @@ impl JobType {
             JobType::GenerateTitle => Some(JobType::GenerateSectionNames),
             JobType::GenerateSectionNames => Some(JobType::GenerateSubSections),
             JobType::GenerateSubSections => Some(JobType::GenerateSearchQueries),
+            JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
             // Done
             JobType::Invalid => None,
             JobType::Done => None,
@@ -62,6 +45,7 @@ impl JobType {
             JobType::GenerateSectionNames => Some(Box::new(section_names::SectionNamesJob)),
             JobType::GenerateSubSections => Some(Box::new(sub_sections::SubSectionsJob)),
             JobType::GenerateSearchQueries => Some(Box::new(search_queries::GenerateSearchQueriesJob)),
+            JobType::SearchQueries => Some(Box::new(search_terms::SearchJob)),
             _ => None,
         }
     }
