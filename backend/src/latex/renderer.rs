@@ -144,6 +144,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore = "Depends on external resources"]
     fn test_construct_report() {
         let sources = vec![
             Source {
