@@ -27,6 +27,7 @@ impl JobType {
     pub fn job(&self) -> Option<Box<dyn Job>> {
         match self {
             JobType::Pending => None,
+            JobType::Validation => Some(Box::new(validation::ValidationJob)),
             _ => None,
         }
     }
