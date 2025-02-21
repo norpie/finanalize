@@ -3,13 +3,13 @@ use async_trait::async_trait;
 
 use super::{JobType, WorkflowState};
 
-pub mod validation;
-pub mod title;
-pub mod section_names;
-pub mod sub_sections;
+pub mod scrape_pages;
 pub mod search_queries;
 pub mod search_terms;
-pub mod scrape_pages;
+pub mod section_names;
+pub mod sub_sections;
+pub mod title;
+pub mod validation;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
@@ -18,7 +18,7 @@ pub trait Job: Send + Sync + 'static {
 
 /*
 
- */
+*/
 
 impl JobType {
     pub fn next(&self) -> Option<JobType> {
@@ -45,7 +45,9 @@ impl JobType {
             JobType::GenerateTitle => Some(Box::new(title::TitleJob)),
             JobType::GenerateSectionNames => Some(Box::new(section_names::SectionNamesJob)),
             JobType::GenerateSubSections => Some(Box::new(sub_sections::SubSectionsJob)),
-            JobType::GenerateSearchQueries => Some(Box::new(search_queries::GenerateSearchQueriesJob)),
+            JobType::GenerateSearchQueries => {
+                Some(Box::new(search_queries::GenerateSearchQueriesJob))
+            }
             JobType::SearchQueries => Some(Box::new(search_terms::SearchJob)),
             _ => None,
         }

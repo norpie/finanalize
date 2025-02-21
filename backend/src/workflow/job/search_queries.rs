@@ -61,7 +61,7 @@ impl Job for GenerateSearchQueriesJob {
         let input = SearchQueriesInput {
             title: state.state.title.clone().unwrap(),
             date: Utc::now().to_rfc3339(),
-            sections
+            sections,
         };
         let raw_input = RawSearchQueriesInput {
             input: serde_json::to_string_pretty(&input)?,
