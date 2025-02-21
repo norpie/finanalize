@@ -122,7 +122,7 @@ pub enum JobType {
     Validation,
     GenerateTitle,
     GenerateSectionNames,
-    GenerateParagraphBullets,
+    GenerateSubSections,
     GenerateSearchQueries,
     SearchQueries,
     ScrapeTopResults,
