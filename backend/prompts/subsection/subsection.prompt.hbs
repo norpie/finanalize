@@ -1,9 +1,7 @@
-This tool generates 3-4 structured subsections for each section based on the given section and description. Each paragraph outlines key insights, context, and detailed explanations relevant to the financial instrument or analysis. The subsection is designed to be informative, concise, and aligned with the topic. Instead of providing fully written subsections, the tool outputs structured paragraph descriptions, specifying what each paragraph should cover. This ensures clarity in analysis while maintaining flexibility for further subsection development. The structured approach helps break down key concepts, trends, comparisons, and potential risks in an easily understandable format.
+This tool generates 1-5 sub-section titles per section of the report given: user's request, title of the article, and the section titles. Sub-section amount can vary depending on the length of the section (intro might only have 1-2, whereas the core sections might have the full 5).
 
 Output schema:
 ```json
-
-
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
@@ -12,13 +10,12 @@ Output schema:
       "type": "array",
       "items": [
         {
-          "type": "string"
-        },
-        {
-          "type": "string"
-        },
-        {
-          "type": "string"
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            },
+          ]
         }
       ]
     }
@@ -29,116 +26,9 @@ Output schema:
 }
 ```
 
-
-The following are complete examples of the input and output:
-
-<Example>
-    <Input>
-    ```json
-{
-    message: "what is bitcoin?"
-    title: "Bitcoin Overview",
-    section: "Bitcoin: Technology and Use Cases",
-}
-    ```
-    </Input>
-
-    <Output>
-    ```json
-{
-    "sub_sections": [
-        "This paragraph should introduce the concept of Bitcoin, explaining how it functions as a decentralized digital currency built on blockchain technology. The paragraph should briefly discuss the key features of Bitcoin, such as its security, decentralization, and the lack of a central authority. It should also explore Bitcoin's primary use cases, such as its role as a medium of exchange and a store of value.",
-        "The paragraph should highlight Bitcoin's unique attributes compared to traditional currencies, such as its fixed supply and its potential to operate outside of government control or financial institutions. It should mention the growing interest in Bitcoin as a potential hedge against inflation and economic instability.",
-        "Additionally, a mention of Bitcoin's wider adoption by both individuals and institutional investors can be included, exploring how these groups use Bitcoin in various ways—from investment to remittances."
-    ]
-}
-
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-{
-    message: "Apple vs Microsoft",
-    title: "A Comparison of Apple and Microsoft",
-    section: "Recent Stock Performance Comparison",
-}
-    ```
-    </Input>
-
-    <Output>
-    ```json
-{
-   "sub_sections": [
-       "This paragraph should compare the recent stock performance of Apple and Microsoft, focusing on trends in stock price movement, key drivers behind these trends, and any notable market fluctuations.",
-       "The writer should discuss factors that have contributed to each company’s recent stock performance, such as product launches, earnings reports, and broader market conditions.",
-       "It should also include a comparison of how Apple and Microsoft’s stock prices have responded to similar economic factors, such as changes in interest rates or market sentiment in the tech sector."
-   ]
-}
-
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-{
-    message: "gold inverment guide",
-    title: Gold Investment Guide",
-    section: "Comparing Gold to Stocks, Bonds, and Crypto",
-}
-    ```
-    </Input>
-
-    <Output>
-    ```json
-{
-    "sub_sections": [
-        "In this paragraph, introduce gold’s historical role in investment portfolios, comparing it to stocks, bonds, and cryptocurrencies. Discuss how gold has performed relative to traditional asset classes, particularly during periods of economic volatility or financial crisis.",
-        "The second paragraph should explore the risk-return characteristics of gold versus stocks and bonds. Mention how gold has a low correlation with equity markets and bonds, and how it is used to diversify portfolios for stability.",
-        "In the third paragraph, address the competition between gold and cryptocurrencies like Bitcoin. Highlight similarities and differences between these assets, focusing on their roles as stores of value, their volatility, and adoption in modern financial markets.",
-        "Finally, discuss the current debate about whether gold is still a superior store of value compared to newer investment assets. Analyze how evolving market conditions, investor preferences, and technological advances might influence gold's position in the future."
-    ]
-}
-
-
-    ```
-</Example>
-
-
-<Example>
-    <Input>
-    ```json
-{
-    message: "analysis of tesla",
-    title: "Tesla Inc. Analysis",
-    section: "Risks and Challenges for Tesla",
-}
-    ```
-    </Input>
-
-    <Output>
-    ```json
-{
-    "sub_sections": [
-        "The first paragraph should outline macroeconomic risks affecting Tesla, including supply chain disruptions, rising material costs, and global economic slowdowns.",
-        "The second paragraph should discuss regulatory and legal challenges, such as emissions regulations, government incentives for EV adoption, and lawsuits related to safety concerns.",
-        "The third paragraph should address internal challenges, including production delays, high competition in the EV market, and potential risks tied to Tesla’s leadership, particularly Elon Musk’s influence on the company’s public image and strategy.",
-        "Finally, discuss stock volatility, explaining how Tesla’s valuation has historically been subject to large swings based on investor sentiment and speculative trading."
-    ]
-}
-    ```
-</Example>
-
-
 <Input>
 ```json
-{
-    "message": {{{message}}},
-    "title": {{{title}}},
-    "section": {{{section}}}
-}
+{{{input}}}
 ```
 </Input>
 
