@@ -2,31 +2,30 @@ This tool generates 3-4 structured subsections for each section based on the giv
 
 Output schema:
 ```json
+
+
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "subsections": {
+    "sub_sections": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "section": {
-            "type": "string"
-          },
-          "subsection": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "minItems": 3,
-            "maxItems": 3
-          }
+      "items": [
+        {
+          "type": "string"
         },
-        "required": ["section", "subsection"]
-      }
+        {
+          "type": "string"
+        },
+        {
+          "type": "string"
+        }
+      ]
     }
   },
-  "required": ["subsections"]
+  "required": [
+    "sub_sections"
+  ]
 }
 ```
 
@@ -37,36 +36,9 @@ The following are complete examples of the input and output:
     <Input>
     ```json
 {
-    "descriptions": [
-        {
-            "section": "Bitcoin: Technology and Use Cases",
-            "description": "An overview of Bitcoin’s blockchain technology, its decentralized nature, and how it is used as both a currency and a store of value."
-        },
-        {
-            "section": "Price History and Market Cycles",
-            "description": "An analysis of Bitcoin’s historical price trends, past bull and bear cycles, and key events influencing its valuation."
-        },
-        {
-            "section": "Institutional Adoption and Regulation",
-            "description": "A look at how major financial institutions are adopting Bitcoin, along with regulatory developments shaping its future."
-        },
-        {
-            "section": "Comparing Bitcoin to Traditional Assets",
-            "description": "A comparison of Bitcoin’s performance against stocks, bonds, and gold, analyzing its role in investment portfolios."
-        },
-        {
-            "section": "Security, Scalability, and Network Health",
-            "description": "An assessment of Bitcoin’s security model, network strength, and scalability solutions like the Lightning Network."
-        },
-        {
-            "section": "Future Challenges and Innovations",
-            "description": "An exploration of upcoming advancements and challenges, including environmental concerns, regulation, and competition from other cryptos."
-        },
-        {
-            "section": "Predictions for Bitcoin's Long-Term Viability",
-            "description": "Expert opinions on Bitcoin’s future role in the financial system, price predictions, and long-term sustainability."
-        }
-    ]
+    message: "what is bitcoin?"
+    title: "Bitcoin Overview",
+    section: "Bitcoin: Technology and Use Cases",
 }
     ```
     </Input>
@@ -74,63 +46,10 @@ The following are complete examples of the input and output:
     <Output>
     ```json
 {
-    "subsections": [
-        {
-            "section": "Bitcoin: Technology and Use Cases",
-            "subsection": [
-                "This paragraph should introduce the concept of Bitcoin, explaining how it functions as a decentralized digital currency built on blockchain technology. The paragraph should briefly discuss the key features of Bitcoin, such as its security, decentralization, and the lack of a central authority. It should also explore Bitcoin's primary use cases, such as its role as a medium of exchange and a store of value.",
-                "The paragraph should highlight Bitcoin's unique attributes compared to traditional currencies, such as its fixed supply and its potential to operate outside of government control or financial institutions. It should mention the growing interest in Bitcoin as a potential hedge against inflation and economic instability.",
-                "Additionally, a mention of Bitcoin's wider adoption by both individuals and institutional investors can be included, exploring how these groups use Bitcoin in various ways—from investment to remittances."
-            ]
-        },
-        {
-            "section": "Price History and Market Cycles",
-            "subsection": [
-                "In this paragraph, the writer should outline Bitcoin's price history, focusing on key price trends and cycles. This could include significant moments such as early price surges, major market crashes, and the long-term upward trend since Bitcoin's inception.",
-                "The paragraph should briefly discuss the factors that contribute to Bitcoin's price movements, such as investor sentiment, regulatory news, and macroeconomic events. It can explore how Bitcoin's volatility compares to traditional assets like stocks and commodities.",
-                "Finally, the paragraph should introduce the concept of market cycles, noting how Bitcoin has experienced several bull and bear markets and how these cycles impact its long-term price trajectory."
-            ]
-        },
-        {
-            "section": "Institutional Adoption and Regulation",
-            "subsection": [
-                "This paragraph should discuss the increasing involvement of institutional investors in Bitcoin, such as hedge funds, corporations, and financial institutions. It can mention how this growing interest has added legitimacy to Bitcoin and driven its price upward.",
-                "It should also touch on the regulatory environment surrounding Bitcoin, explaining the different stances taken by governments and financial authorities. The writer can explore the challenges Bitcoin faces with regulatory uncertainty, and how new regulations could shape its future.",
-                "A mention of the impact of regulations on market stability, adoption rates, and Bitcoin's role in the broader financial system can also be included."
-            ]
-        },
-        {
-            "section": "Comparing Bitcoin to Traditional Assets",
-            "subsection": [
-                "This paragraph should compare Bitcoin to traditional financial assets such as stocks, bonds, and gold. It can discuss how Bitcoin differs in terms of volatility, risk, and long-term value retention.",
-                "The paragraph should emphasize Bitcoin's role as an alternative asset, especially in a portfolio, and explore its potential to act as a hedge against inflation. It may compare its return potential with that of other assets like stocks, especially during periods of economic uncertainty.",
-                "The writer can also discuss the challenges Bitcoin faces in terms of mainstream adoption and its volatility, which makes it a riskier investment compared to traditional assets."
-            ]
-        },
-        {
-            "section": "Security, Scalability, and Network Health",
-            "subsection": [
-                "In this paragraph, the writer should explain how Bitcoin's blockchain technology provides a secure and transparent network for transactions. They should mention the role of miners in maintaining the network’s security and the importance of decentralization.",
-                "Scalability is another key topic to address, explaining the challenges Bitcoin faces in terms of transaction processing speed and fees. Solutions like the Lightning Network can be mentioned as potential ways to address these issues and improve Bitcoin’s scalability.",
-                "Finally, the paragraph should touch on the overall health of the Bitcoin network, considering factors like decentralization, mining participation, and the ongoing development of the protocol."
-            ]
-        },
-        {
-            "section": "Future Challenges and Innovations",
-            "subsection": [
-                "This paragraph should address the challenges Bitcoin faces as it moves toward broader adoption. Topics like regulatory hurdles, environmental concerns (due to energy consumption from mining), and competition from other cryptocurrencies should be discussed.",
-                "The writer should explore the ongoing innovations within the Bitcoin ecosystem, such as scalability improvements, privacy enhancements, and the potential for Bitcoin to become more energy-efficient.",
-                "The paragraph can conclude by considering what these challenges and innovations mean for Bitcoin's future, including its potential to remain a dominant force in the digital economy or face setbacks."
-            ]
-        },
-        {
-            "section": "Predictions for Bitcoin's Long-Term Viability",
-            "subsection": [
-                "In this paragraph, the writer should explore expert opinions and predictions regarding Bitcoin's long-term role in the financial system. It can discuss whether Bitcoin will continue to rise in value, remain a niche asset, or face challenges from other cryptocurrencies or financial systems.",
-                "Potential predictions about Bitcoin's price trajectory, its adoption by individuals and institutions, and its place in the broader financial ecosystem should be included. Opinions on the future role of Bitcoin as a hedge against inflation or its use in global trade can also be discussed.",
-                "Finally, the writer should consider the likelihood of Bitcoin's success or failure in the long term, based on current trends and the evolution of the digital asset market."
-            ]
-        }
+    "sub_sections": [
+        "This paragraph should introduce the concept of Bitcoin, explaining how it functions as a decentralized digital currency built on blockchain technology. The paragraph should briefly discuss the key features of Bitcoin, such as its security, decentralization, and the lack of a central authority. It should also explore Bitcoin's primary use cases, such as its role as a medium of exchange and a store of value.",
+        "The paragraph should highlight Bitcoin's unique attributes compared to traditional currencies, such as its fixed supply and its potential to operate outside of government control or financial institutions. It should mention the growing interest in Bitcoin as a potential hedge against inflation and economic instability.",
+        "Additionally, a mention of Bitcoin's wider adoption by both individuals and institutional investors can be included, exploring how these groups use Bitcoin in various ways—from investment to remittances."
     ]
 }
 
@@ -141,101 +60,21 @@ The following are complete examples of the input and output:
     <Input>
     ```json
 {
-    "descriptions": [
-        {
-            "section": "Introduction to Apple and Microsoft",
-            "description": "An overview of Apple and Microsoft, their business models, core products, and market influence in the tech sector."
-        },
-        {
-            "section": "Recent Stock Performance Comparison",
-            "description": "A comparative analysis of Apple and Microsoft’s stock trends, key drivers behind price movements, and recent performance indicators."
-        },
-        {
-            "section": "Key Financial Metrics: Revenue, P/E Ratio, EPS",
-            "description": "An evaluation of revenue growth, profitability, and valuation ratios to compare the financial health of both companies."
-        },
-        {
-            "section": "Risk and Volatility Analysis",
-            "description": "An assessment of stock volatility, potential risks from market fluctuations, and challenges faced by each company."
-        },
-        {
-            "section": "Industry Trends and Market Position",
-            "description": "An analysis of current tech industry trends, competitive positioning, and how Apple and Microsoft are adapting to market changes."
-        },
-        {
-            "section": "Future Growth Potential",
-            "description": "An exploration of future innovation, expansion strategies, and growth opportunities for both companies in the coming years."
-        },
-        {
-            "section": "Stock Performance Comparison Charts",
-            "description": "Visual representations of stock performance trends, valuation metrics, and historical price comparisons between Apple and Microsoft."
-        }
-    ]
+    message: "Apple vs Microsoft",
+    title: "A Comparison of Apple and Microsoft",
+    section: "Recent Stock Performance Comparison",
 }
     ```
     </Input>
 
     <Output>
     ```json
-    {
-    "subsections": [
-        {
-            "section": "Introduction to Apple and Microsoft",
-            "subsection": [
-                "This paragraph should introduce Apple and Microsoft as two of the largest and most influential companies in the technology sector. It should provide a brief overview of their business models, with Apple focusing on consumer electronics and Microsoft specializing in software, cloud services, and enterprise solutions.",
-                "The paragraph can compare their core products, such as Apple's iPhones, iPads, and Mac computers, with Microsoft’s software products like Windows and Office and its cloud platform, Azure. It should also touch on their respective market influence and how they shape the tech industry.",
-                "The writer should mention both companies’ strong market presence and influence on the global economy, despite operating in different areas of the tech space."
-            ]
-        },
-        {
-            "section": "Recent Stock Performance Comparison",
-            "subsection": [
-                "This paragraph should compare the recent stock performance of Apple and Microsoft, focusing on trends in stock price movement, key drivers behind these trends, and any notable market fluctuations.",
-                "The writer should discuss factors that have contributed to each company’s recent stock performance, such as product launches, earnings reports, and broader market conditions.",
-                "It should also include a comparison of how Apple and Microsoft’s stock prices have responded to similar economic factors, such as changes in interest rates or market sentiment in the tech sector."
-            ]
-        },
-        {
-            "section": "Key Financial Metrics: Revenue, P/E Ratio, EPS",
-            "subsection": [
-                "In this paragraph, the writer should discuss key financial metrics like revenue growth, earnings per share (EPS), and the price-to-earnings (P/E) ratio. These metrics are crucial for comparing the financial health and profitability of Apple and Microsoft.",
-                "The writer should explore how revenue growth is driven by each company’s respective business lines, such as Apple’s consumer products and Microsoft’s software and cloud services. They should also explain what the P/E ratio reveals about investor expectations for growth.",
-                "Finally, the paragraph can provide an analysis of EPS, explaining how each company generates profit relative to shares outstanding, and what this means for investors."
-            ]
-        },
-        {
-            "section": "Risk and Volatility Analysis",
-            "subsection": [
-                "This paragraph should assess the risks and volatility of investing in Apple and Microsoft. The writer should highlight the unique risks each company faces, such as product demand shifts for Apple or competitive pressures in the cloud market for Microsoft.",
-                "The paragraph should also discuss the impact of broader economic conditions, such as market fluctuations and geopolitical risks, on the stock performance of both companies.",
-                "Finally, the writer should consider the overall stability and risk profile of each stock, especially in comparison to other tech stocks or traditional investments."
-            ]
-        },
-        {
-            "section": "Industry Trends and Market Position",
-            "subsection": [
-                "This paragraph should explore industry trends that affect Apple and Microsoft. Topics could include the rise of cloud computing, the growing importance of AI, and the increasing shift to mobile-first technologies.",
-                "The writer should assess how both companies are adapting to these trends. For instance, how Apple is investing in wearables and services, and how Microsoft is expanding its cloud infrastructure and AI capabilities.",
-                "The paragraph should also address their positions within the tech industry, comparing their market shares, competitive advantages, and potential for future growth."
-            ]
-        },
-        {
-            "section": "Future Growth Potential",
-            "subsection": [
-                "This paragraph should focus on the future growth potential of both Apple and Microsoft, considering their strategies for innovation and expansion. It should touch on areas where each company is looking to grow, such as Apple’s move into services and wearables and Microsoft’s emphasis on cloud computing and AI.",
-                "The writer should explore new markets and emerging technologies that could impact both companies' future growth, as well as potential challenges they might face.",
-                "The paragraph can conclude with a comparison of each company's growth outlook and how investors should weigh this potential in their investment decisions."
-            ]
-        },
-        {
-            "section": "Stock Performance Comparison Charts",
-            "subsection": [
-                "This paragraph should suggest including visual representations of stock performance, such as charts comparing Apple and Microsoft’s price movements over time.",
-                "The writer should discuss what these charts can reveal about each company’s performance relative to the broader market and to each other, including periods of significant growth or decline.",
-                "The paragraph should also highlight how these charts can provide insights into valuation metrics and historical trends that inform investment decisions."
-            ]
-        }
-    ]
+{
+   "sub_sections": [
+       "This paragraph should compare the recent stock performance of Apple and Microsoft, focusing on trends in stock price movement, key drivers behind these trends, and any notable market fluctuations.",
+       "The writer should discuss factors that have contributed to each company’s recent stock performance, such as product launches, earnings reports, and broader market conditions.",
+       "It should also include a comparison of how Apple and Microsoft’s stock prices have responded to similar economic factors, such as changes in interest rates or market sentiment in the tech sector."
+   ]
 }
 
     ```
@@ -245,36 +84,9 @@ The following are complete examples of the input and output:
     <Input>
     ```json
 {
-    "descriptions": [
-        {
-            "section": "Gold as an Asset: Safe Haven or Speculation?",
-            "description": "An evaluation of gold’s role as a hedge against economic uncertainty versus its use in speculative trading."
-        },
-        {
-            "section": "Historical Performance and Inflation Hedge",
-            "description": "An analysis of gold’s price trends over decades and its correlation with inflation, interest rates, and economic downturns."
-        },
-        {
-            "section": "Supply, Demand, and Central Bank Influence",
-            "description": "A study of global gold production, consumer demand, and central bank gold reserves shaping market trends."
-        },
-        {
-            "section": "Comparing Gold to Stocks, Bonds, and Crypto",
-            "description": "A risk-return comparison of gold against traditional assets like stocks and bonds, and its competition with Bitcoin as a store of value."
-        },
-        {
-            "section": "Market Risks and Volatility Analysis",
-            "description": "An assessment of gold price volatility, geopolitical risks, currency fluctuations, and liquidity concerns."
-        },
-        {
-            "section": "Investment Strategies: When and How to Buy",
-            "description": "A guide on timing gold investments based on technical indicators, economic cycles, and portfolio diversification principles."
-        },
-        {
-            "section": "Future Outlook: Expert Predictions and Trends",
-            "description": "Insights from analysts on gold’s price trajectory, macroeconomic influences, and potential risks affecting its value."
-        }
-    ]
+    message: "gold inverment guide",
+    title: Gold Investment Guide",
+    section: "Comparing Gold to Stocks, Bonds, and Crypto",
 }
     ```
     </Input>
@@ -282,70 +94,11 @@ The following are complete examples of the input and output:
     <Output>
     ```json
 {
-    "subsections": [
-        {
-            "section": "Gold as an Asset: Safe Haven or Speculation?",
-            "subsection": [
-                "This paragraph should introduce gold as an asset, exploring its historical role as a store of value and its use as a safe haven during periods of economic uncertainty. Mention how it has been viewed as a hedge against inflation, currency devaluation, and geopolitical instability.",
-                "The second paragraph can focus on the speculative nature of gold, highlighting its role in short-term investment strategies. Discuss how investors seek to profit from price movements due to market sentiment, speculation, or economic cycles, and how gold futures and derivatives markets are involved.",
-                "In the third paragraph, compare the long-term perspective of gold as a stable store of value versus the volatility it experiences in the short term. Discuss the pros and cons of each approach, including the risk/reward dynamics of speculative trading.",
-                "Finally, in the fourth paragraph, analyze the current debate around gold's role in modern portfolios, weighing its position as an established asset versus newer speculative instruments, and its potential role in diversifying portfolios in uncertain times."
-            ]
-        },
-        {
-            "section": "Historical Performance and Inflation Hedge",
-            "subsection": [
-                "This paragraph should discuss gold's price history over several decades, particularly during times of high inflation, economic recessions, or periods of financial instability. Highlight how gold has often outperformed other assets during such times.",
-                "The second paragraph should explain how inflation affects purchasing power and the way gold has been able to maintain or increase its value, even as currencies lose value over time. Mention examples of inflationary periods when gold’s role as a hedge was apparent.",
-                "In the third paragraph, expand on how central banks and monetary policy, particularly interest rates and quantitative easing, have impacted gold’s performance during times of inflation or economic downturns.",
-                "Finally, address any limitations to gold's ability to act as an inflation hedge. Discuss instances where gold’s price did not align with inflation trends, and consider other economic factors that may influence gold's effectiveness in these scenarios."
-            ]
-        },
-        {
-            "section": "Supply, Demand, and Central Bank Influence",
-            "subsection": [
-                "Start by discussing how the supply and demand dynamics influence the price of gold. This paragraph should focus on mining production, extraction costs, and the global gold supply, along with factors like technological advancements and industry demand (e.g., electronics, jewelry).",
-                "The second paragraph can focus on the demand side, particularly how consumer behavior, industrial uses, and investment demand contribute to gold’s price movements. Mention shifts in demand from various sectors, such as emerging markets’ appetite for gold or changes in investment trends.",
-                "In the third paragraph, delve into the role of central banks in the gold market. Discuss how central banks accumulate or sell gold reserves and the impact this has on gold’s market price. Address the importance of gold as part of a nation’s monetary policy.",
-                "Finally, the fourth paragraph can cover external geopolitical or macroeconomic events that impact gold’s supply-demand balance, including trade disputes, currency devaluations, or changes in gold mining practices that might affect prices globally."
-            ]
-        },
-        {
-            "section": "Comparing Gold to Stocks, Bonds, and Crypto",
-            "subsection": [
-                "In this paragraph, introduce gold’s historical role in investment portfolios, comparing it to stocks, bonds, and cryptocurrencies. Discuss how gold has performed relative to traditional asset classes, particularly during periods of economic volatility or financial crisis.",
-                "The second paragraph should explore the risk-return characteristics of gold versus stocks and bonds. Mention how gold has a low correlation with equity markets and bonds, and how it is used to diversify portfolios for stability.",
-                "In the third paragraph, address the competition between gold and cryptocurrencies like Bitcoin. Highlight similarities and differences between these assets, focusing on their roles as stores of value, their volatility, and adoption in modern financial markets.",
-                "Finally, discuss the current debate about whether gold is still a superior store of value compared to newer investment assets. Analyze how evolving market conditions, investor preferences, and technological advances might influence gold's position in the future."
-            ]
-        },
-        {
-            "section": "Market Risks and Volatility Analysis",
-            "subsection": [
-                "This paragraph should focus on the inherent volatility in the gold market. Discuss how price fluctuations are influenced by global economic events, market sentiment, and external factors such as political unrest or natural disasters.",
-                "In the second paragraph, expand on specific risks that affect gold, such as geopolitical tensions, changes in central bank policies, and shifts in market liquidity. Discuss how these risks lead to sudden price swings and affect gold’s appeal to investors.",
-                "In the third paragraph, talk about the role of speculative trading in creating price volatility. Consider how futures and options markets influence short-term movements in gold prices and how this can lead to unexpected fluctuations.",
-                "Finally, in the fourth paragraph, discuss how gold's volatility compares to other assets, like stocks and bonds, and how its volatility is often perceived in the context of the broader financial market landscape. Explore the implications of these price swings for investors looking to use gold as a hedge or long-term investment."
-            ]
-        },
-        {
-            "section": "Investment Strategies: When and How to Buy",
-            "subsection": [
-                "In this paragraph, explain the basic principles behind investing in gold, such as the timing of purchases based on economic conditions, market sentiment, and macroeconomic cycles. Discuss how to assess when gold prices are undervalued or overvalued.",
-                "The second paragraph should focus on different ways to invest in gold, such as buying physical gold (bullion, coins), investing in gold mining stocks, or using ETFs and mutual funds. Include the benefits and drawbacks of each method, especially in terms of liquidity and costs.",
-                "In the third paragraph, discuss the role of technical analysis and indicators like moving averages, Relative Strength Index (RSI), and trend analysis to identify the best times to buy gold.",
-                "Finally, explore the importance of portfolio diversification. Discuss how investors should balance gold in their portfolios to optimize returns and reduce risk, particularly when market conditions are uncertain or during inflationary periods."
-            ]
-        },
-        {
-            "section": "Future Outlook: Expert Predictions and Trends",
-            "subsection": [
-                "This paragraph should summarize the expert predictions for gold’s future price trajectory, based on macroeconomic trends, such as inflation expectations, central bank policies, and global economic growth.",
-                "In the second paragraph, address the evolving factors that may shape the future of gold. This could include technological innovations, changes in global demand, and the role of digital currencies or central bank digital currencies (CBDCs) as competitors to gold.",
-                "The third paragraph should discuss the challenges that gold may face in the future, including competition from other assets, such as cryptocurrencies, and how changes in investor sentiment and market preferences could affect its status as a store of value.",
-                "Finally, conclude by examining the potential risks to gold’s future role in the global economy, including shifts in investor behavior, disruptions in supply and demand, or the introduction of new financial products that could impact its price and position in investment portfolios."
-            ]
-        }
+    "sub_sections": [
+        "In this paragraph, introduce gold’s historical role in investment portfolios, comparing it to stocks, bonds, and cryptocurrencies. Discuss how gold has performed relative to traditional asset classes, particularly during periods of economic volatility or financial crisis.",
+        "The second paragraph should explore the risk-return characteristics of gold versus stocks and bonds. Mention how gold has a low correlation with equity markets and bonds, and how it is used to diversify portfolios for stability.",
+        "In the third paragraph, address the competition between gold and cryptocurrencies like Bitcoin. Highlight similarities and differences between these assets, focusing on their roles as stores of value, their volatility, and adoption in modern financial markets.",
+        "Finally, discuss the current debate about whether gold is still a superior store of value compared to newer investment assets. Analyze how evolving market conditions, investor preferences, and technological advances might influence gold's position in the future."
     ]
 }
 
@@ -358,94 +111,23 @@ The following are complete examples of the input and output:
     <Input>
     ```json
 {
-    "descriptions": [
-        {
-            "section": "Introduction to Tesla Inc.",
-            "description": "An overview of Tesla’s business model, core products, and its role in the electric vehicle and renewable energy industries."
-        },
-        {
-            "section": "Tesla’s Recent Stock Performance",
-            "description": "An analysis of Tesla’s stock trends, key events affecting price movements, and investor sentiment."
-        },
-        {
-            "section": "Key Financial Metrics: Revenue, Profitability, and Valuation",
-            "description": "An evaluation of Tesla’s revenue growth, profit margins, and valuation metrics such as P/E ratio and market capitalization."
-        },
-        {
-            "section": "Competitive Position in the EV Market",
-            "description": "A comparison of Tesla’s market share, competitive advantages, and challenges from rival automakers."
-        },
-        {
-            "section": "Risks and Challenges for Tesla",
-            "description": "A discussion on the risks Tesla faces, including supply chain issues, regulatory pressures, and market volatility."
-        },
-        {
-            "section": "Future Growth and Expansion Plans",
-            "description": "An exploration of Tesla’s future projects, including new vehicle models, battery innovations, and global expansion strategies."
-        }
-    ]
+    message: "analysis of tesla",
+    title: "Tesla Inc. Analysis",
+    section: "Risks and Challenges for Tesla",
 }
-
     ```
     </Input>
 
     <Output>
     ```json
 {
-    "subsections": [
-        {
-            "section": "Introduction to Tesla Inc.",
-            "subsection": [
-                "The first paragraph should introduce Tesla as a leader in the electric vehicle industry, highlighting its mission to accelerate the world’s transition to sustainable energy. Mention its key business areas, including EV production, battery technology, and renewable energy solutions.",
-                "The second paragraph should focus on Tesla’s core products, including its vehicle lineup (Model S, Model 3, Model X, Model Y, and upcoming Cybertruck and Roadster), as well as its solar energy and battery storage solutions.",
-                "The third paragraph should briefly touch on Tesla’s global presence, its major manufacturing facilities (such as Gigafactories), and its influence on the broader automotive and energy sectors."
-            ]
-        },
-        {
-            "section": "Tesla’s Recent Stock Performance",
-            "subsection": [
-                "Start with a discussion of Tesla’s stock performance over recent months or years, including significant price movements, earnings reports, and overall market trends.",
-                "The second paragraph should analyze key events impacting Tesla’s stock, such as product launches, financial results, regulatory developments, or high-profile statements from Elon Musk.",
-                "The third paragraph should touch on investor sentiment, explaining how analysts and major shareholders view Tesla’s stock in terms of long-term growth versus short-term volatility."
-            ]
-        },
-        {
-            "section": "Key Financial Metrics: Revenue, Profitability, and Valuation",
-            "subsection": [
-                "The first paragraph should discuss Tesla’s revenue growth over recent years, highlighting how increasing vehicle deliveries and energy product sales have contributed to its expansion.",
-                "The second paragraph should focus on Tesla’s profitability, examining operating margins, net income trends, and how cost efficiencies have evolved.",
-                "The third paragraph should analyze valuation metrics such as price-to-earnings (P/E) ratio, price-to-sales (P/S) ratio, and how Tesla compares to traditional automakers and tech companies in terms of market capitalization."
-            ]
-        },
-        {
-            "section": "Competitive Position in the EV Market",
-            "subsection": [
-                "Begin by discussing Tesla’s dominance in the EV industry, highlighting its first-mover advantage, brand recognition, and global reach.",
-                "The second paragraph should analyze Tesla’s competition, including legacy automakers (e.g., Ford, GM, Volkswagen) and emerging EV startups (e.g., Rivian, Lucid Motors, BYD).",
-                "The third paragraph should explore Tesla’s unique advantages, such as its Supercharger network, battery technology leadership, and its ability to scale production efficiently."
-            ]
-        },
-        {
-            "section": "Risks and Challenges for Tesla",
-            "subsection": [
-                "The first paragraph should outline macroeconomic risks affecting Tesla, including supply chain disruptions, rising material costs, and global economic slowdowns.",
-                "The second paragraph should discuss regulatory and legal challenges, such as emissions regulations, government incentives for EV adoption, and lawsuits related to safety concerns.",
-                "The third paragraph should address internal challenges, including production delays, high competition in the EV market, and potential risks tied to Tesla’s leadership, particularly Elon Musk’s influence on the company’s public image and strategy.",
-                "Finally, discuss stock volatility, explaining how Tesla’s valuation has historically been subject to large swings based on investor sentiment and speculative trading."
-            ]
-        },
-        {
-            "section": "Future Growth and Expansion Plans",
-            "subsection": [
-                "The first paragraph should explore Tesla’s roadmap for expansion, including plans for new Gigafactories, increasing production capacity, and entering new global markets.",
-                "The second paragraph should focus on Tesla’s innovation pipeline, such as developments in Full Self-Driving (FSD) technology, advancements in battery efficiency, and upcoming product launches like the Tesla Semi and Cybertruck.",
-                "The third paragraph should discuss Tesla’s role in the broader renewable energy industry, including its solar panel and battery storage initiatives, and how these businesses contribute to long-term revenue diversification.",
-                "Finally, touch on long-term investor expectations, including whether Tesla can maintain its growth trajectory, defend its competitive position, and continue to innovate at the same pace."
-            ]
-        }
+    "sub_sections": [
+        "The first paragraph should outline macroeconomic risks affecting Tesla, including supply chain disruptions, rising material costs, and global economic slowdowns.",
+        "The second paragraph should discuss regulatory and legal challenges, such as emissions regulations, government incentives for EV adoption, and lawsuits related to safety concerns.",
+        "The third paragraph should address internal challenges, including production delays, high competition in the EV market, and potential risks tied to Tesla’s leadership, particularly Elon Musk’s influence on the company’s public image and strategy.",
+        "Finally, discuss stock volatility, explaining how Tesla’s valuation has historically been subject to large swings based on investor sentiment and speculative trading."
     ]
 }
-
     ```
 </Example>
 
@@ -453,8 +135,9 @@ The following are complete examples of the input and output:
 <Input>
 ```json
 {
-
-    "descriptions": {{{descriptions}}}
+    "message": {{{message}}},
+    "title": {{{title}}},
+    "section": {{{section}}}
 }
 ```
 </Input>
