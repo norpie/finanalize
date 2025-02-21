@@ -1,6 +1,6 @@
 use crate::api::ApiResponse;
 use crate::db::SurrealDb;
-use crate::models::{Report, ReportCreation, SurrealDBReport, SurrealDBUser};
+use crate::models::{FullReport, FullSDBReport, Report, ReportCreation, SurrealDBReport, SurrealDBUser};
 use crate::prelude::FinanalizeError;
 use crate::prelude::*;
 use crate::rabbitmq::PUBLISHER;
@@ -22,7 +22,7 @@ pub async fn create_report(
     report_creation: Json<ReportCreationLight>,
 ) -> Result<impl Responder> {
     let report_creation = ReportCreation::new(report_creation.user_input.clone());
-    let report: SurrealDBReport = db
+    let report: FullSDBReport = db
         .create("report")
         .content(report_creation)
         .await?
@@ -31,11 +31,11 @@ pub async fn create_report(
         .bind(("user", user.id.clone()))
         .bind(("report", report.id.clone()))
         .await?;
-    let created_report: Report = Report::from(report.clone());
+    let created_report: FullReport = FullReport::from(report);
     let workflow_status_update = WorkflowState {
-        id: report.id.id.to_string(),
+        id: created_report.id.to_string(),
         last_job_type: JobType::Pending,
-        state: "{}".to_string(),
+        state: created_report.clone(),
     };
     PUBLISHER
         .get()
@@ -74,61 +74,52 @@ pub struct Source {
     pub url: String,
 }
 
-#[derive(Debug, Clone, Serialize)]
-pub struct FullReport {
-    pub report: Report,
-    pub verdict: Option<Verdict>,
-    pub title: Option<String>,
-    pub headings: Vec<Heading>,
-    pub searches: Vec<Query>,
-    pub sources: Vec<Source>,
-}
-
 #[get("/reports/{report_id}")]
 pub async fn get_report(
-    user: SurrealDBUser,
-    db: Data<SurrealDb>,
-    report_id: Path<String>,
+    _user: SurrealDBUser,
+    _db: Data<SurrealDb>,
+    _report_id: Path<String>,
 ) -> Result<impl Responder> {
-    let report = db
-        .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
-        .bind(("user", user.id))
-        .bind(("report", Thing::from(("report", report_id.as_str()))))
-        .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
-
-    let verdict = db
-        .query("SELECT * FROM (SELECT ->has_verdict->report_verdict as verdicts FROM $report FETCH verdicts).verdicts[0];")
-        .bind(("report", report.id.clone()))
-        .await?.take::<Option<Verdict>>(0)?;
-
-    let title = db
-        .query("SELECT * FROM (SELECT ->has_title->report_title as titles FROM $report FETCH titles).titles[0]")
-        .bind(("report", report.id.clone()))
-        .await?.take::<Option<String>>((0, "title"))?;
-
-    let headings = db
-        .query("SELECT * FROM (SELECT ->has_paragraph->paragraph as paragraphs FROM $report FETCH paragraphs)[0].paragraphs")
-        .bind(("report", report.id.clone()))
-        .await?.take::<Vec<Heading>>(0)?;
-
-    let searches = db
-        .query("SELECT * FROM (SELECT ->has_search_query->search_query as searches FROM $report FETCH searches)[0].searches")
-        .bind(("report", report.id.clone()))
-        .await?.take::<Vec<Query>>(0)?;
-
-    let sources = db
-        .query("SELECT * FROM (SELECT ->has_search_result->search_result as sources FROM $report FETCH sources)[0].sources")
-        .bind(("report", report.id.clone()))
-        .await?.take::<Vec<Source>>(0)?;
-
-    Ok(ApiResponse::new(FullReport {
-        report: Report::from(report),
-        verdict,
-        title,
-        headings,
-        searches,
-        sources,
-    }))
+    // let report = db
+    //     .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
+    //     .bind(("user", user.id))
+    //     .bind(("report", Thing::from(("report", report_id.as_str()))))
+    //     .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
+    //
+    // let verdict = db
+    //     .query("SELECT * FROM (SELECT ->has_verdict->report_verdict as verdicts FROM $report FETCH verdicts).verdicts[0];")
+    //     .bind(("report", report.id.clone()))
+    //     .await?.take::<Option<Verdict>>(0)?;
+    //
+    // let title = db
+    //     .query("SELECT * FROM (SELECT ->has_title->report_title as titles FROM $report FETCH titles).titles[0]")
+    //     .bind(("report", report.id.clone()))
+    //     .await?.take::<Option<String>>((0, "title"))?;
+    //
+    // let headings = db
+    //     .query("SELECT * FROM (SELECT ->has_paragraph->paragraph as paragraphs FROM $report FETCH paragraphs)[0].paragraphs")
+    //     .bind(("report", report.id.clone()))
+    //     .await?.take::<Vec<Heading>>(0)?;
+    //
+    // let searches = db
+    //     .query("SELECT * FROM (SELECT ->has_search_query->search_query as searches FROM $report FETCH searches)[0].searches")
+    //     .bind(("report", report.id.clone()))
+    //     .await?.take::<Vec<Query>>(0)?;
+    //
+    // let sources = db
+    //     .query("SELECT * FROM (SELECT ->has_search_result->search_result as sources FROM $report FETCH sources)[0].sources")
+    //     .bind(("report", report.id.clone()))
+    //     .await?.take::<Vec<Source>>(0)?;
+    //
+    // Ok(ApiResponse::new(FullReport {
+    //     report: Report::from(report),
+    //     verdict,
+    //     title,
+    //     headings,
+    //     searches,
+    //     sources,
+    // }))
+    Ok(ApiResponse::new("disabled"))
 }
 
 #[post("/reports/{report_id}/retry")]
