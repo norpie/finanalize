@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use super::{JobType, WorkflowState};
 
 pub mod validation;
+pub mod title;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
