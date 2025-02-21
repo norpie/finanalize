@@ -6,6 +6,7 @@ use super::{JobType, WorkflowState};
 pub mod validation;
 pub mod title;
 pub mod section_names;
+pub mod sub_sections;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
@@ -17,10 +18,10 @@ impl JobType {
         match self {
             // Start
             JobType::Pending => Some(JobType::Validation),
+            // Doing
             JobType::Validation => Some(JobType::GenerateTitle),
             JobType::GenerateTitle => Some(JobType::GenerateSectionNames),
-            // Doing
-            // TODO: Add the rest of the steps
+            JobType::GenerateSectionNames => Some(JobType::GenerateSubSections),
             // Done
             JobType::Invalid => None,
             JobType::Done => None,
@@ -34,6 +35,7 @@ impl JobType {
             JobType::Validation => Some(Box::new(validation::ValidationJob)),
             JobType::GenerateTitle => Some(Box::new(title::TitleJob)),
             JobType::GenerateSectionNames => Some(Box::new(section_names::SectionNamesJob)),
+            JobType::GenerateSubSections => Some(Box::new(sub_sections::SubSectionsJob)),
             _ => None,
         }
     }
