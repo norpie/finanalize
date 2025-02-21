@@ -8,13 +8,8 @@ Output schema:
     "sections": {
       "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-          "section": {
-            "type": "string"
-          }
+        "type": "string",
         },
-        "required": ["section"]
       }
     }
   },
@@ -39,16 +34,15 @@ The following are complete examples of the input and output:
     ```json
 {
     "sections": [
-        {"section": "Company Overview and Market Position"},
-        {"section": "Stock Price Trends and Key Drivers"},
-        {"section": "Financial Performance: Revenue & Profitability"},
-        {"section": "Macroeconomic and Industry Impact"},
-        {"section": "Investment Risks and Challenges"},
-        {"section": "Growth Potential and Innovation Strategy"},
-        {"section": "Stock Forecast and Analyst Predictions"}
+        "Company Overview and Market Position",
+        "Stock Price Trends and Key Drivers",
+        "Financial Performance: Revenue & Profitability",
+        "Macroeconomic and Industry Impact",
+        "Investment Risks and Challenges",
+        "Growth Potential and Innovation Strategy",
+        "Stock Forecast and Analyst Predictions"
     ]
 }
-
     ```
 </Example>
 
@@ -66,13 +60,13 @@ The following are complete examples of the input and output:
     ```json
 {
     "sections": [
-        {"section": "Bitcoin: Technology and Use Cases"},
-        {"section": "Price History and Market Cycles"},
-        {"section": "Institutional Adoption and Regulation"},
-        {"section": "Comparing Bitcoin to Traditional Assets"},
-        {"section": "Security, Scalability, and Network Health"},
-        {"section": "Future Challenges and Innovations"},
-        {"section": "Predictions for Bitcoin's Long-Term Viability"}
+        "Bitcoin: Technology and Use Cases",
+        "Price History and Market Cycles",
+        "Institutional Adoption and Regulation",
+        "Comparing Bitcoin to Traditional Assets",
+        "Security, Scalability, and Network Health",
+        "Future Challenges and Innovations",
+        "Predictions for Bitcoin's Long-Term Viability"
     ]
 }
 
@@ -92,13 +86,13 @@ The following are complete examples of the input and output:
     ```json
 {
     "sections": [
-        {"section": "Introduction to Apple and Microsoft"},
-        {"section": "Recent Stock Performance Comparison"},
-        {"section": "Key Financial Metrics: Revenue, P/E Ratio, EPS"},
-        {"section": "Risk and Volatility Analysis"},
-        {"section": "Industry Trends and Market Position"},
-        {"section": "Future Growth Potential"},
-        {"section": "Stock Performance Comparison Charts"}
+        "Introduction to Apple and Microsoft",
+        "Recent Stock Performance Comparison",
+        "Key Financial Metrics: Revenue, P/E Ratio, EPS",
+        "Risk and Volatility Analysis",
+        "Industry Trends and Market Position",
+        "Future Growth Potential",
+        "Stock Performance Comparison Charts"
     ]
 }
     ```
@@ -118,13 +112,13 @@ The following are complete examples of the input and output:
     ```json
 {
     "sections": [
-        {"section": "Gold as an Asset: Safe Haven or Speculation?"},
-        {"section": "Historical Performance and Inflation Hedge"},
-        {"section": "Supply, Demand, and Central Bank Influence"},
-        {"section": "Comparing Gold to Stocks, Bonds, and Crypto"},
-        {"section": "Market Risks and Volatility Analysis"},
-        {"section": "Investment Strategies: When and How to Buy"},
-        {"section": "Future Outlook: Expert Predictions and Trends"}
+        "Gold as an Asset: Safe Haven or Speculation?",
+        "Historical Performance and Inflation Hedge",
+        "Supply, Demand, and Central Bank Influence",
+        "Comparing Gold to Stocks, Bonds, and Crypto",
+        "Market Risks and Volatility Analysis",
+        "Investment Strategies: When and How to Buy",
+        "Future Outlook: Expert Predictions and Trends"
     ]
 }
 
@@ -146,35 +140,15 @@ The following are complete examples of the input and output:
     ```json
 {
     "sections": [
-        {"section": "Overview of Microsoft Stock"},
-        {"section": "Recent Stock Performance"},
-        {"section": "Key Financial Metrics and Valuation"},
-        {"section": "Risk and Volatility Assessment"},
-        {"section": "Market Trends and Industry Impact"},
-        {"section": "Future Outlook for Microsoft's Stock"},
-        {"section": "Stock Performance Visualization"}
+        "Overview of Microsoft Stock",
+        "Recent Stock Performance",
+        "Key Financial Metrics and Valuation",
+        "Risk and Volatility Assessment",
+        "Market Trends and Industry Impact",
+        "Future Outlook for Microsoft's Stock",
+        "Stock Performance Visualization"
     ]
 }
-
-
-
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "I study finance"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-    {
-        "error": "No recognizable financial topic found in the message"
-    }
     ```
 </Example>
 
