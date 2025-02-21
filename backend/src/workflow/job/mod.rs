@@ -16,6 +16,8 @@ impl JobType {
         match self {
             // Start
             JobType::Pending => Some(JobType::Validation),
+            JobType::Validation => Some(JobType::GenerateTitle),
+            JobType::GenerateTitle => Some(JobType::GenerateSectionNames),
             // Doing
             // TODO: Add the rest of the steps
             // Done
@@ -29,6 +31,7 @@ impl JobType {
         match self {
             JobType::Pending => None,
             JobType::Validation => Some(Box::new(validation::ValidationJob)),
+            JobType::GenerateTitle => Some(Box::new(title::TitleJob)),
             _ => None,
         }
     }
