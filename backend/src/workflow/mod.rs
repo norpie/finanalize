@@ -27,14 +27,14 @@ use surrealdb::sql::Thing;
 pub struct WorkflowState {
     pub id: String,
     pub last_job_type: JobType,
-    pub state: FullReport
+    pub state: FullReport,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SDBWorkflowState {
     pub id: Thing,
     pub last_job_type: JobType,
-    pub state: FullReport
+    pub state: FullReport,
 }
 
 impl From<SDBWorkflowState> for WorkflowState {

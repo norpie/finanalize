@@ -40,7 +40,6 @@ impl Job for SectionNamesJob {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -54,7 +53,7 @@ mod tests {
     #[ignore = "Uses LLM API (External Service)"]
     async fn test_section_job_valid() {
         env_logger::init();
-        let job = SectionNamesJob ;
+        let job = SectionNamesJob;
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,

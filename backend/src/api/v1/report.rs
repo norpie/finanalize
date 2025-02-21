@@ -1,6 +1,8 @@
 use crate::api::ApiResponse;
 use crate::db::SurrealDb;
-use crate::models::{FullReport, FullSDBReport, Report, ReportCreation, SurrealDBReport, SurrealDBUser};
+use crate::models::{
+    FullReport, FullSDBReport, Report, ReportCreation, SurrealDBReport, SurrealDBUser,
+};
 use crate::prelude::FinanalizeError;
 use crate::prelude::*;
 use crate::rabbitmq::PUBLISHER;
