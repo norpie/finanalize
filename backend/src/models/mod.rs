@@ -117,6 +117,7 @@ pub struct FullSDBReport {
     pub updated_at: DateTime<Utc>,
     pub validation: Option<ValidationOutput>,
     pub title: Option<String>,
+    pub sections: Option<Vec<String>>,
 }
 
 impl From<FullSDBReport> for FullReport {
@@ -129,6 +130,7 @@ impl From<FullSDBReport> for FullReport {
             updated_at: report.updated_at.to_utc(),
             validation: report.validation,
             title: report.title,
+            sections: report.sections,
         }
     }
 }
@@ -142,4 +144,5 @@ pub struct FullReport {
     pub updated_at: DateTime<Utc>,
     pub validation: Option<ValidationOutput>,
     pub title: Option<String>,
+    pub sections: Option<Vec<String>>,
 }
