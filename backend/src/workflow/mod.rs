@@ -47,7 +47,7 @@ impl From<SDBWorkflowState> for WorkflowState {
     }
 }
 
-mod job;
+pub mod job;
 
 pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Result<()> {
     let workflow_state: WorkflowState = serde_json::from_slice(&delivery.data)?;

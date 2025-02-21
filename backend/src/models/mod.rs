@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-use crate::workflow::JobType;
+use crate::workflow::{job::validation::models::ValidationOutput, JobType};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -106,4 +106,15 @@ impl ReportCreation {
             updated_at: now,
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FullReport {
+    pub id: String,
+    pub user_input: String,
+    pub status: JobType,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub validation: Option<ValidationOutput>,
+    pub title: Option<String>,
 }
