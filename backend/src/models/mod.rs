@@ -109,6 +109,31 @@ impl ReportCreation {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FullSDBReport {
+    pub id: Thing,
+    pub user_input: String,
+    pub status: JobType,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub validation: Option<ValidationOutput>,
+    pub title: Option<String>,
+}
+
+impl From<FullSDBReport> for FullReport {
+    fn from(report: FullSDBReport) -> Self {
+        FullReport {
+            id: report.id.id.to_string(),
+            user_input: report.user_input,
+            status: report.status,
+            created_at: report.created_at.to_utc(),
+            updated_at: report.updated_at.to_utc(),
+            validation: report.validation,
+            title: report.title,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FullReport {
     pub id: String,
     pub user_input: String,
