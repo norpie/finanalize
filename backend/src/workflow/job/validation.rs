@@ -1,4 +1,4 @@
-use crate::{llm, models::Report, prelude::*, prompting, tasks::Task};
+use crate::{llm, prelude::*, prompting, tasks::Task};
 
 use async_trait::async_trait;
 use models::ValidationOutput;
@@ -28,15 +28,13 @@ pub struct ValidationJob;
 impl Job for ValidationJob {
     /// Expects the previous state to be a `Report`
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
-        let report: Report = serde_json::from_str(&state.state)?;
         let prompt = prompting::get_prompt("validation".into())?;
         let task = Task::new(&prompt);
         let input = models::ValidationInput {
-            message: report.user_input,
+            message: state.state.user_input.clone(),
         };
         let output: ValidationOutput = task.run(llm::API.clone(), &input).await?;
-        dbg!(&output.error);
-        state.state = serde_json::to_string(&output)?;
+        state.state.validation = Some(output);
         Ok(state)
     }
 }
@@ -45,10 +43,10 @@ impl Job for ValidationJob {
 mod tests {
     use super::*;
 
-    use models::ValidationOutput;
-
-    use crate::workflow::{JobType, WorkflowState};
-
+    use crate::{
+        models::FullReport,
+        workflow::{JobType, WorkflowState},
+    };
 
     #[tokio::test]
     #[ignore = "Uses LLM API (External Service)"]
@@ -57,18 +55,18 @@ mod tests {
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
-            state: serde_json::to_string(&Report {
+            state: FullReport {
                 id: "sjaudnhcrlas".into(),
                 user_input: "Hello, World!".into(),
                 status: JobType::Pending,
                 created_at: chrono::Utc::now(),
                 updated_at: chrono::Utc::now(),
-            })
-            .unwrap(),
+                validation: None,
+                title: None,
+            },
         };
         let new_state = job.run(state).await.unwrap();
-        let output: ValidationOutput = serde_json::from_str(&new_state.state).unwrap();
-        assert!(!output.valid);
+        assert!(!new_state.state.validation.unwrap().valid);
     }
 
     #[tokio::test]
@@ -78,17 +76,17 @@ mod tests {
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
-            state: serde_json::to_string(&Report {
+            state: FullReport {
                 id: "sjaudnhcrlas".into(),
                 user_input: "Apple stock in 2025".into(),
                 status: JobType::Pending,
                 created_at: chrono::Utc::now(),
                 updated_at: chrono::Utc::now(),
-            })
-            .unwrap(),
+                validation: None,
+                title: None,
+            },
         };
         let new_state = job.run(state).await.unwrap();
-        let output: ValidationOutput = serde_json::from_str(&new_state.state).unwrap();
-        assert!(output.valid);
+        assert!(new_state.state.validation.unwrap().valid);
     }
 }
