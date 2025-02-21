@@ -55,6 +55,7 @@ mod tests {
                 updated_at: chrono::Utc::now(),
                 validation: None,
                 title: None,
+                sections: None,
             },
         };
         job.run(state).await.unwrap().state.title.unwrap();

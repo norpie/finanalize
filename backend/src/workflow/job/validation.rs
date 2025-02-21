@@ -63,6 +63,7 @@ mod tests {
                 updated_at: chrono::Utc::now(),
                 validation: None,
                 title: None,
+                sections: None,
             },
         };
         let new_state = job.run(state).await.unwrap();
@@ -84,6 +85,7 @@ mod tests {
                 updated_at: chrono::Utc::now(),
                 validation: None,
                 title: None,
+                sections: None,
             },
         };
         let new_state = job.run(state).await.unwrap();
