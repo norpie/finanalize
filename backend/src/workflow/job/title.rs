@@ -57,6 +57,8 @@ mod tests {
                 title: None,
                 sections: None,
                 sub_sections: None,
+                searches: None,
+                sources: None
             },
         };
         job.run(state).await.unwrap().state.title.unwrap();
