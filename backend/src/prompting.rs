@@ -11,6 +11,7 @@ pub fn get_prompt(id: String) -> Result<String> {
         .ok_or_else(|| FinanalizeError::MissingPromptFile(prompt_path.clone()))?
         .contents_utf8()
         .ok_or_else(|| FinanalizeError::MissingPromptUTF8(prompt_path))?
+        .trim_end()
         .to_string();
 
     Ok(prompt)
