@@ -76,6 +76,8 @@ mod tests {
                     "Conclusion".into(),
                 ]),
                 sub_sections: None,
+                searches: None,
+                sources: None,
             },
         };
         let state = job.run(state).await.unwrap();

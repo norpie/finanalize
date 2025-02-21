@@ -65,6 +65,8 @@ mod tests {
                 title: None,
                 sections: None,
                 sub_sections: None,
+                searches: None,
+                sources: None,
             },
         };
         let new_state = job.run(state).await.unwrap();
@@ -88,6 +90,8 @@ mod tests {
                 title: None,
                 sections: None,
                 sub_sections: None,
+                searches: None,
+                sources: None,
             },
         };
         let new_state = job.run(state).await.unwrap();
