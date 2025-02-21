@@ -5,10 +5,11 @@ use super::{JobType, WorkflowState};
 
 pub mod validation;
 pub mod title;
+pub mod section_names;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
-    async fn run(&self, input: WorkflowState) -> Result<WorkflowState>;
+    async fn run(&self, state: WorkflowState) -> Result<WorkflowState>;
 }
 
 impl JobType {
