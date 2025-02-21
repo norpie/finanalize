@@ -120,6 +120,7 @@ pub struct FullSDBReport {
     pub sections: Option<Vec<String>>,
     pub sub_sections: Option<Vec<Vec<String>>>,
     pub searches: Option<Vec<String>>,
+    pub search_results: Option<Vec<String>>,
     pub sources: Option<Vec<String>>,
 }
 
@@ -136,6 +137,7 @@ impl From<FullSDBReport> for FullReport {
             sections: report.sections,
             sub_sections: report.sub_sections,
             searches: report.searches,
+            search_results: report.search_results,
             sources: report.sources,
         }
     }
@@ -153,5 +155,6 @@ pub struct FullReport {
     pub sections: Option<Vec<String>>,
     pub sub_sections: Option<Vec<Vec<String>>>,
     pub searches: Option<Vec<String>>,
+    pub search_results: Option<Vec<String>>,
     pub sources: Option<Vec<String>>,
 }
