@@ -121,7 +121,7 @@ pub enum JobType {
     Pending,
     Validation,
     GenerateTitle,
-    GenerateSectionHeadings,
+    GenerateSectionNames,
     GenerateParagraphBullets,
     GenerateSearchQueries,
     SearchQueries,
