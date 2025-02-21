@@ -1,57 +1,39 @@
-This tool generates relevant search search_queries based on the first-level headings, current date, and the detailed paragraphs from each section of a financial analysis. The aim is to create search terms that users are likely to enter into a search engine when looking for information on the topic of each heading. The tool will produce three concise, effective queries per paragraph, ensuring that they match the user's search intent and incorporate commonly used financial terminology. These search queries will help users quickly find relevant information in a manner aligned with typical search patterns. If a heading is too broad, the tool should refine it into more specific search phrases. The generated search_queries should avoid unnecessary words and be formatted as natural search engine queries.
+This tool generates relevant search queries based on the first and second level sections, and current date.
+The aim is to create search terms that users are likely to enter into a search engine when looking for information on the topic of each heading.
+The tool will produce three concise, effective queries per subsection, ensuring that they match the user's search intent and incorporate commonly used financial terminology.
+These search queries will help users quickly find relevant information in a manner aligned with typical search patterns.
+If a section is too broad, the tool should refine it into more specific search phrases.
+The generated queries should avoid unnecessary words and be formatted as natural search engine queries.
 
 Output schema:
 ```json
 {
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "search_queries": {
+    "queries": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "section": {
-            "type": "string"
-          },
-          "subsections": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "subsection": {
-                  "type": "string"
-                },
-                "queries": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  },
-                  "minItems": 3,
-                  "maxItems": 3
-                }
-              },
-              "required": ["subsection", "queries"]
-            }
-          }
-        },
-        "required": ["section", "subsections"]
-      }
+      "items": [
+        {
+          "type": "string"
+        }
+      ]
     }
   },
-  "required": ["search_queries"]
+  "required": [
+    "queries"
+  ]
 }
 ```
 
 
 <Input>
 ```json
-{
-    "currentDate": {{currentDate}},
-    "subsections": {{{subsections}}}
-}
+{{{input}}}
 ```
 </Input>
 
 <Output>
 ```json
 {
+    "queries"
