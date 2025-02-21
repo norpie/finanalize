@@ -45,6 +45,8 @@ mod sec;
 mod tasks;
 #[allow(dead_code)]
 mod workflow;
+mod credit;
+#[allow(dead_code)]
 
 #[tokio::main]
 async fn main() -> Result<()> {
