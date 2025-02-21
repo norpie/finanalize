@@ -118,6 +118,7 @@ pub struct FullSDBReport {
     pub validation: Option<ValidationOutput>,
     pub title: Option<String>,
     pub sections: Option<Vec<String>>,
+    pub sub_sections: Option<Vec<Vec<String>>>,
 }
 
 impl From<FullSDBReport> for FullReport {
@@ -131,6 +132,7 @@ impl From<FullSDBReport> for FullReport {
             validation: report.validation,
             title: report.title,
             sections: report.sections,
+            sub_sections: report.sub_sections,
         }
     }
 }
@@ -145,4 +147,5 @@ pub struct FullReport {
     pub validation: Option<ValidationOutput>,
     pub title: Option<String>,
     pub sections: Option<Vec<String>>,
+    pub sub_sections: Option<Vec<Vec<String>>>,
 }
