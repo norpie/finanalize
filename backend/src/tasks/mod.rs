@@ -6,7 +6,7 @@ use log::{debug, error, info, warn};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::Value;
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum RetryStrategy {
     None,
     Count(usize),
@@ -20,23 +20,24 @@ pub enum RetryStrategy {
 ///     closing brace
 ///     - RemoveTrailingComma: Remove the trailing comma at the end of the JSON
 ///     - InsertClosedBrace: Keep inserting closing braces until the JSON is valid (max 3)
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FixStrategy {
     RemoveTrailingAlphanumeric,
     RemoveTrailingComma,
     InsertClosedBrace,
 }
 
-pub struct Task<'a> {
-    prompt: &'a str,
+#[derive(Debug, Clone)]
+pub struct Task {
+    prompt: String,
     retry_strategy: RetryStrategy,
     fix_strategies: Vec<FixStrategy>,
 }
 
-impl<'a> Task<'a> {
-    pub fn new(template: &'a str) -> Self {
+impl Task {
+    pub fn new(template: &str) -> Self {
         Self {
-            prompt: template,
+            prompt: template.into(),
             retry_strategy: RetryStrategy::None,
             fix_strategies: Vec::new(),
         }
@@ -57,7 +58,7 @@ impl<'a> Task<'a> {
         T: Serialize,
         U: DeserializeOwned + std::fmt::Debug,
     {
-        let prompt = Handlebars::default().render_template(self.prompt, input)?;
+        let prompt = Handlebars::default().render_template(&self.prompt, input)?;
         info!(
             "Starting task with retry strategy: {:?}",
             self.retry_strategy
@@ -112,6 +113,7 @@ impl<'a> Task<'a> {
         debug!("Deserializing output into value.");
         let value: Value = self.deserialize_into_value(json)?;
         debug!("Deserializing value into struct.");
+        dbg!(&value);
         Ok(serde_json::from_value(value)?)
     }
 
