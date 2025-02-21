@@ -52,7 +52,7 @@ mod tests {
 
     #[tokio::test]
     #[ignore = "Uses LLM API (External Service)"]
-    async fn test_title_job_valid() {
+    async fn test_section_job_valid() {
         env_logger::init();
         let job = SectionNamesJob ;
         let state = WorkflowState {
