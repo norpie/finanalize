@@ -2,7 +2,6 @@ use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowStat
 
 use async_trait::async_trait;
 use models::{SubSectionsInput, SubSectionsOutput};
-use tokio::task::JoinHandle;
 
 use super::Job;
 
@@ -11,14 +10,17 @@ pub mod models {
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
     pub struct SubSectionsInput {
-        pub message: String,
-        pub title: String,
-        pub section: String,
+        pub sections: Vec<String>,
+    }
+
+    #[derive(Debug, Clone, Serialize, Deserialize)]
+    pub struct RawSubSectionsInput {
+        pub input: String,
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
     pub struct SubSectionsOutput {
-        pub sub_sections: Vec<String>,
+        pub sub_sections: Vec<Vec<String>>,
     }
 }
 
@@ -29,39 +31,15 @@ impl Job for SubSectionsJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         let prompt = prompting::get_prompt("subsection".into())?;
         let task = Task::new(&prompt);
-        let mut handles = vec![];
-        for (i, section) in state
-            .state
-            .sections
-            .clone()
-            .unwrap()
-            .into_iter()
-            .enumerate()
-        {
-            let state = state.state.clone();
-            let task = task.clone();
-            let handle: JoinHandle<Result<Vec<String>>> = tokio::spawn(async move {
-                let input = SubSectionsInput {
-                    message: state.user_input,
-                    title: state.title.unwrap(),
-                    section,
-                };
-                let output: SubSectionsOutput = task.run(API.clone(), &input).await?;
-                Ok(output.sub_sections)
-            });
-            handles.push((i, handle));
-        }
-        let mut indexed_sub_sections = Vec::with_capacity(handles.len());
-        for (i, handle) in handles {
-            let result = handle.await?;
-            indexed_sub_sections.push((i, result?));
-        }
-        indexed_sub_sections.sort_by_key(|(i, _)| *i);
-        let sub_sections = indexed_sub_sections
-            .into_iter()
-            .map(|(_, sub_sections)| sub_sections)
-            .collect();
-        state.state.sub_sections = Some(sub_sections);
+        let task = task.clone();
+        let input = SubSectionsInput {
+            sections: state.state.sections.clone().unwrap(),
+        };
+        let raw_input = models::RawSubSectionsInput {
+            input: serde_json::to_string(&input)?,
+        };
+        let output: SubSectionsOutput = task.run(API.clone(), &raw_input).await?;
+        state.state.sub_sections = Some(output.sub_sections);
         Ok(state)
     }
 }
