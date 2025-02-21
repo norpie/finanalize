@@ -9,6 +9,7 @@ pub mod section_names;
 pub mod sub_sections;
 pub mod search_queries;
 pub mod search_terms;
+pub mod scrape_pages;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
