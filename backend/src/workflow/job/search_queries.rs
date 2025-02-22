@@ -112,6 +112,7 @@ mod tests {
                 searches: None,
                 search_results: None,
                 sources: None,
+                report: None,
             },
         };
         let state = job.run(state).await.unwrap();

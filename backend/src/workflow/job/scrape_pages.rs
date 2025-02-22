@@ -38,10 +38,6 @@ impl Job for ScrapePagesJob {
     }
 }
 
-/*
-
-*/
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -101,6 +97,7 @@ mod tests {
                     .collect(),
                 ),
                 sources: None,
+                report: None,
             },
         };
         let state = job.run(state).await.unwrap();
