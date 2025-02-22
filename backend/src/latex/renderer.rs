@@ -66,11 +66,12 @@ pub fn construct_report(
     compile_latex(output_path, destination_folder, false)?;
     compile_latex(output_path, destination_folder, false)?;
     // Cleanup destination folder as to only include the pdf
+    let pdf_path = output_path.with_extension("pdf");
     cleanup_destination_folder(destination_folder)?;
     Ok(PdfReport {
         uuid,
         report_title,
-        report_path: output_path.to_str().unwrap().to_string(),
+        report_path: pdf_path.to_str().unwrap().to_string(),
     })
 }
 
