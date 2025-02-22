@@ -70,6 +70,7 @@ mod tests {
                 searches: None,
                 search_results: None,
                 sources: None,
+                report: None,
             },
         };
         job.run(state).await.unwrap().state.sections.unwrap();
