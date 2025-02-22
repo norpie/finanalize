@@ -3,6 +3,7 @@ use async_trait::async_trait;
 
 use super::{JobType, WorkflowState};
 
+pub mod generate_report;
 pub mod scrape_pages;
 pub mod search_queries;
 pub mod search_terms;
@@ -10,7 +11,6 @@ pub mod section_names;
 pub mod sub_sections;
 pub mod title;
 pub mod validation;
-pub mod generate_report;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {

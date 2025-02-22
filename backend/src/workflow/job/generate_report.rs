@@ -1,11 +1,11 @@
 use async_trait::async_trait;
 
-use crate::latex::{self, LatexCommand, LatexComponent, Section, Source, Subsection};
+use crate::latex::{self, LatexComponent, Section, Source, Subsection};
 use crate::prelude::*;
 
 use crate::workflow::WorkflowState;
 
-use super::{sub_sections, Job};
+use super::Job;
 
 pub mod models {}
 
