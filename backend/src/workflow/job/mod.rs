@@ -10,15 +10,12 @@ pub mod section_names;
 pub mod sub_sections;
 pub mod title;
 pub mod validation;
+pub mod generate_report;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
     async fn run(&self, state: WorkflowState) -> Result<WorkflowState>;
 }
-
-/*
-
-*/
 
 impl JobType {
     pub fn next(&self) -> Option<JobType> {
@@ -31,6 +28,7 @@ impl JobType {
             JobType::GenerateSectionNames => Some(JobType::GenerateSubSections),
             JobType::GenerateSubSections => Some(JobType::GenerateSearchQueries),
             JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
+            JobType::SearchQueries => Some(JobType::GeneratePDFReport),
             // Done
             JobType::Invalid => None,
             JobType::Done => None,
@@ -49,6 +47,7 @@ impl JobType {
                 Some(Box::new(search_queries::GenerateSearchQueriesJob))
             }
             JobType::SearchQueries => Some(Box::new(search_terms::SearchJob)),
+            JobType::GeneratePDFReport => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }
     }
