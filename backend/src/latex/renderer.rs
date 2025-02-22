@@ -21,9 +21,9 @@ struct BibData {
 
 #[derive(Debug)]
 pub struct PdfReport {
-    uuid: String,
-    report_title: String,
-    report_path: String,
+    pub uuid: String,
+    pub report_title: String,
+    pub report_path: String,
 }
 
 pub fn construct_report(

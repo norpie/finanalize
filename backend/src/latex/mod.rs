@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use serde::Serialize;
 
-mod renderer;
+pub mod renderer;
 
 pub enum LatexComponent {
     Section(Section),
@@ -17,42 +17,42 @@ pub enum LatexComponent {
 }
 
 pub struct Section {
-    heading: String,
+    pub heading: String,
 }
 
 pub struct Subsection {
-    heading: String,
+    pub heading: String,
 }
 
 pub struct Figure {
-    caption: String,
-    path: String,
+    pub caption: String,
+    pub path: String,
 }
 
 pub struct Table {
-    caption: String,
-    rows: Vec<Vec<String>>,
-    columns: Vec<String>,
+    pub caption: String,
+    pub rows: Vec<Vec<String>>,
+    pub columns: Vec<String>,
 }
 
 pub struct Quotation {
-    text: String,
-    author: String,
+    pub text: String,
+    pub author: String,
 }
 
 pub struct Citation {
-    source: String,
+    pub source: String,
 }
 
 pub struct List {
-    is_numbered: bool,
-    items: Vec<String>,
+    pub is_numbered: bool,
+    pub items: Vec<String>,
 }
 
 pub struct Link {
-    is_mailto: bool,
-    text: String,
-    url: String,
+    pub is_mailto: bool,
+    pub text: String,
+    pub url: String,
 }
 
 // pub struct Equation {
@@ -69,6 +69,29 @@ pub struct Source {
     journal: String,
     url: String,
 }
+
+impl Source {
+    pub fn new(
+        source_type: String,
+        citation_key: String,
+        author: String,
+        title: String,
+        year: i32,
+        journal: String,
+        url: String,
+    ) -> Self {
+        Source {
+            source_type,
+            citation_key,
+            author,
+            title,
+            year,
+            journal,
+            url,
+        }
+    }
+}
+
 #[derive(Serialize)]
 pub struct LatexCommand {
     command: String,
