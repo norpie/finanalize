@@ -8,8 +8,11 @@ use crate::prelude::*;
 use crate::rabbitmq::PUBLISHER;
 use crate::workflow::{JobType, WorkflowState};
 use actix_web::web::{self, Data, Json, Path};
-use actix_web::{get, post, Responder};
+use actix_web::{get, post, rt, HttpRequest, Responder};
+use futures_util::StreamExt;
 use serde::{Deserialize, Serialize};
+use surrealdb::Notification;
+use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct ReportCreationLight {
@@ -170,4 +173,46 @@ pub async fn get_reports(
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ReportQuery {
     reports: Vec<SurrealDBReport>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ReportUpdate {
+    report_id: String,
+    status: JobType,
+}
+
+#[get("/live/reports/{report_id}")]
+pub async fn get_live_report(
+    req: HttpRequest,
+    stream: web::Payload,
+    db: Data<SurrealDb>,
+    report_id: Path<String>,
+    user: SurrealDBUser,
+) -> Result<impl Responder> {
+    let db_user = db.query("SELECT id FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports WHERE id = $report;")
+        .bind(("user", user.id))
+        .bind(("report", Thing::from(("report", report_id.as_str()))))
+        .await?.take::<Option<Thing>>(0)?.is_some();
+    if !db_user {
+        return Err(FinanalizeError::NotFound.into());
+    }
+
+    let (res, mut session, stream) = actix_ws::handle(&req, stream)?;
+
+    let db = db.get_ref().clone();
+    let report_id = Thing::from(("report", report_id.as_str()));
+    let mut stream = db
+        .query("LIVE SELECT * FROM $report")
+        .bind(("report", report_id))
+        .await?
+        .stream::<Notification<SurrealDBReport>>(0)?;
+    rt::spawn(async move { while let Some(Ok(notification)) = stream.next().await {
+        let report_update = ReportUpdate {
+            report_id: notification.data.id.id.to_string(),
+            status: notification.data.status,
+        };
+        session.text(serde_json::to_string_pretty(&report_update).unwrap()).await.unwrap();
+    } });
+
+    Ok(res)
 }

@@ -8,7 +8,7 @@
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import { get, post } from '$lib/request';
-	import { onMount } from 'svelte';
+	import {onDestroy, onMount} from 'svelte';
 	import Spinner from '$lib/components/spinner.svelte';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
@@ -21,7 +21,36 @@
 	}
 
 	let reports: Report[] = $state([]);
+	let sockets: Record<string, WebSocket> = {};
+	let shouldReconnect: boolean = true;
+	let reconnectTimeout: number = 2000;
 
+	function connectSocket(reportId: string){
+		if(!reportId || sockets[reportId]) return;
+		const url = import.meta.env.VITE_BACKEND_URL;
+		const ws = new WebSocket(`${url}/v1/protected/live/reports/${reportId}`);
+		ws.onmessage = (event) => {
+			const data = JSON.parse(event.data);
+			console.log(data);
+		}
+		ws.onerror = (event) => {
+			console.error(event);
+		}
+		ws.onclose = (event) => {
+			console.log(`Socket closed for ${reportId}: `, event);
+			delete sockets[reportId];
+			if(shouldReconnect){
+				setTimeout(() => connectSocket(reportId), reconnectTimeout);
+			}
+		}
+	}
+
+	function disconnectSockets(){
+		shouldReconnect = false;
+		Object.values(sockets).forEach((socket) => {
+			socket.close();
+		});
+	}
 	function boop(page: number) {
 		console.log(page);
 	}
@@ -81,6 +110,14 @@
 
 	onMount(async () => {
 		reports = (await get<Report[]>('v1/protected/reports?page=0&perPage=20')).result;
+		shouldReconnect = true;
+		reports.forEach((report) => {
+			connectSocket(report.id);
+		});
+	});
+
+	onDestroy(() => {
+	disconnectSockets();
 	});
 </script>
 

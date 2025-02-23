@@ -1,3 +1,4 @@
+use actix_web::Error;
 use derive_more::derive::Display;
 use fantoccini::error::{CmdError, NewSessionError};
 use selectors::parser::SelectorParseErrorKind;
@@ -68,6 +69,14 @@ pub enum FinanalizeError {
     PoolError(#[from] deadpool::unmanaged::PoolError),
     #[error("pdf_extract error: {0}")]
     Output(#[from] pdf_extract::OutputError),
+    #[error("Actix Websocket error: {0}")]
+    Websocket(String),
+}
+
+impl From<actix_web::Error> for FinanalizeError {
+    fn from(value: Error) -> Self {
+        Self::Websocket(value.to_string())
+    }
 }
 
 // #[error("Fantoccini error: {0}")]
