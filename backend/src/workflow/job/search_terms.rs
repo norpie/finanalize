@@ -2,7 +2,7 @@ use crate::{prelude::*, search::SEARCH, workflow::WorkflowState};
 
 use async_trait::async_trait;
 use log::debug;
-use tokio::task::{self, JoinSet};
+use tokio::task::JoinSet;
 
 use super::Job;
 
