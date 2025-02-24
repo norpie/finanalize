@@ -28,7 +28,9 @@ impl JobType {
             JobType::GenerateSectionNames => Some(JobType::GenerateSubSections),
             JobType::GenerateSubSections => Some(JobType::GenerateSearchQueries),
             JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
-            JobType::SearchQueries => Some(JobType::GeneratePDFReport),
+            JobType::SearchQueries => Some(JobType::ScrapeTopResults),
+            JobType::ScrapeTopResults => Some(JobType::GeneratePDFReport),
+            JobType::GeneratePDFReport => Some(JobType::Done),
             // Done
             JobType::Invalid => None,
             JobType::Done => None,
@@ -47,6 +49,7 @@ impl JobType {
                 Some(Box::new(search_queries::GenerateSearchQueriesJob))
             }
             JobType::SearchQueries => Some(Box::new(search_terms::SearchJob)),
+            JobType::ScrapeTopResults => Some(Box::new(scrape_pages::ScrapePagesJob)),
             JobType::GeneratePDFReport => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }
