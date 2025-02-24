@@ -1,0 +1,40 @@
+This tool analyzes a given text and recommends 1-2 appropriate charts or tables to effectively visualize key insights. It selects from a predefined list of chart types and suggests a table if it's more suitable. For each recommendation, the tool specifies the type, purpose, data used, and axis assignment. If there is insufficient data for relevant visualizations, the tool returns an error message.
+
+Output schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "graphics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "type": "string" },
+          "purpose": { "type": "string" },
+          "data_used": { "type": "string" },
+          "axis_assignment": { "type": "string" }
+        },
+        "required": ["type", "purpose", "data_used", "axis_assignment"]
+      }
+    },
+    "error": {
+      "type": "string"
+    }
+  },
+  "required": ["graphics"]
+}
+```
+
+<Input>
+```json
+{
+  "chart_options": {{chart_options}},
+  "text": "{{text}}"
+}
+```
+</Input>
+
+<Output>
+```json
+{
