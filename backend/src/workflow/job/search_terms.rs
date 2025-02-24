@@ -2,6 +2,7 @@ use crate::{prelude::*, search::SEARCH, workflow::WorkflowState};
 
 use async_trait::async_trait;
 use log::debug;
+use tokio::task::{self, JoinSet};
 
 use super::Job;
 
@@ -10,16 +11,29 @@ pub struct SearchJob;
 #[async_trait]
 impl Job for SearchJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
-        let mut all_urls = vec![];
         let searches = state.state.searches.clone().unwrap();
         let total = searches.len();
+
+        // Create a vector to hold the futures
+        let mut search_futures = JoinSet::new();
+
         for (i, search) in searches.into_iter().enumerate() {
             debug!("Searching for {} ({}/{})", search, i + 1, total);
-            let result = SEARCH.clone().search(&search).await?;
-            all_urls.extend(result);
+            // Spawn each search as a separate task and push the future to the vector
+            search_futures.spawn(async move { SEARCH.clone().search(&search).await });
         }
+
+        // Join all futures concurrently
+        let search_results = search_futures.join_all().await;
+        let mut all_urls = Vec::new();
+        for result in search_results.into_iter() {
+            all_urls.extend(result?);
+        }
+
+        // Sort and deduplicate URLs
         all_urls.sort();
         all_urls.dedup();
+
         state.state.search_results = Some(all_urls);
         Ok(state)
     }
