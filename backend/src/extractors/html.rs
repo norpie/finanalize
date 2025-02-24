@@ -1,29 +1,26 @@
 use crate::prelude::*;
 use async_trait::async_trait;
 use scraper::{ElementRef, Html, Selector};
-use tokio::fs::File;
-use tokio::io::AsyncReadExt;
 use tokio::task;
-use super::ContentExtract;
-use super::Content;
+use super::{Content, ContentExtract, FileType};
+use crate::extractors::md::MarkdownExtractor;
 
 pub struct HTMLExtractor;
 
 #[async_trait]
 impl ContentExtract for HTMLExtractor {
-    async fn extract(&self, file_path: &str) -> Result<Vec<Content>> {
-        let mut file = File::open(file_path).await.map_err(FinanalizeError::from)?;
-        let mut buffer = String::new();
-        file.read_to_string(&mut buffer)
-            .await
-            .map_err(FinanalizeError::from)?;
+    async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
+        // Ensure the input is of the correct type
+        let FileType::Html(input) = file else {
+            return Err(FinanalizeError::ParseError("Invalid input type".to_string()));
+        };
 
         // Move parsing into a blocking thread to avoid `Send` issues
         let extracted_texts = task::spawn_blocking(move || {
-            let document = Html::parse_document(&buffer);
+            let document = Html::parse_document(&input);
 
-            // Select all `div` and `article` elements inside `<body>`
-            let selector = Selector::parse("body > div, body > article")
+            // Select all `div` and `article` elements
+            let selector = Selector::parse("div, article")
                 .map_err(|err| FinanalizeError::ParseError(format!("{:?}", err)))?;
 
             let mut texts = vec![];
@@ -32,9 +29,12 @@ impl ContentExtract for HTMLExtractor {
                 // Check if the element is NOT inside ignored tags
                 if !is_inside_ignored_section(element) {
                     let text = element.text().collect::<Vec<_>>().join(" ");
+                    println!("Extracted text: {}", text); // Debug log
                     if !text.is_empty() {
                         texts.push(text);
                     }
+                } else {
+                    println!("Ignored element: {:?}", element.value().name()); // Debug log
                 }
             }
 
@@ -47,10 +47,14 @@ impl ContentExtract for HTMLExtractor {
         .await
         .map_err(|_| FinanalizeError::InternalServerError)??;
 
-        // Wrap the extracted texts in `Content::Html` variants
-        let content = extracted_texts.into_iter().map(Content::Html).collect();
+        let markdown_extractor = MarkdownExtractor;
 
-        Ok(content)
+        // Convert extracted HTML content to Markdown using MarkdownExtractor
+        let result = markdown_extractor
+            .extract(FileType::MarkDown(extracted_texts.join("\n")))
+            .await?;
+
+        Ok(result)
     }
 }
 
@@ -90,28 +94,32 @@ mod tests {
         </html>
         "#;
 
-        let file_path = "test.html";
-        tokio::fs::write(file_path, test_html)
-            .await
-            .expect("Could not create test.html");
-
+        let file = FileType::Html(test_html.to_string());
         let extractor = HTMLExtractor;
-        let result = extractor.extract(file_path).await.unwrap();
 
-        println!("Extracted content: {:?}", result);
+        match extractor.extract(file).await {
+            Ok(result) => {
+                println!("Extraction result: {:?}", result);
+                // Ensure there is one Markdown entry
+                assert_eq!(result.len(), 1);
 
-        // Check extracted content
-        assert!(result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Main Content"))));
-        assert!(result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Another Important Section"))));
+                if let Content::MarkDown(markdown) = &result[0] {
+                    // Check the Markdown output
+                    assert!(markdown.contains("Main Content"), "Expected 'Main Content' in Markdown output");
+                    assert!(markdown.contains("Another Important Section"), "Expected 'Another Important Section' in Markdown output");
 
-        // Ensure unwanted elements are not included
-        assert!(!result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Header Title"))));
-        assert!(!result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Navigation Links"))));
-        assert!(!result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Sidebar Content"))));
-        assert!(!result.iter().any(|content| matches!(content, Content::Html(text) if text.contains("Footer Information"))));
-
-        tokio::fs::remove_file(file_path)
-            .await
-            .expect("Could not delete test.html");
+                    // Ensure ignored sections are not included
+                    assert!(!markdown.contains("Header Title"), "Ignored section 'Header Title' found in Markdown output");
+                    assert!(!markdown.contains("Navigation Links"), "Ignored section 'Navigation Links' found in Markdown output");
+                    assert!(!markdown.contains("Sidebar Content"), "Ignored section 'Sidebar Content' found in Markdown output");
+                    assert!(!markdown.contains("Footer Information"), "Ignored section 'Footer Information' found in Markdown output");
+                } else {
+                    panic!("Expected Content::MarkDown variant");
+                }
+            }
+            Err(err) => {
+                panic!("Test failed with error: {:?}", err);
+            }
+        }
     }
 }
