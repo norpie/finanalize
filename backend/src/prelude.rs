@@ -65,7 +65,7 @@ pub enum FinanalizeError {
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
     #[error("Deadpool error: {0}")]
-    PoolError(#[from] deadpool::unmanaged::PoolError)
+    PoolError(#[from] deadpool::unmanaged::PoolError),
 }
 
 // #[error("Fantoccini error: {0}")]

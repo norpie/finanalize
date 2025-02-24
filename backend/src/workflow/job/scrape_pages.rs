@@ -5,14 +5,11 @@ use crate::{prelude::*, workflow::WorkflowState};
 use super::Job;
 
 use async_trait::async_trait;
-use deadpool::{
-    managed::Manager,
-    unmanaged::{Object, Pool},
-};
+use deadpool::unmanaged::{Object, Pool};
 use fantoccini::{Client, ClientBuilder};
 use log::debug;
 use serde_json::json;
-use tokio::{io::Join, sync::Mutex, task::JoinSet};
+use tokio::{sync::Mutex, task::JoinSet};
 
 pub mod models {}
 
