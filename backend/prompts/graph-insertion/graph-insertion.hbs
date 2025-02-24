@@ -1,0 +1,32 @@
+This tool analyzes the given text and graph to determine the most suitable location for inserting the graph. It identifies the point in the text where the graph would provide the most clarity or enhance understanding. The output specifies the recommended position by referencing the closest surrounding content. If no suitable location is found, the tool returns an error message indicating that the graph does not fit meaningfully into the text.
+
+Output schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "position": {
+      "type": "string",
+      "description": "The recommended location in the text for inserting the graph."
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if no suitable position is found."
+    }
+  },
+  "required": ["position"]
+}
+```
+
+<Input>
+```json
+{
+  "text": "{{text}}",
+  "graph": "{{graph_description}}"
+}
+```
+</Input>
+
+<Output>
+```json
+{
