@@ -123,6 +123,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore = "Depends on external services"]
     async fn test_process_state() {
         env_logger::init();
         let mut state = WorkflowState {
