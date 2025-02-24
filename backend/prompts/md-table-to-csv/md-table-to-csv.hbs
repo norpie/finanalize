@@ -1,0 +1,31 @@
+This tool converts a Markdown table into a properly formatted CSV file. It takes a Markdown table as input, processes the structure, and outputs a CSV where each row corresponds to a table row, and each column is separated by commas. Extra spaces, table borders (|), and alignment symbols (:) are removed. If the input is not a valid Markdown table, the tool returns an error message indicating the issue.
+
+Output schema:
+```json
+{
+  "type": "object",
+  "properties": {
+    "csv": {
+      "type": "string",
+      "description": "CSV formatted output of the provided Markdown table."
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if the input is not a valid Markdown table."
+    }
+  },
+  "required": ["csv"]
+}
+```
+
+<Input>
+```json
+{
+  "markdown_table": "{{markdown_table}}"
+}
+```
+</Input>
+
+<Output>
+```json
+{
