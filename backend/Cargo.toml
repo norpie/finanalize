@@ -35,3 +35,4 @@ log = "0.4.25"
 env_logger = "0.11.6"
 include_dir = "0.7.4"
 uuid = { version = "1.13.1", features = ["v4"] }
+deadpool = "0.12.2"
