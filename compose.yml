@@ -59,19 +59,6 @@ services:
     env_file: ".env"
 
 
-  ullm:
-    container_name: ullm
-    build: https://github.com/norpie/uLLM-API.git#main
-    ports:
-      - 8082:8080
-    devices:
-      - /dev/kfd
-      - /dev/dri
-    security_opt:
-      - seccomp=unconfined
-    volumes:
-      - "${MODELS_DIR}:/data/models"
-
 
 volumes:
   surrealdb-data:
