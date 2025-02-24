@@ -1,35 +1,71 @@
+use std::io::{BufWriter, Write};
+
+use super::{html::HTMLExtractor, Content, ContentExtract, FileType};
 use crate::prelude::*;
+use async_trait::async_trait;
 use lopdf::Document;
-use tokio::fs::File;
-use tokio::io::AsyncReadExt;
+use pdf_extract::HTMLOutput;
+// Import Error for `lopdf`
+use tokio::task;
 
-use super::text::TextExtractor;
-use super::ContentExtract;
+pub struct PdfExtractor;
 
-pub struct PDFExtractor;
+#[async_trait]
+impl ContentExtract for PdfExtractor {
+    async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
+        let FileType::Pdf(buffer) = file else {
+            return Err(FinanalizeError::ParseError(
+                "Invalid input type".to_string(),
+            ));
+        };
 
-impl PDFExtractor {
-    pub async fn extract(mut file: File) -> Result<Vec<String>> {
-        let mut buffer = Vec::new();
-        file.read_to_end(&mut buffer)
-            .await
-            .map_err(FinanalizeError::from)?;
+        // Perform PDF extraction in a blocking thread
+        let html_content = task::spawn_blocking(move || {
+            // Load the PDF document from the buffer using lopdf's `load_from` function
+            let doc = Document::load_mem(&*buffer)?;
 
-        let doc = Document::load_mem(&buffer).map_err(FinanalizeError::from)?;
+            // Create a buffer to write into
+            let mut buffer = Vec::new();
 
-        let mut extracted_text = String::new();
-
-        for (_, (page_id, _)) in doc.get_pages().iter() {
-            if let Ok(text) = doc.extract_text(&[*page_id]) {
-                extracted_text.push_str(&text);
-                extracted_text.push('\n');
+            // Wrap the buffer with BufWriter
+            {
+                let mut writer = BufWriter::new(&mut buffer);
+                let mut output = HTMLOutput::new(&mut writer);
+                pdf_extract::output_doc(&doc, &mut output)?;
+                writer.flush()?;
             }
-        }
+            let output = String::from_utf8(buffer)?;
 
-        if extracted_text.is_empty() {
-            return Err(FinanalizeError::NotFound);
-        }
+            Ok::<_, FinanalizeError>(output) // Return the HTML-wrapped extracted text
+        })
+        .await??;
 
-        TextExtractor {}.extract(&extracted_text).await
+        let result = HTMLExtractor
+            .extract(FileType::Html(html_content))
+            .await?;
+
+        // Return the extracted HTML content wrapped in Content::Html
+        Ok(result)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_pdf_extraction() {
+        // Use the sample PDF data directly
+        let sample_pdf_data = include_bytes!("../../tests/sample.pdf");
+
+        let extractor = PdfExtractor;
+
+        // Extract the content from the PDF
+        let result = extractor
+            .extract(FileType::Pdf(sample_pdf_data.to_vec()))
+            .await
+            .unwrap();
+
+        assert_eq!(result.len(), 1);
     }
 }
