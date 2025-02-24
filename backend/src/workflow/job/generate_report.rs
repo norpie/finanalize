@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use log::debug;
 
 use crate::latex::{self, LatexComponent, Section, Source, Subsection};
 use crate::prelude::*;
@@ -14,6 +15,24 @@ pub struct GenerateReportJob;
 #[async_trait]
 impl Job for GenerateReportJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        let mut components = Vec::new();
+        for (section, sub_sections) in state.state.sections.clone().unwrap().into_iter().zip(
+            state
+                .state
+                .sub_sections
+                .clone()
+                .unwrap()
+                .into_iter()
+                .map(|sub_sections| sub_sections.into_iter()),
+        ) {
+            components.push(LatexComponent::Section(Section { heading: section }));
+            for sub_section in sub_sections {
+                components.push(LatexComponent::Subsection(Subsection {
+                    heading: sub_section,
+                }));
+            }
+        }
+
         let mut sources = vec![];
         for (i, source) in state
             .state
@@ -34,22 +53,12 @@ impl Job for GenerateReportJob {
             ));
         }
 
-        let mut components = Vec::new();
-        for (section, sub_sections) in state.state.sections.clone().unwrap().into_iter().zip(
-            state
-                .state
-                .sub_sections
-                .clone()
-                .unwrap()
-                .into_iter()
-                .map(|sub_sections| sub_sections.into_iter()),
-        ) {
-            components.push(LatexComponent::Section(Section { heading: section }));
-            for sub_section in sub_sections {
-                components.push(LatexComponent::Subsection(Subsection {
-                    heading: sub_section,
-                }));
-            }
+        components.push(LatexComponent::Text(
+            "This is some content in the last subsection".into(),
+        ));
+
+        for source in &sources {
+            components.push(LatexComponent::Citation(source.citation_key.clone()));
         }
 
         let commands = latex::get_commands(components)?;
@@ -61,6 +70,7 @@ impl Job for GenerateReportJob {
             "Report Subtitle".into(),
         )?;
 
+        debug!("Report can be found at: {}", &report.report_path);
         state.state.report = Some(report.report_path);
         Ok(state)
     }
