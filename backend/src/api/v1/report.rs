@@ -1,5 +1,6 @@
 use crate::api::ApiResponse;
 use crate::db::SurrealDb;
+use crate::jwt::TokenFactory;
 use crate::models::{
     FullReport, FullSDBReport, Report, ReportCreation, SurrealDBReport, SurrealDBUser,
 };
@@ -9,9 +10,10 @@ use crate::rabbitmq::PUBLISHER;
 use crate::workflow::{JobType, WorkflowState};
 use actix_web::web::{self, Data, Json, Path};
 use actix_web::{get, post, rt, HttpRequest, Responder};
+use actix_ws::Message;
 use futures_util::StreamExt;
+use log::debug;
 use serde::{Deserialize, Serialize};
-use surrealdb::Notification;
 use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -174,11 +176,9 @@ pub async fn get_reports(
 pub struct ReportQuery {
     reports: Vec<SurrealDBReport>,
 }
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct ReportUpdate {
-    report_id: String,
-    status: JobType,
+#[derive(Deserialize)]
+struct AuthQuery {
+    bearer: String,
 }
 
 #[get("/live/reports/{report_id}")]
@@ -187,32 +187,54 @@ pub async fn get_live_report(
     stream: web::Payload,
     db: Data<SurrealDb>,
     report_id: Path<String>,
-    user: SurrealDBUser,
+    query: web::Query<AuthQuery>,
+    token_factory: Data<TokenFactory>,
 ) -> Result<impl Responder> {
-    let db_user = db.query("SELECT id FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports WHERE id = $report;")
-        .bind(("user", user.id))
-        .bind(("report", Thing::from(("report", report_id.as_str()))))
-        .await?.take::<Option<Thing>>(0)?.is_some();
-    if !db_user {
-        return Err(FinanalizeError::NotFound.into());
-    }
+    let token = &query.bearer;
+    let user_id = token_factory.subject(token)?;
 
-    let (res, mut session, stream) = actix_ws::handle(&req, stream)?;
+    let db_report_id = Thing::from(("report", report_id.as_str()));
+    let db_user_id = Thing::from(("user", user_id.as_str()));
+    let _report = db
+         .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
+         .bind(("user", db_user_id))
+         .bind(("report", db_report_id.clone()))
+         .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
+
+    let (res, mut session, mut ws) = actix_ws::handle(&req, stream)?;
 
     let db = db.get_ref().clone();
-    let report_id = Thing::from(("report", report_id.as_str()));
-    let mut stream = db
-        .query("LIVE SELECT * FROM $report")
-        .bind(("report", report_id))
-        .await?
-        .stream::<Notification<SurrealDBReport>>(0)?;
-    rt::spawn(async move { while let Some(Ok(notification)) = stream.next().await {
-        let report_update = ReportUpdate {
-            report_id: notification.data.id.id.to_string(),
-            status: notification.data.status,
-        };
-        session.text(serde_json::to_string_pretty(&report_update).unwrap()).await.unwrap();
-    } });
+    let mut stream: surrealdb::method::Stream<Option<SurrealDBReport>> =
+        db.select(("report", report_id.as_str())).live().await?;
 
+    rt::spawn(async move {
+        debug!("starting live query stream");
+        while let Some(res) = stream.next().await {
+            let Ok(notification) = res else {
+                debug!("error {:#?}", res.unwrap_err());
+                break;
+            };
+            debug!("update");
+            let report = &notification.data;
+            let report_status = report.status.clone();
+            session
+                .text(serde_json::to_string_pretty(&report_status).unwrap())
+                .await
+                .unwrap();
+        }
+        while let Some(msg) = ws.next().await {
+            let Ok(msg) = msg else {
+                debug!("Error in message stream: {:?}", msg.unwrap_err());
+                break;
+            };
+            debug!("Received WebSocket message: {:?}", msg);
+            if let Message::Close(_) = msg {
+                debug!("Client closed WebSocket connection.");
+                session.close(None).await.ok();
+                break;
+            }
+        }
+        debug!("ending live query stream");
+    });
     Ok(res)
 }

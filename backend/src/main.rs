@@ -5,11 +5,10 @@ use actix_web::{
     web::{self, Data},
     App, HttpServer, Responder,
 };
-use actix_web::web::service;
 use api::{
     v1::{
         auth::{login, logout, me, refresh, register},
-        report::{create_report, get_report, get_reports, retry},
+        report::{create_report, get_live_report, get_report, get_reports, retry},
     },
     ApiResponse,
 };
@@ -17,7 +16,6 @@ use auth_middleware::Auth;
 use db::DB;
 use jwt::TokenFactory;
 use rabbitmq::RabbitMQPublisher;
-use crate::api::v1::report::get_live_report;
 
 mod api;
 mod auth_middleware;
@@ -93,9 +91,9 @@ async fn main() -> Result<()> {
                     .service(create_report)
                     .service(retry)
                     .service(get_report)
-                    .service(get_reports)
-                    .service(get_live_report),
+                    .service(get_reports),
             )
+            .service(web::scope("/api/v1/unprotected").service(get_live_report))
     })
     .bind(("0.0.0.0", 8080))?
     .run()
