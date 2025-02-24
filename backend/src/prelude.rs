@@ -64,6 +64,8 @@ pub enum FinanalizeError {
     Excel(#[from] calamine::XlsxError),
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
+    #[error("Deadpool error: {0}")]
+    PoolError(#[from] deadpool::unmanaged::PoolError)
 }
 
 // #[error("Fantoccini error: {0}")]
