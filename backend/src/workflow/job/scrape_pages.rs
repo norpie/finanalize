@@ -1,43 +1,94 @@
+use std::sync::Arc;
+
 use crate::{prelude::*, workflow::WorkflowState};
 
 use super::Job;
 
 use async_trait::async_trait;
-use fantoccini::ClientBuilder;
+use deadpool::{
+    managed::Manager,
+    unmanaged::{Object, Pool},
+};
+use fantoccini::{Client, ClientBuilder};
 use log::debug;
 use serde_json::json;
+use tokio::{io::Join, sync::Mutex, task::JoinSet};
 
 pub mod models {}
 
 pub struct ScrapePagesJob;
 
+const BROWSER_COUNT: u16 = 4;
+const FIRST_PORT: u16 = 4444;
+
+async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
+    let mut browsers = vec![];
+    for i in 0..amount {
+        browsers.push(
+            ClientBuilder::native()
+                .capabilities(
+                    json!({
+                        "moz:firefoxOptions": {
+                            "args": ["--headless"]
+                        }
+                    })
+                    .as_object()
+                    .unwrap()
+                    .clone(),
+                )
+                .connect(&format!("http://localhost:{}", FIRST_PORT + i))
+                .await?,
+        );
+    }
+    Ok(Pool::from(browsers))
+}
+
+async fn scrape_page(browser: &Object<Client>, url: &str) -> Result<String> {
+    browser.goto(url).await?;
+    let source = browser.source().await?;
+    Ok(source)
+}
+
+fn split_evenly(items: Vec<String>, n: usize) -> Vec<Vec<String>> {
+    let mut chunks = vec![Vec::new(); n];
+    for (index, item) in items.into_iter().enumerate() {
+        chunks[index % n].push(item);
+    }
+    chunks
+}
+
 #[async_trait]
 impl Job for ScrapePagesJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
-        let browser = ClientBuilder::native()
-            .capabilities(
-                json!({
-                    "moz:firefoxOptions": {
-                        "args": ["--headless"]
-                    }
-                })
-                .as_object()
-                .unwrap()
-                .clone(),
-            )
-            .connect("http://localhost:4444")
-            .await?;
-        let mut sources = vec![];
-        let search_results = state.state.search_results.clone().unwrap().into_iter().take(10);
+        let browsers = Arc::new(make_browsers(BROWSER_COUNT).await?);
+        let sources: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
+        let search_results = state.state.search_results.clone().unwrap();
+        let mut join_set = JoinSet::new();
         let total = search_results.len();
-        for (i, source) in search_results.enumerate() {
-            debug!("Scraping {} ({}/{})", source, i + 1, total);
-            browser.goto(&source).await?;
-            let source = browser.source().await?;
-            sources.push(source);
+        for (i, source) in search_results.into_iter().enumerate() {
+            let browsers = browsers.clone();
+            let sources = sources.clone();
+            join_set.spawn(async move {
+                let Ok(browser) = browsers.clone().get().await else {
+                    return Err(FinanalizeError::InternalServerError);
+                };
+                debug!("Scraping ({}/{}): {}", i + 1, total, source);
+                let Ok(source) = scrape_page(&browser, &source).await else {
+                    return Err(FinanalizeError::InternalServerError);
+                };
+                sources.clone().lock().await.push(source);
+                Ok(())
+            });
         }
-        browser.close().await?;
-        state.state.sources = Some(sources);
+
+        let results: Result<Vec<()>> = join_set.join_all().await.into_iter().collect();
+        results?;
+
+        for _ in 0..BROWSER_COUNT {
+            let browser = browsers.remove().await?;
+            browser.close().await?;
+        }
+        state.state.sources = Some(sources.lock().await.clone());
         Ok(state)
     }
 }
@@ -104,7 +155,7 @@ mod tests {
                 report: None,
             },
         };
-        let state = job.run(state).await.unwrap();
-        dbg!(state.state.sources.unwrap());
+        let _state = job.run(state).await.unwrap();
+        // dbg!(state.state.sources.unwrap());
     }
 }
