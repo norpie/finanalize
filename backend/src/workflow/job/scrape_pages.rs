@@ -4,6 +4,7 @@ use super::Job;
 
 use async_trait::async_trait;
 use fantoccini::ClientBuilder;
+use log::debug;
 use serde_json::json;
 
 pub mod models {}
@@ -27,7 +28,10 @@ impl Job for ScrapePagesJob {
             .connect("http://localhost:4444")
             .await?;
         let mut sources = vec![];
-        for source in state.state.search_results.clone().unwrap() {
+        let search_results = state.state.search_results.clone().unwrap().into_iter().take(10);
+        let total = search_results.len();
+        for (i, source) in search_results.enumerate() {
+            debug!("Scraping {} ({}/{})", source, i + 1, total);
             browser.goto(&source).await?;
             let source = browser.source().await?;
             sources.push(source);

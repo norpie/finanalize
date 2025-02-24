@@ -1,6 +1,7 @@
 use crate::{prelude::*, search::SEARCH, workflow::WorkflowState};
 
 use async_trait::async_trait;
+use log::debug;
 
 use super::Job;
 
@@ -10,7 +11,10 @@ pub struct SearchJob;
 impl Job for SearchJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         let mut all_urls = vec![];
-        for search in state.state.searches.clone().unwrap() {
+        let searches = state.state.searches.clone().unwrap();
+        let total = searches.len();
+        for (i, search) in searches.into_iter().enumerate() {
+            debug!("Searching for {} ({}/{})", search, i + 1, total);
             let result = SEARCH.clone().search(&search).await?;
             all_urls.extend(result);
         }
