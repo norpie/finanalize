@@ -161,3 +161,24 @@ pub struct FullReport {
     pub sources: Option<Vec<String>>,
     pub report: Option<String>,
 }
+
+impl FullReport {
+    pub fn new(id: String, user_input: String) -> Self {
+        let now = Utc::now();
+        FullReport {
+            id,
+            user_input,
+            status: JobType::Pending,
+            created_at: now,
+            updated_at: now,
+            validation: None,
+            title: None,
+            sections: None,
+            sub_sections: None,
+            searches: None,
+            search_results: None,
+            sources: None,
+            report: None,
+        }
+    }
+}
