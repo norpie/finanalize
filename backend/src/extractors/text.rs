@@ -1,12 +1,16 @@
 use crate::prelude::*;
 use async_trait::async_trait;
 use super::{Content, ContentExtract};
+use super::FileType;
 
 pub struct TextExtractor;
 
 #[async_trait]
 impl ContentExtract for TextExtractor {
-    async fn extract(&self, input: &str) -> Result<Vec<Content>> {
+    async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
+        let FileType::Text(input) = file else {
+            return Err(FinanalizeError::ParseError("Invalid input type".to_string()));
+        };
         let mut chunks = Vec::new();
         let mut current_chunk = String::new();
 
@@ -36,7 +40,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_extract() {
-        let text = "Once upon a time, in a vast kingdom surrounded by towering mountains and endless forests, there lived a wise old storyteller named Eldrin. \
+        let text: &str = "Once upon a time, in a vast kingdom surrounded by towering mountains and endless forests, there lived a wise old storyteller named Eldrin. \
         He traveled from village to village, sharing tales of ancient heroes, mystical creatures, and forgotten lands. Children gathered around him, eyes wide with wonder, \
         as he spoke of dragons soaring through the skies, knights embarking on perilous quests, and hidden treasures buried deep beneath the earth. \
         His voice carried the weight of history, weaving a tapestry of imagination that spanned generations. Eldrin believed that stories held power—the power to inspire, \
@@ -45,7 +49,7 @@ mod tests {
         where dreams shaped reality and hope never faded. Eldrin smiled, knowing that every story leads to another.";
 
         let extractor = TextExtractor;
-        let chunks = extractor.extract(text).await.unwrap();
+        let chunks = extractor.extract(FileType::Text(text.into())).await.unwrap();
 
         // Check that each chunk is wrapped as `Content::Text`
         for chunk in &chunks {
