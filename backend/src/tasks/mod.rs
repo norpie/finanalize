@@ -38,7 +38,7 @@ impl Task {
     pub fn new(template: &str) -> Self {
         Self {
             prompt: template.into(),
-            retry_strategy: RetryStrategy::None,
+            retry_strategy: RetryStrategy::Count(3),
             fix_strategies: Vec::new(),
         }
     }
