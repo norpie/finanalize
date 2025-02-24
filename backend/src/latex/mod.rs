@@ -61,13 +61,13 @@ pub struct Link {
 
 #[derive(Serialize)]
 pub struct Source {
-    source_type: String,
-    citation_key: String,
-    author: String,
-    title: String,
-    year: i32,
-    journal: String,
-    url: String,
+    pub source_type: String,
+    pub citation_key: String,
+    pub author: String,
+    pub title: String,
+    pub year: i32,
+    pub journal: String,
+    pub url: String,
 }
 
 impl Source {
