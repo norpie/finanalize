@@ -1,3 +1,5 @@
+include:
+  - ./searxng/compose.yml
 services:
   init-data:
     container_name: init
@@ -56,15 +58,6 @@ services:
       - 8080:8080
     env_file: ".env"
 
-  searxng:
-    container_name: searxng
-    image: searxng/searxng:latest
-    environment:
-      - BASE_URL=http://localhost:8081/
-    ports:
-      - 8081:8080
-    volumes:
-      - ./searxng:/etc/searxng
 
   ullm:
     container_name: ullm
