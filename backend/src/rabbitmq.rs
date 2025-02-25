@@ -18,8 +18,12 @@ pub static PUBLISHER: OnceCell<Arc<RabbitMQPublisher>> = OnceCell::const_new();
 impl RabbitMQPublisher {
     pub async fn setup() -> Result<()> {
         // TODO: change the connection string to use env variable
+        let mut default_address = "amqp://localhost".into();
+        if let Ok(env_address) = std::env::var("RABBITMQ_URL") {
+            default_address = env_address;
+        }
         let connection =
-            Connection::connect("amqp://localhost", ConnectionProperties::default()).await?;
+            Connection::connect(&default_address, ConnectionProperties::default()).await?;
         let channel = connection.create_channel().await?;
 
         let queue = channel
@@ -45,8 +49,12 @@ pub struct RabbitMQConsumer {
 impl RabbitMQConsumer {
     pub async fn new() -> Result<Self> {
         // TODO: change the connection string to use env variable
+        let mut default_address = "amqp://localhost".into();
+        if let Ok(env_address) = std::env::var("RABBITMQ_URL") {
+            default_address = env_address;
+        }
         let connection =
-            Connection::connect("amqp://localhost", ConnectionProperties::default()).await?;
+            Connection::connect(&default_address, ConnectionProperties::default()).await?;
         let channel = connection.create_channel().await?;
         let queue = channel
             .queue_declare(
