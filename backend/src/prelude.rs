@@ -66,9 +66,7 @@ pub enum FinanalizeError {
     LopdfError(#[from] lopdf::Error),
     #[error("Deadpool error: {0}")]
     PoolError(#[from] deadpool::unmanaged::PoolError),
-    #[error("Missing report title")]
-    MissingReportTitle,
-    #[error("pdf_extract 🖕")]
+    #[error("pdf_extract error: {0}")]
     Output(#[from] pdf_extract::OutputError),
 }
 

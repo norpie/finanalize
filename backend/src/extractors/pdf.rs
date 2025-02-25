@@ -22,7 +22,7 @@ impl ContentExtract for PdfExtractor {
         // Perform PDF extraction in a blocking thread
         let html_content = task::spawn_blocking(move || {
             // Load the PDF document from the buffer using lopdf's `load_from` function
-            let doc = Document::load_mem(&*buffer)?;
+            let doc = Document::load_mem(&buffer)?;
 
             // Create a buffer to write into
             let mut buffer = Vec::new();
@@ -40,9 +40,7 @@ impl ContentExtract for PdfExtractor {
         })
         .await??;
 
-        let result = HTMLExtractor
-            .extract(FileType::Html(html_content))
-            .await?;
+        let result = HTMLExtractor.extract(FileType::Html(html_content)).await?;
 
         // Return the extracted HTML content wrapped in Content::Html
         Ok(result)

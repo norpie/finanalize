@@ -1,9 +1,9 @@
+use super::FileType;
+use super::{Content, ContentExtract};
 use crate::prelude::*;
 use async_trait::async_trait;
 use scraper::{Html, Selector};
 use tokio::task;
-use super::{Content, ContentExtract};
-use super::FileType;
 
 pub struct MarkdownExtractor;
 
@@ -11,7 +11,9 @@ pub struct MarkdownExtractor;
 impl ContentExtract for MarkdownExtractor {
     async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
         let FileType::MarkDown(buffer) = file else {
-            return Err(FinanalizeError::ParseError("Invalid input type".to_string()));
+            return Err(FinanalizeError::ParseError(
+                "Invalid input type".to_string(),
+            ));
         };
 
         // Perform the HTML-to-Markdown conversion in a blocking thread
@@ -58,8 +60,8 @@ impl ContentExtract for MarkdownExtractor {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio::fs;
     use tempfile::tempdir;
+    use tokio::fs;
 
     #[tokio::test]
     async fn test_html_to_markdown_conversion() {
@@ -97,11 +99,26 @@ mod tests {
 
         assert_eq!(result.len(), 1);
         if let Content::MarkDown(markdown) = &result[0] {
-            assert!(markdown.contains("# Title"), "Markdown should contain '# Title'");
-            assert!(markdown.contains("## Subtitle"), "Markdown should contain '## Subtitle'");
-            assert!(markdown.contains("- Item 1"), "Markdown should contain '- Item 1'");
-            assert!(markdown.contains("- Item 2"), "Markdown should contain '- Item 2'");
-            assert!(markdown.contains("This is a paragraph."), "Markdown should contain the paragraph text");
+            assert!(
+                markdown.contains("# Title"),
+                "Markdown should contain '# Title'"
+            );
+            assert!(
+                markdown.contains("## Subtitle"),
+                "Markdown should contain '## Subtitle'"
+            );
+            assert!(
+                markdown.contains("- Item 1"),
+                "Markdown should contain '- Item 1'"
+            );
+            assert!(
+                markdown.contains("- Item 2"),
+                "Markdown should contain '- Item 2'"
+            );
+            assert!(
+                markdown.contains("This is a paragraph."),
+                "Markdown should contain the paragraph text"
+            );
         } else {
             panic!("Expected Content::MarkDown variant");
         }
@@ -132,7 +149,9 @@ mod tests {
 
         let extractor = MarkdownExtractor;
 
-        let result = extractor.extract(FileType::MarkDown(sample_text.to_string())).await;
+        let result = extractor
+            .extract(FileType::MarkDown(sample_text.to_string()))
+            .await;
 
         assert!(result.is_err(), "Empty input should return an error");
         if let Err(FinanalizeError::NotFound) = result {

@@ -1,7 +1,7 @@
+use super::FileType;
+use super::{Content, ContentExtract};
 use crate::prelude::*;
 use async_trait::async_trait;
-use super::{Content, ContentExtract};
-use super::FileType;
 
 pub struct TextExtractor;
 
@@ -9,7 +9,9 @@ pub struct TextExtractor;
 impl ContentExtract for TextExtractor {
     async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
         let FileType::Text(input) = file else {
-            return Err(FinanalizeError::ParseError("Invalid input type".to_string()));
+            return Err(FinanalizeError::ParseError(
+                "Invalid input type".to_string(),
+            ));
         };
         let mut chunks = Vec::new();
         let mut current_chunk = String::new();
@@ -49,7 +51,10 @@ mod tests {
         where dreams shaped reality and hope never faded. Eldrin smiled, knowing that every story leads to another.";
 
         let extractor = TextExtractor;
-        let chunks = extractor.extract(FileType::Text(text.into())).await.unwrap();
+        let chunks = extractor
+            .extract(FileType::Text(text.into()))
+            .await
+            .unwrap();
 
         // Check that each chunk is wrapped as `Content::Text`
         for chunk in &chunks {
