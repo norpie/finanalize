@@ -40,32 +40,24 @@ pub fn construct_report(
     let backend_dir = env::current_dir()?;
     let project_root = backend_dir.parent().unwrap();
     let tmp_dir = env::temp_dir();
-    // Generate an uuid for the new pdf and create destination folder
     let uuid = Uuid::new_v4().to_string();
     let destination_folder = &tmp_dir.join(&uuid);
     create_dir_all(destination_folder)?;
-    // Retrieve latex path and template path
     let latex_dir = project_root.join("latex");
     let template_path = latex_dir.join("report.tex.hbs");
-    // Define path where the rendered LaTeX will be written to
     let output_path =
         &destination_folder.join(report_title.replace(" ", "_").to_lowercase() + ".tex");
-    // Write the tex file from the template using handlebars
     let handlebars = Handlebars::new();
     let template = read_to_string(template_path)?;
     let rendered_tex = handlebars.render_template(&template, &data)?;
-    // Write the rendered LaTeX to a file on output_path
     write(output_path, rendered_tex)?;
-    // Copy latex directory to tmp directory for compiling
     copy_latex_dir(&latex_dir, destination_folder)?;
-    // Construct bib file
     construct_bib_file(sources, destination_folder)?;
-    // Compile
     compile_latex(output_path, destination_folder, false)?;
     compile_latex(output_path, destination_folder, true)?;
     compile_latex(output_path, destination_folder, false)?;
     compile_latex(output_path, destination_folder, false)?;
-    // Cleanup destination folder as to only include the pdf
+    compile_latex(output_path, destination_folder, false)?;
     let pdf_path = output_path.with_extension("pdf");
     cleanup_destination_folder(destination_folder)?;
     Ok(PdfReport {
@@ -76,7 +68,6 @@ pub fn construct_report(
 }
 
 fn copy_latex_dir(latex_dir: &Path, output_dir: &Path) -> Result<()> {
-    // Recursively copy the latex directory to the output directory (tmp)
     for file in read_dir(latex_dir)? {
         let file = file?;
         let file_path = file.path();
@@ -116,8 +107,6 @@ fn cleanup_destination_folder(destination_folder: &Path) -> Result<()> {
             if ext != "pdf" {
                 remove_file(path)?;
             }
-        } else {
-            remove_file(path)?;
         }
     }
     Ok(())
@@ -169,13 +158,377 @@ mod tests {
         ];
         let components = vec![
             LatexComponent::Section(Section {
-                heading: "Test Section".to_string(),
+                heading: "Financial Report for Q4 2024".to_string(),
             }),
             LatexComponent::Subsection(Subsection {
-                heading: "Test Subsection".to_string(),
+                heading: "Executive Summary".to_string(),
             }),
-            LatexComponent::Text("Test Text".to_string()),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
             LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::Section(Section {
+                heading: "Financial Report for Q4 2024".to_string(),
+            }),
+            LatexComponent::Subsection(Subsection {
+                heading: "Executive Summary".to_string(),
+            }),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
+            LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::Section(Section {
+                heading: "Financial Report for Q4 2024".to_string(),
+            }),
+            LatexComponent::Subsection(Subsection {
+                heading: "Executive Summary".to_string(),
+            }),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
+            LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::Section(Section {
+                heading: "Financial Report for Q4 2024".to_string(),
+            }),
+            LatexComponent::Subsection(Subsection {
+                heading: "Executive Summary".to_string(),
+            }),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
+            LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::Section(Section {
+                heading: "Financial Report for Q4 2024".to_string(),
+            }),
+            LatexComponent::Subsection(Subsection {
+                heading: "Executive Summary".to_string(),
+            }),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
+            LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::Section(Section {
+                heading: "Financial Report for Q4 2024".to_string(),
+            }),
+            LatexComponent::Subsection(Subsection {
+                heading: "Executive Summary".to_string(),
+            }),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
+            LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::Section(Section {
+                heading: "Financial Report for Q4 2024".to_string(),
+            }),
+            LatexComponent::Subsection(Subsection {
+                heading: "Executive Summary".to_string(),
+            }),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
+            LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::List(List {
+                is_numbered: true,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::Section(Section {
+                heading: "Financial Report for Q4 2024".to_string(),
+            }),
+            LatexComponent::Subsection(Subsection {
+                heading: "Executive Summary".to_string(),
+            }),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
+            LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),
+            LatexComponent::List(List {
+                is_numbered: true,
+                items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
+            }),          LatexComponent::Section(Section {
+                heading: "Financial Report for Q4 2024".to_string(),
+            }),
+            LatexComponent::Subsection(Subsection {
+                heading: "Executive Summary".to_string(),
+            }),
+            LatexComponent::Text("The financial performance for the fourth quarter of 2024 demonstrated steady growth across key revenue streams, alongside controlled operational expenses. The company achieved a revenue increase of 8% compared to the previous quarter, while net profit margins remained stable at 12%. Strategic investments in technology and operational efficiency contributed to the overall financial stability.".to_string()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Revenue Performance".to_string(),
+            }),
+            LatexComponent::List(List {
+                is_numbered: false,
+                items: vec![
+                    "Revenue increased by 8% compared to Q3 2024".to_string(),
+                    "Growth was driven by strong performance in the software division".to_string(),
+                    "Hardware sales remained stable, with a slight increase in demand for premium products".to_string(),
+                ],
+            }),
+            LatexComponent::Citation(sources[0].citation_key.clone()),
+            LatexComponent::Subsection(Subsection {
+                heading: "Expense Analysis".to_string(),
+            }),
+            LatexComponent::Text("Total revenue for Q4 2024 reached $120 million, reflecting an 8% increase from Q3 2024. The primary drivers of revenue growth included increased customer acquisition, enhanced product offerings, and expansion into new markets. Subscription-based revenue grew by 10%, while one-time sales increased by 5%.".to_string()),
+            LatexComponent::Section(Section {
+                heading: "Other stuff".to_string(),
+            }),
+            LatexComponent::Text("Profitability
+Net income for Q4 2024 was $14.4 million, compared to $13.5 million in Q3 2024. EBITDA margin stood at 18%, supported by efficient cost management and revenue diversification. Earnings per share (EPS) for Q4 were $1.20, marking a 7% increase.
+
+Cash Flow & Liquidity
+Operating cash flow remained strong at $20 million, enabling continued reinvestment in growth opportunities. The company maintains a healthy cash reserve of $50 million with a low debt-to-equity ratio of 0.35.
+
+Outlook for Q1 2025
+Continued investment in technology and expansion into new geographic markets is expected to drive further revenue growth. Cost optimization measures and automation initiatives aim to improve profitability. The company remains confident in sustaining its growth trajectory with an expected revenue increase of 5-7% in the next quarter.
+
+Conclusion
+Q4 2024 was a strong quarter for the company, with steady revenue growth, controlled expenses, and solid profitability. The company remains well-positioned for continued financial success in the coming quarters.".to_string()),
             LatexComponent::List(List {
                 is_numbered: false,
                 items: vec!["Test Item".to_string(), "Test Item 2".to_string()],
