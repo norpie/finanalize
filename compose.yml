@@ -34,6 +34,7 @@ services:
     env_file: ".env"
 
   webdriver:
+    container_name: webdriver
     image: instrumentisto/geckodriver
     command: "--host=webdriver --binary=/opt/firefox/firefox --log=debug -p 4444"
     ports:
