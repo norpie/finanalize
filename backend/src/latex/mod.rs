@@ -294,13 +294,13 @@ fn format_table_command(table: &Table, is_column: bool) -> LatexCommand {
 }
 
 fn escape_special_chars(input: String) -> String {
-        let special_chars: &[char] = &['&', '%', '$', '#', '_', '{', '}', '~', '^', '€', '\\'];
-        let mut escaped = String::with_capacity(input.len());
-        for ch in input.chars() {
-            if special_chars.contains(&ch) {
-                escaped.push('\\');
-            }
-            escaped.push(ch);
+    let special_chars: &[char] = &['&', '%', '$', '#', '_', '{', '}', '~', '^', '€', '\\'];
+    let mut escaped = String::with_capacity(input.len());
+    for ch in input.chars() {
+        if special_chars.contains(&ch) {
+            escaped.push('\\');
         }
-        escaped
+        escaped.push(ch);
+    }
+    escaped
 }
