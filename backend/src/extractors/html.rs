@@ -1,9 +1,9 @@
+use super::{Content, ContentExtract, FileType};
+use crate::extractors::md::MarkdownExtractor;
 use crate::prelude::*;
 use async_trait::async_trait;
 use scraper::{ElementRef, Html, Selector};
 use tokio::task;
-use super::{Content, ContentExtract, FileType};
-use crate::extractors::md::MarkdownExtractor;
 
 pub struct HTMLExtractor;
 
@@ -12,7 +12,9 @@ impl ContentExtract for HTMLExtractor {
     async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
         // Ensure the input is of the correct type
         let FileType::Html(input) = file else {
-            return Err(FinanalizeError::ParseError("Invalid input type".to_string()));
+            return Err(FinanalizeError::ParseError(
+                "Invalid input type".to_string(),
+            ));
         };
 
         // Move parsing into a blocking thread to avoid `Send` issues
@@ -105,14 +107,32 @@ mod tests {
 
                 if let Content::MarkDown(markdown) = &result[0] {
                     // Check the Markdown output
-                    assert!(markdown.contains("Main Content"), "Expected 'Main Content' in Markdown output");
-                    assert!(markdown.contains("Another Important Section"), "Expected 'Another Important Section' in Markdown output");
+                    assert!(
+                        markdown.contains("Main Content"),
+                        "Expected 'Main Content' in Markdown output"
+                    );
+                    assert!(
+                        markdown.contains("Another Important Section"),
+                        "Expected 'Another Important Section' in Markdown output"
+                    );
 
                     // Ensure ignored sections are not included
-                    assert!(!markdown.contains("Header Title"), "Ignored section 'Header Title' found in Markdown output");
-                    assert!(!markdown.contains("Navigation Links"), "Ignored section 'Navigation Links' found in Markdown output");
-                    assert!(!markdown.contains("Sidebar Content"), "Ignored section 'Sidebar Content' found in Markdown output");
-                    assert!(!markdown.contains("Footer Information"), "Ignored section 'Footer Information' found in Markdown output");
+                    assert!(
+                        !markdown.contains("Header Title"),
+                        "Ignored section 'Header Title' found in Markdown output"
+                    );
+                    assert!(
+                        !markdown.contains("Navigation Links"),
+                        "Ignored section 'Navigation Links' found in Markdown output"
+                    );
+                    assert!(
+                        !markdown.contains("Sidebar Content"),
+                        "Ignored section 'Sidebar Content' found in Markdown output"
+                    );
+                    assert!(
+                        !markdown.contains("Footer Information"),
+                        "Ignored section 'Footer Information' found in Markdown output"
+                    );
                 } else {
                     panic!("Expected Content::MarkDown variant");
                 }

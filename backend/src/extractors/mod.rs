@@ -4,8 +4,8 @@ use serde::{Deserialize, Serialize};
 
 // pub mod csv;
 pub mod html;
-pub mod text;
 pub mod md;
+pub mod text;
 // pub mod figure;
 pub mod pdf;
 
@@ -22,7 +22,6 @@ pub enum Content {
     // Csv(String),
     MarkDown(String),
     Pdf(Vec<u8>),
-    
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub enum FileType {
