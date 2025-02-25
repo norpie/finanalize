@@ -16,6 +16,7 @@ use actix_web::{FromRequest, HttpMessage};
 use argon2::password_hash::rand_core::OsRng;
 use argon2::password_hash::SaltString;
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier};
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
@@ -51,13 +52,15 @@ impl FromRequest for SurrealDBUser {
 
 #[post("/refresh")]
 pub async fn refresh(token_factory: Data<TokenFactory>, req: HttpRequest) -> impl Responder {
+    debug!("Received refresh request: {:?}", req);
     let refresh_token = match req.cookie("refresh_token") {
         Some(cookie) => cookie.value().to_string(),
         None => return Err(FinanalizeError::Unauthorized(AuthError::InvalidToken)),
     };
-
+    
     let subject = token_factory.subject(&refresh_token)?;
     let pair = token_factory.generate_token(subject)?;
+    debug!("Generated new token pair: {:?}", pair);
     Ok(ApiResponse::new(AccessToken {
         access_token: pair.access().to_string(),
     })
@@ -83,6 +86,7 @@ pub async fn login(
     let Some(existing) = response.take::<Option<SurrealDBUser>>(0)? else {
         return Err(FinanalizeError::Unauthorized(AuthError::InvalidCredentials));
     };
+    debug!("Existing user: {:?}", existing);
 
     // Verify password hash
     let parsed_hash = PasswordHash::new(&existing.password)?;
@@ -90,6 +94,7 @@ pub async fn login(
 
     // Generate token pair and set cookie with refresh token, return access token
     let pair = token_factory.generate_token(existing.id.id.to_string())?;
+    debug!("Generated token pair: {:?}", pair);
 
     Ok(ApiResponse::new(AccessToken {
         access_token: pair.access().to_string(),
@@ -128,9 +133,9 @@ pub async fn register(
         .content(user)
         .await?
         .ok_or(FinanalizeError::InternalServerError)?;
-
+    debug!("Created user: {:?}", user);
     let pair = token_factory.generate_token(user.id.id.to_string())?;
-
+    debug!("Generated token pair: {:?}", pair);
     Ok(ApiResponse::new(AccessToken {
         access_token: pair.access().to_string(),
     })

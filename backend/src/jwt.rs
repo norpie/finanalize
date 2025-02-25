@@ -92,6 +92,7 @@ impl TokenType {
     }
 }
 
+#[derive(Debug)]
 pub struct TokenPair(String, String);
 
 impl TokenPair {
