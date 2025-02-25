@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 use crate::{prelude::*, workflow::WorkflowState};
 
@@ -21,6 +21,10 @@ const FIRST_PORT: u16 = 4444;
 async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
     let mut browsers = vec![];
     for i in 0..amount {
+        let mut default = format!("http://localhost:{}", FIRST_PORT + i);
+        if let Ok(address) = env::var(format!("GECKODRIVER_URL{i}")) {
+            default = address;
+        }
         browsers.push(
             ClientBuilder::native()
                 .capabilities(
@@ -33,7 +37,7 @@ async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
                     .unwrap()
                     .clone(),
                 )
-                .connect(&format!("http://localhost:{}", FIRST_PORT + i))
+                .connect(&default)
                 .await?,
         );
     }
