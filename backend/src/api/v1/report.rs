@@ -216,9 +216,8 @@ pub async fn get_live_report(
             };
             debug!("update");
             let report = &notification.data;
-            let report_status = report.status.clone();
             session
-                .text(serde_json::to_string_pretty(&report_status).unwrap())
+                .text(serde_json::to_string_pretty(&report.status).unwrap())
                 .await
                 .unwrap();
         }
