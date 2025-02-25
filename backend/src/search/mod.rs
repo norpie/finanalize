@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 use crate::prelude::*;
 use async_trait::async_trait;
@@ -11,8 +11,13 @@ pub trait SearchEngine: Send + Sync + 'static {
     async fn search(&self, query: &str) -> Result<Vec<String>>;
 }
 
-pub static SEARCH: Lazy<Arc<dyn SearchEngine>> =
-    Lazy::new(|| Arc::new(SearxNG::new("http://localhost:8081")));
+pub static SEARCH: Lazy<Arc<dyn SearchEngine>> = Lazy::new(|| {
+    let mut default = "http://localhost:8081".into();
+    if let Ok(address) = env::var("SEARXNG_ADDRESS") {
+        default = address;
+    };
+    Arc::new(SearxNG::new(&default))
+});
 
 #[derive(Default)]
 pub struct SearxNG {
@@ -62,8 +67,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "Depends on external service"]
     async fn test_searxng() {
-        let searxng = SearxNG::new("http://localhost:8081");
-        let results = searxng.search("rust").await.unwrap();
+        let results = SEARCH.search("rust").await.unwrap();
         assert!(!results.is_empty());
     }
 }
