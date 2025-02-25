@@ -1,33 +1,7 @@
 include:
   - ./searxng/compose.yml
+  - ./db/compose.yml
 services:
-  init-data:
-    container_name: init
-    image: busybox
-    command: chmod -R 777 /data
-    volumes:
-      - surrealdb-data:/data
-
-  surrealdb:
-    container_name: surrealdb
-    depends_on:
-      - init-data
-    env_file:
-      - .env
-    entrypoint:
-      - /surreal
-      - start
-      - --user
-      - $DB_USER
-      - --pass
-      - $DB_PASSWORD
-      - rocksdb:/data/finanalize.db
-    image: surrealdb/surrealdb:v2.1.4
-    ports:
-      - 8000:8000
-    volumes:
-      - surrealdb-data:/data
-
   rabbitmq:
     container_name: rabbitmq
     image: rabbitmq:4.0-management
@@ -58,7 +32,3 @@ services:
       - 8080:8080
     env_file: ".env"
 
-
-
-volumes:
-  surrealdb-data:
