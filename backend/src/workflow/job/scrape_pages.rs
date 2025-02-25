@@ -22,7 +22,7 @@ async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
     let mut browsers = vec![];
     for i in 0..amount {
         let mut default = format!("http://localhost:{}", FIRST_PORT + i);
-        if let Ok(address) = env::var(format!("GECKODRIVER_URL{i}")) {
+        if let Ok(address) = env::var(format!("GECKODRIVER{}_URL", i)) {
             default = address;
         }
         browsers.push(
