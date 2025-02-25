@@ -14,4 +14,6 @@ COPY --from=builder /usr/local/cargo/bin/backend /usr/local/bin/backend
 
 EXPOSE 8080
 
+ENV RUST_LOG none,backend=debug
+
 CMD ["backend"]
