@@ -25,3 +25,6 @@ services:
       - 8000:8000
     volumes:
       - surrealdb-data:/data
+
+volumes:
+  surrealdb-data:
