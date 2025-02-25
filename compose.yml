@@ -25,6 +25,7 @@ services:
       - surrealdb
       - rabbitmq
       - searxng
+      - webdriver
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -32,3 +33,8 @@ services:
       - 8080:8080
     env_file: ".env"
 
+  webdriver:
+    image: instrumentisto/geckodriver
+    command: "--host=webdriver --binary=/opt/firefox/firefox --log=debug -p 4444"
+    ports:
+      - 4444:4444
