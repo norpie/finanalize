@@ -115,9 +115,10 @@ pub fn get_commands(components: Vec<LatexComponent>) -> Result<Vec<LatexCommand>
                 });
             }
             LatexComponent::Text(text) => {
+                let escaped_text = escape_special_chars(text.clone());
                 commands.push(LatexCommand {
                     command: "".to_string(),
-                    args: text.clone(),
+                    args: escaped_text.clone(),
                 });
             }
             LatexComponent::Citation(citation_key) => {
@@ -290,4 +291,16 @@ fn format_table_command(table: &Table, is_column: bool) -> LatexCommand {
             args: r" \\".to_string(),
         }
     }
+}
+
+fn escape_special_chars(input: String) -> String {
+        let special_chars: &[char] = &['&', '%', '$', '#', '_', '{', '}', '~', '^', '€', '\\'];
+        let mut escaped = String::with_capacity(input.len());
+        for ch in input.chars() {
+            if special_chars.contains(&ch) {
+                escaped.push('\\');
+            }
+            escaped.push(ch);
+        }
+        escaped
 }
