@@ -30,6 +30,7 @@ impl DataExtract for ExcelExtractor {
                 .join(",");
             writeln!(temp_csv, "{}", row_str)?;
         }
+        debug!("Temp CSV file: {}", temp_csv.path().display());
 
         // Use CsvExtractor to process the CSV file
         let csv_extractor = CsvExtractor;
