@@ -5,6 +5,7 @@ use std::env;
 use std::fs::*;
 use std::path::Path;
 use std::process::Command;
+use log::debug;
 use uuid::Uuid;
 
 #[derive(Serialize)]
@@ -32,6 +33,7 @@ pub fn construct_report(
     report_title: String,
     report_subtitle: String,
 ) -> Result<PdfReport> {
+    debug!("Constructing report: {}", report_title);
     let data = TemplateData {
         report_title: report_title.clone(),
         report_subtitle: report_subtitle.clone(),
@@ -43,6 +45,7 @@ pub fn construct_report(
     let uuid = Uuid::new_v4().to_string();
     let destination_folder = &tmp_dir.join(&uuid);
     create_dir_all(destination_folder)?;
+    debug!("Destination folder created: {:?}", destination_folder.display());
     let latex_dir = project_root.join("latex");
     let template_path = latex_dir.join("report.tex.hbs");
     let output_path =
@@ -51,15 +54,25 @@ pub fn construct_report(
     let template = read_to_string(template_path)?;
     let rendered_tex = handlebars.render_template(&template, &data)?;
     write(output_path, rendered_tex)?;
+    debug!("Rendered LaTeX file: {:?}", output_path.display());
+    debug!("Copying LaTeX files to {:?} for compiling", destination_folder.display());
     copy_latex_dir(&latex_dir, destination_folder)?;
+    debug!("Constructing bibliography file based on references template");
     construct_bib_file(sources, destination_folder)?;
+    debug!("Compiling LaTeX file for the first time");
     compile_latex(output_path, destination_folder, false)?;
+    debug!("Compiling LaTeX file with bibliography");
     compile_latex(output_path, destination_folder, true)?;
+    debug!("Compiling LaTeX file for the second time");
     compile_latex(output_path, destination_folder, false)?;
+    debug!("Compiling LaTeX file for the third time");
     compile_latex(output_path, destination_folder, false)?;
+    debug!("Compiling LaTeX file for the fourth & last time");
     compile_latex(output_path, destination_folder, false)?;
     let pdf_path = output_path.with_extension("pdf");
+    debug!("Cleaning up {:?}, removing all files except the report PDF", destination_folder.display());
     cleanup_destination_folder(destination_folder)?;
+    debug!("Report compiled successfully: {:?}", pdf_path.display());
     Ok(PdfReport {
         uuid,
         report_title,
@@ -74,12 +87,15 @@ fn copy_latex_dir(latex_dir: &Path, output_dir: &Path) -> Result<()> {
         let file_name = file_path.file_name().unwrap().to_str().unwrap();
         let dest_path = output_dir.join(file_name);
         if file_path.is_dir() {
+            debug!("Copying directory: {:?}", file_path.display());
             create_dir_all(&dest_path)?;
             copy_latex_dir(&file_path, &dest_path)?;
         } else {
+            debug!("Copying file: {:?}", file_path.display());
             copy(file_path, dest_path)?;
         }
     }
+    debug!("Copied all LaTeX files to {:?}", output_dir.display());
     Ok(())
 }
 
@@ -93,7 +109,8 @@ fn construct_bib_file(sources: Vec<Source>, destination_folder: &Path) -> Result
     let handlebars = Handlebars::new();
     let template = read_to_string(template_path)?;
     let rendered_bib = handlebars.render_template(&template, &data)?;
-    write(bib_path, rendered_bib)?;
+    write(&bib_path, rendered_bib)?;
+    debug!("Rendered bibliography file: {:?}", &bib_path.display());
     Ok(())
 }
 
@@ -102,13 +119,16 @@ fn cleanup_destination_folder(destination_folder: &Path) -> Result<()> {
         let entry = entry?;
         let path = entry.path();
         if path.is_dir() {
+            debug!("Removing directory: {:?}", path);
             remove_dir_all(path)?;
         } else if let Some(ext) = path.extension() {
             if ext != "pdf" {
+                debug!("Removing file: {:?}", path);
                 remove_file(path)?;
             }
         }
     }
+    debug!("Destination folder cleaned up successfully");
     Ok(())
 }
 
