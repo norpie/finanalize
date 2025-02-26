@@ -896,6 +896,8 @@ dependencies = [
  "regex",
  "reqwest",
  "schemars",
+ "rust_decimal",
+ "rust_decimal_macros",
  "scraper",
  "selectors",
  "serde",
@@ -5886,6 +5888,16 @@ dependencies = [
  "rkyv",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "rust_decimal_macros"
+version = "1.36.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "da991f231869f34268415a49724c6578e740ad697ba0999199d6f22b3949332c"
+dependencies = [
+ "quote",
+ "rust_decimal",
 ]
 
 [[package]]
