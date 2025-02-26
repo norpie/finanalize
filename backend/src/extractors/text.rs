@@ -33,10 +33,16 @@ impl ContentExtract for TextExtractor {
         }
 
         if !current_chunk.is_empty() {
-            debug!("Pushing the last chunk with length: {}", current_chunk.len());
+            debug!(
+                "Pushing the last chunk with length: {}",
+                current_chunk.len()
+            );
             chunks.push(Content::Text(current_chunk));
         }
-        debug!("Finished extracting text content. Returning {} chunks", chunks.len());
+        debug!(
+            "Finished extracting text content. Returning {} chunks",
+            chunks.len()
+        );
         Ok(chunks)
     }
 }

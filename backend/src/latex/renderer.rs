@@ -1,11 +1,11 @@
 use crate::latex::*;
 use handlebars::Handlebars;
+use log::debug;
 use serde::Serialize;
 use std::env;
 use std::fs::*;
 use std::path::Path;
 use std::process::Command;
-use log::debug;
 use uuid::Uuid;
 
 #[derive(Serialize)]
@@ -45,7 +45,10 @@ pub fn construct_report(
     let uuid = Uuid::new_v4().to_string();
     let destination_folder = &tmp_dir.join(&uuid);
     create_dir_all(destination_folder)?;
-    debug!("Destination folder created: {:?}", destination_folder.display());
+    debug!(
+        "Destination folder created: {:?}",
+        destination_folder.display()
+    );
     let latex_dir = project_root.join("latex");
     let template_path = latex_dir.join("report.tex.hbs");
     let output_path =
@@ -55,7 +58,10 @@ pub fn construct_report(
     let rendered_tex = handlebars.render_template(&template, &data)?;
     write(output_path, rendered_tex)?;
     debug!("Rendered LaTeX file: {:?}", output_path.display());
-    debug!("Copying LaTeX files to {:?} for compiling", destination_folder.display());
+    debug!(
+        "Copying LaTeX files to {:?} for compiling",
+        destination_folder.display()
+    );
     copy_latex_dir(&latex_dir, destination_folder)?;
     debug!("Constructing bibliography file based on references template");
     construct_bib_file(sources, destination_folder)?;
@@ -70,7 +76,10 @@ pub fn construct_report(
     debug!("Compiling LaTeX file for the fourth & last time");
     compile_latex(output_path, destination_folder, false)?;
     let pdf_path = output_path.with_extension("pdf");
-    debug!("Cleaning up {:?}, removing all files except the report PDF", destination_folder.display());
+    debug!(
+        "Cleaning up {:?}, removing all files except the report PDF",
+        destination_folder.display()
+    );
     cleanup_destination_folder(destination_folder)?;
     debug!("Report compiled successfully: {:?}", pdf_path.display());
     Ok(PdfReport {

@@ -1,5 +1,6 @@
 use std::future::{ready, Ready};
 
+use crate::jwt::TokenFactory;
 use actix_web::{
     body::EitherBody,
     dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
@@ -7,7 +8,6 @@ use actix_web::{
 };
 use futures_util::future::LocalBoxFuture;
 use log::debug;
-use crate::jwt::TokenFactory;
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with

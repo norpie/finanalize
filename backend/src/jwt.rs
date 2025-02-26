@@ -73,7 +73,7 @@ impl Claims {
         debug!(
             "Creating claims for subject: {}, token type: {:?}",
             sub, token_type
-            );
+        );
         Self {
             exp: token_type.valid_until(),
             iat: Utc::now().timestamp() as usize,
