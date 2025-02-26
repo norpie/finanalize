@@ -33,11 +33,13 @@ pub async fn create_report(
         .content(report_creation)
         .await?
         .ok_or(FinanalizeError::InternalServerError)?;
+    debug!("Created db report: {:#?}", report);
     db.query("RELATE $user -> has -> $report")
         .bind(("user", user.id.clone()))
         .bind(("report", report.id.clone()))
         .await?;
     let created_report: FullReport = FullReport::from(report);
+    debug!("Created report object: {:#?}", created_report);
     let workflow_status_update = WorkflowState {
         id: created_report.id.to_string(),
         last_job_type: JobType::Pending,
@@ -55,6 +57,7 @@ pub async fn create_report(
             Default::default(),
         )
         .await?;
+    debug!("Published workflow status update: {:#?}", workflow_status_update);
     Ok(ApiResponse::new(created_report))
 }
 
@@ -191,8 +194,9 @@ pub async fn get_live_report(
     token_factory: Data<TokenFactory>,
 ) -> Result<impl Responder> {
     let token = &query.bearer;
+    debug!("Bearer token: {:#?}", token);
     let user_id = token_factory.subject(token)?;
-
+    debug!("User ID: {:#?}", user_id);
     let db_report_id = Thing::from(("report", report_id.as_str()));
     let db_user_id = Thing::from(("user", user_id.as_str()));
     let _report = db
@@ -200,7 +204,7 @@ pub async fn get_live_report(
          .bind(("user", db_user_id))
          .bind(("report", db_report_id.clone()))
          .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
-
+    debug!("Report: {:#?}", _report);
     let (res, mut session, mut ws) = actix_ws::handle(&req, stream)?;
 
     let db = db.get_ref().clone();
