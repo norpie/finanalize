@@ -1,3 +1,4 @@
+use log::debug;
 use serde::{Deserialize, Serialize};
 use tokio::time::{sleep, Duration};
 
@@ -12,6 +13,7 @@ struct RecentFilings {
 
 /// Fetches the CIK (Central Index Key) for a given stock ticker
 async fn get_cik_from_ticker(ticker: &str) -> Option<String> {
+    debug!("Fetching CIK for ticker: {:#?}", ticker);
     let url = "https://www.sec.gov/files/company_tickers.json";
     let user_agent = "FinAnalizeBot/1.0 (nguijoel.bryana@student.ehb.be)";
 
@@ -24,25 +26,27 @@ async fn get_cik_from_ticker(ticker: &str) -> Option<String> {
         .json::<serde_json::Value>()
         .await
         .ok()?;
-
+    debug!("Response: {:#?}", response);
     let companies = response.as_object()?;
-
+    debug!("Companies: {:#?}", companies);
     for (_key, company) in companies.iter() {
         if let (Some(cik_str), Some(company_ticker)) = (
             company.get("cik_str")?.as_u64(),
             company.get("ticker")?.as_str(),
         ) {
             if company_ticker.eq_ignore_ascii_case(ticker) {
+                debug!("CIK found for {:#?}: {:0>10}", ticker, cik_str);
                 return Some(format!("{:0>10}", cik_str));
             }
         }
     }
-
+    debug!("CIK not found for {:#?}", ticker);
     None
 }
 
 /// Fetches only the relevant SEC filing data for a given CIK, filtering by Form 10-K
 async fn get_latest_filing_links(cik: &str) -> Option<Vec<String>> {
+    debug!("Fetching latest filings for CIK: {:#?}", cik);
     sleep(Duration::from_secs(1)).await;
     let url = format!("https://data.sec.gov/submissions/CIK{}.json", cik);
     let user_agent = "FinAnalizeBot/1.0 (nguijoel.bryana@student.ehb.be)";
@@ -53,7 +57,8 @@ async fn get_latest_filing_links(cik: &str) -> Option<Vec<String>> {
         .send()
         .await
         .ok()?;
-
+    debug!("Received response from SEC filings API for CIK {:#?}: {:#?}", cik, response);
+    
     let text = response.text().await.ok()?;
     let filings: serde_json::Value = serde_json::from_str(&text).ok()?;
 
@@ -75,20 +80,23 @@ async fn get_latest_filing_links(cik: &str) -> Option<Vec<String>> {
             }
         }
     }
-
+    debug!("Found {} Form 10-K filing links", links.len());
     Some(links.into_iter().take(3).collect())
 }
 
 /// Fetches the SEC filing links for a given ticker
 pub async fn get_sec_filing_links(ticker: &str) -> Result<Vec<String>, String> {
+    debug!("Fetching SEC filing links for ticker: {:#?}", ticker);
     let cik = get_cik_from_ticker(ticker)
         .await
         .ok_or("Ticker not found")?;
+    debug!("CIK for ticker {:#?}: {:#?}", ticker, cik);
     let links = get_latest_filing_links(&cik)
         .await
         .ok_or("Error retrieving filings")?;
 
     if links.is_empty() {
+        debug!("No filings found for ticker: {:#?}", ticker);
         Err("No filings found".to_string())
     } else {
         Ok(links)
