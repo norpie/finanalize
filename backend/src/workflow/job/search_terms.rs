@@ -11,9 +11,10 @@ pub struct SearchJob;
 #[async_trait]
 impl Job for SearchJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        debug!("Running SearchJob...");
         let searches = state.state.searches.clone().unwrap();
         let total = searches.len();
-
+        debug!("Total searches: {}", total);
         // Create a vector to hold the futures
         let mut search_futures = JoinSet::new();
 
@@ -27,14 +28,17 @@ impl Job for SearchJob {
         let search_results = search_futures.join_all().await;
         let mut all_urls = Vec::new();
         for result in search_results.into_iter() {
+            debug!("Adding search result: {:?}", result);
             all_urls.extend(result?);
         }
 
         // Sort and deduplicate URLs
+        debug!("Sorting and deduplicating URLs");
         all_urls.sort();
         all_urls.dedup();
-
+        debug!("Search results: {:?}", all_urls.len());
         state.state.search_results = Some(all_urls);
+        debug!("SearchJob completed");
         Ok(state)
     }
 }
