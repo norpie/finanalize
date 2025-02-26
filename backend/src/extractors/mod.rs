@@ -3,11 +3,11 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 // pub mod csv;
+pub mod figure;
 pub mod html;
 pub mod md;
-pub mod text;
-pub mod figure;
 pub mod pdf;
+pub mod text;
 
 #[async_trait]
 pub trait ContentExtract {
