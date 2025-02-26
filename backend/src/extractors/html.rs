@@ -1,4 +1,5 @@
 use super::{Content, ContentExtract, FileType};
+use crate::extractors::figure::FigureExtractor; // Import FigureExtractor
 use crate::extractors::md::MarkdownExtractor;
 use crate::prelude::*;
 use async_trait::async_trait;
@@ -19,7 +20,14 @@ impl ContentExtract for HTMLExtractor {
             ));
         };
         debug!("Input type is HTML");
-        // Move parsing into a blocking thread to avoid `Send` issues
+        // Step 1: Extract figures using FigureExtractor
+        let figure_extractor = FigureExtractor;
+        let figure_content = figure_extractor
+            .extract(FileType::Html(input.clone()))
+            .await
+            .unwrap_or_else(|_| vec![]); // Safely handle errors by returning an empty vector
+
+        // Step 2: Extract text for Markdown conversion
         let extracted_texts = task::spawn_blocking(move || {
             debug!("Parsing HTML content");
             let document = Html::parse_document(&input);
@@ -55,9 +63,14 @@ impl ContentExtract for HTMLExtractor {
         let markdown_extractor = MarkdownExtractor;
 
         // Convert extracted HTML content to Markdown using MarkdownExtractor
-        let result = markdown_extractor
+        let markdown_content = markdown_extractor
             .extract(FileType::MarkDown(extracted_texts.join("\n")))
-            .await?;
+            .await
+            .unwrap_or_else(|_| vec![]); // Safely handle errors by returning an empty vector
+
+        // Combine figure content and markdown content
+        let mut result = figure_content;
+        result.extend(markdown_content);
 
         Ok(result)
     }
@@ -94,6 +107,10 @@ mod tests {
                 <aside>Sidebar Content</aside>
                 <div>Main Content</div>
                 <article>Another Important Section</article>
+                <figure>
+                    <img src="image1.jpg" alt="Image 1">
+                    <figcaption>Caption for Image 1</figcaption>
+                </figure>
                 <footer>Footer Information</footer>
             </body>
         </html>
@@ -105,39 +122,30 @@ mod tests {
         match extractor.extract(file).await {
             Ok(result) => {
                 println!("Extraction result: {:?}", result);
-                // Ensure there is one Markdown entry
-                assert_eq!(result.len(), 1);
 
-                if let Content::MarkDown(markdown) = &result[0] {
-                    // Check the Markdown output
-                    assert!(
-                        markdown.contains("Main Content"),
-                        "Expected 'Main Content' in Markdown output"
-                    );
-                    assert!(
-                        markdown.contains("Another Important Section"),
-                        "Expected 'Another Important Section' in Markdown output"
-                    );
+                // Ensure the result contains both figures and Markdown
+                assert!(result.iter().any(|content| matches!(content, Content::Figures(_))));
+                assert!(result.iter().any(|content| matches!(content, Content::MarkDown(_))));
+
+                // Check the figure content
+                if let Some(Content::Figures(figures)) = result.iter().find(|content| matches!(content, Content::Figures(_))) {
+                    assert_eq!(figures.len(), 1);
+                    let figure = &figures[0];
+                    assert_eq!(figure.url, "image1.jpg");
+                    assert_eq!(figure.alt_text.as_deref(), Some("Image 1"));
+                    assert_eq!(figure.caption.as_deref(), Some("Caption for Image 1"));
+                }
+
+                // Check the Markdown content
+                if let Some(Content::MarkDown(markdown)) = result.iter().find(|content| matches!(content, Content::MarkDown(_))) {
+                    assert!(markdown.contains("Main Content"));
+                    assert!(markdown.contains("Another Important Section"));
 
                     // Ensure ignored sections are not included
-                    assert!(
-                        !markdown.contains("Header Title"),
-                        "Ignored section 'Header Title' found in Markdown output"
-                    );
-                    assert!(
-                        !markdown.contains("Navigation Links"),
-                        "Ignored section 'Navigation Links' found in Markdown output"
-                    );
-                    assert!(
-                        !markdown.contains("Sidebar Content"),
-                        "Ignored section 'Sidebar Content' found in Markdown output"
-                    );
-                    assert!(
-                        !markdown.contains("Footer Information"),
-                        "Ignored section 'Footer Information' found in Markdown output"
-                    );
-                } else {
-                    panic!("Expected Content::MarkDown variant");
+                    assert!(!markdown.contains("Header Title"));
+                    assert!(!markdown.contains("Navigation Links"));
+                    assert!(!markdown.contains("Sidebar Content"));
+                    assert!(!markdown.contains("Footer Information"));
                 }
             }
             Err(err) => {
