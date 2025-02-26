@@ -61,22 +61,28 @@ fn split_evenly(items: Vec<String>, n: usize) -> Vec<Vec<String>> {
 #[async_trait]
 impl Job for ScrapePagesJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        debug!("Running ScrapePagesJob...");
         let browsers = Arc::new(make_browsers(BROWSER_COUNT).await?);
+        debug!("Initialized {} browsers", BROWSER_COUNT);
         let sources: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
         let search_results = state.state.search_results.clone().unwrap();
+        debug!("Pages to scrape: {}", search_results.len());
         let mut join_set = JoinSet::new();
         let total = search_results.len();
         for (i, source) in search_results.into_iter().enumerate() {
             let browsers = browsers.clone();
             let sources = sources.clone();
+            debug!("Spawning task for scraping URL {}: {}", i + 1, source);
             join_set.spawn(async move {
                 let Ok(browser) = browsers.clone().get().await else {
                     return Err(FinanalizeError::InternalServerError);
                 };
                 debug!("Scraping ({}/{}): {}", i + 1, total, source);
                 let Ok(source) = scrape_page(&browser, &source).await else {
+                    debug!("Failed to scrape page: {}", source);
                     return Err(FinanalizeError::InternalServerError);
                 };
+                debug!("Scraped ({}/{}): {}", i + 1, total, source);
                 sources.clone().lock().await.push(source);
                 Ok(())
             });
@@ -84,12 +90,15 @@ impl Job for ScrapePagesJob {
 
         let results: Result<Vec<()>> = join_set.join_all().await.into_iter().collect();
         results?;
+        debug!("Scraped all pages, closing browser instances...");
 
         for _ in 0..BROWSER_COUNT {
             let browser = browsers.remove().await?;
             browser.close().await?;
         }
+        debug!("Closed all browser instances");
         state.state.sources = Some(sources.lock().await.clone());
+        debug!("ScrapePagesJob completed");
         Ok(state)
     }
 }
