@@ -1,7 +1,7 @@
 use crate::{llm::LLMApi, prelude::*};
 
 use std::sync::Arc;
-
+use log::debug;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -84,13 +84,16 @@ pub async fn vector_search(
     report: Thing,
     query: String,
 ) -> Result<Vec<DocumentChunk>> {
+    debug!("Searching for '{:#?}'", &query);
     let search_embed = llm_api.embed(query).await?;
+    debug!("Embedding length: {}", &search_embed.len());
     let results: Vec<SurrealDbDocumentChunk> = db
         .query(VECTOR_SEARCH_QUERY)
         .bind(("search_embed", search_embed))
         .bind(("report", report))
         .await?
         .take(0)?;
+    debug!("Found {} results", results.len());
     Ok(results.into_iter().map(DocumentChunk::from).collect())
 }
 
