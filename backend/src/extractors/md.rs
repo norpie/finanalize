@@ -2,6 +2,7 @@ use super::FileType;
 use super::{Content, ContentExtract};
 use crate::prelude::*;
 use async_trait::async_trait;
+use log::debug;
 use scraper::{Html, Selector};
 use tokio::task;
 
@@ -10,16 +11,19 @@ pub struct MarkdownExtractor;
 #[async_trait]
 impl ContentExtract for MarkdownExtractor {
     async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
+        debug!("Extracting Markdown content...");
         let FileType::MarkDown(buffer) = file else {
             return Err(FinanalizeError::ParseError(
                 "Invalid input type".to_string(),
             ));
         };
+        debug!("Received valid Markdown input");
 
         // Perform the HTML-to-Markdown conversion in a blocking thread
         let markdown = task::spawn_blocking(move || {
             if buffer.trim().starts_with("<") {
                 // Input looks like HTML, process it as HTML
+                debug!("Buffer is HTML; converting to Markdown");
                 let document = Html::parse_document(&buffer);
                 let selector = Selector::parse("body *")
                     .map_err(|_| FinanalizeError::ParseError("Selector parse error".to_string()))?;
@@ -28,7 +32,7 @@ impl ContentExtract for MarkdownExtractor {
                 for element in document.select(&selector) {
                     let tag_name = element.value().name();
                     let text = element.text().collect::<Vec<_>>().join(" ");
-
+                    debug!("Processing HTML element. Tag: {}, Text: {}", tag_name, text);
                     match tag_name {
                         "h1" => md.push_str(&format!("# {}\n\n", text)),
                         "h2" => md.push_str(&format!("## {}\n\n", text)),
@@ -38,7 +42,7 @@ impl ContentExtract for MarkdownExtractor {
                         _ => md.push_str(&format!("{}\n", text)),
                     }
                 }
-
+                debug!("Converted HTML buffer into Markdown complete");
                 Ok(md.trim().to_string()) as Result<String>
             } else {
                 // Input is plain text; return it as-is
@@ -47,7 +51,7 @@ impl ContentExtract for MarkdownExtractor {
         })
         .await
         .map_err(|_| FinanalizeError::InternalServerError)??;
-
+        debug!("Markdown extracted: {}", markdown);
         if markdown.is_empty() {
             return Err(FinanalizeError::NotFound);
         }
