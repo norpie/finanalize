@@ -124,11 +124,18 @@ mod tests {
                 println!("Extraction result: {:?}", result);
 
                 // Ensure the result contains both figures and Markdown
-                assert!(result.iter().any(|content| matches!(content, Content::Figures(_))));
-                assert!(result.iter().any(|content| matches!(content, Content::MarkDown(_))));
+                assert!(result
+                    .iter()
+                    .any(|content| matches!(content, Content::Figures(_))));
+                assert!(result
+                    .iter()
+                    .any(|content| matches!(content, Content::MarkDown(_))));
 
                 // Check the figure content
-                if let Some(Content::Figures(figures)) = result.iter().find(|content| matches!(content, Content::Figures(_))) {
+                if let Some(Content::Figures(figures)) = result
+                    .iter()
+                    .find(|content| matches!(content, Content::Figures(_)))
+                {
                     assert_eq!(figures.len(), 1);
                     let figure = &figures[0];
                     assert_eq!(figure.url, "image1.jpg");
@@ -137,7 +144,10 @@ mod tests {
                 }
 
                 // Check the Markdown content
-                if let Some(Content::MarkDown(markdown)) = result.iter().find(|content| matches!(content, Content::MarkDown(_))) {
+                if let Some(Content::MarkDown(markdown)) = result
+                    .iter()
+                    .find(|content| matches!(content, Content::MarkDown(_)))
+                {
                     assert!(markdown.contains("Main Content"));
                     assert!(markdown.contains("Another Important Section"));
 

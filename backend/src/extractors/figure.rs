@@ -1,12 +1,12 @@
-use crate::prelude::*;
 use super::Figure; // Import the existing Figure struct
+use crate::prelude::*;
 use async_trait::async_trait;
 use scraper::{Html, Selector};
 use tokio::task;
 
+use super::Content;
 use super::ContentExtract;
 use super::FileType;
-use super::Content;
 
 pub struct FigureExtractor;
 
@@ -36,7 +36,7 @@ impl ContentExtract for FigureExtractor {
                             .select(&caption_selector)
                             .next()
                             .map(|caption| caption.text().collect::<Vec<_>>().join(" "));
-            
+
                         figures.push(Figure {
                             url: url.to_string(),
                             alt_text,
@@ -45,7 +45,6 @@ impl ContentExtract for FigureExtractor {
                     }
                 }
             }
-            
 
             Ok(figures) as Result<Vec<Figure>>
         })
@@ -91,8 +90,10 @@ mod tests {
                     assert_eq!(figures[1].url, "image2.png");
                     assert_eq!(figures[1].alt_text, None);
                     assert_eq!(figures[1].caption, Some("Figure 2 Caption".to_string()));
-                    assert!(figures.iter().all(|f| !f.url.is_empty()), "All figures must have a valid URL");
-
+                    assert!(
+                        figures.iter().all(|f| !f.url.is_empty()),
+                        "All figures must have a valid URL"
+                    );
                 } else {
                     panic!("Expected Content::Figures variant");
                 }
