@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 pub mod html;
 pub mod md;
 pub mod text;
-// pub mod figure;
+pub mod figure;
 pub mod pdf;
 
 #[async_trait]
@@ -18,7 +18,7 @@ pub trait ContentExtract {
 pub enum Content {
     Html(String),
     Text(String),
-    // Figures(Vec<Figure>),
+    Figures(Vec<Figure>),
     // Csv(String),
     MarkDown(String),
     Pdf(Vec<u8>),
@@ -27,18 +27,18 @@ pub enum Content {
 pub enum FileType {
     Html(String),
     Text(String),
-    // Figures(Vec<Figure>),
+    Figures(Vec<Figure>),
     // Csv(String),
     MarkDown(String),
     Pdf(Vec<u8>),
 }
 
-// #[derive(Debug, Serialize, Clone, Deserialize)]
-// pub struct Figure {
-//     pub url: String,
-//     pub alt_text: Option<String>,
-//     pub caption: Option<String>,
-// }
+#[derive(Debug, Serialize, Clone, Deserialize)]
+pub struct Figure {
+    pub url: String,
+    pub alt_text: Option<String>,
+    pub caption: Option<String>,
+}
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Data {
