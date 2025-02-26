@@ -1,6 +1,7 @@
 use crate::{llm::API, prelude::*, prompting, tasks::Task};
 
 use async_trait::async_trait;
+use log::debug;
 use models::{SectionNamesInput, SectionNamesOutput};
 
 use crate::workflow::WorkflowState;
@@ -27,15 +28,21 @@ pub struct SectionNamesJob;
 #[async_trait]
 impl Job for SectionNamesJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        debug!("Running SectionNamesJob...");
         let prompt = prompting::get_prompt("section".into())?;
         let task = Task::new(&prompt);
         let input = SectionNamesInput {
             title: state.state.title.clone().unwrap(),
             message: state.state.user_input.clone(),
         };
+        debug!("Prepared input: {:#?}", input);
+        debug!("Running task...");
         let output: SectionNamesOutput = task.run(API.clone(), &input).await?;
+        debug!("Task completed");
         state.state.sections = Some(output.sections);
+        debug!("Sections: {:#?}", state.state.sections);
         dbg!(&state.state.sections);
+        debug!("SectionNamesJob completed");
         Ok(state)
     }
 }
