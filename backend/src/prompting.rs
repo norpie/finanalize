@@ -1,10 +1,11 @@
 use include_dir::{include_dir, Dir};
-
+use log::debug;
 use crate::prelude::*;
 
 static PROMPTS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/prompts");
 
 pub fn get_prompt(id: String) -> Result<String> {
+    debug!("Getting prompt for id: {:#?}", id);
     let prompt_path = format!("{}/{}.prompt.hbs", &id, &id);
     let prompt = PROMPTS_DIR
         .get_file(prompt_path.clone())
@@ -13,7 +14,7 @@ pub fn get_prompt(id: String) -> Result<String> {
         .ok_or_else(|| FinanalizeError::MissingPromptUTF8(prompt_path))?
         .trim_end()
         .to_string();
-
+    debug!("Found prompt: {:#?}", prompt.as_bytes());
     Ok(prompt)
 }
 
