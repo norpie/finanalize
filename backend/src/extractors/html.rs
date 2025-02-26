@@ -2,6 +2,7 @@ use super::{Content, ContentExtract, FileType};
 use crate::extractors::md::MarkdownExtractor;
 use crate::prelude::*;
 use async_trait::async_trait;
+use log::debug;
 use scraper::{ElementRef, Html, Selector};
 use tokio::task;
 
@@ -10,15 +11,17 @@ pub struct HTMLExtractor;
 #[async_trait]
 impl ContentExtract for HTMLExtractor {
     async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
+        debug!("Extracting content from HTML file");
         // Ensure the input is of the correct type
         let FileType::Html(input) = file else {
             return Err(FinanalizeError::ParseError(
                 "Invalid input type".to_string(),
             ));
         };
-
+        debug!("Input type is HTML");
         // Move parsing into a blocking thread to avoid `Send` issues
         let extracted_texts = task::spawn_blocking(move || {
+            debug!("Parsing HTML content");
             let document = Html::parse_document(&input);
 
             // Select all `div` and `article` elements
@@ -31,12 +34,12 @@ impl ContentExtract for HTMLExtractor {
                 // Check if the element is NOT inside ignored tags
                 if !is_inside_ignored_section(element) {
                     let text = element.text().collect::<Vec<_>>().join(" ");
-                    println!("Extracted text: {}", text); // Debug log
+                    debug!("Extracted text: {}", text); // Debug log
                     if !text.is_empty() {
                         texts.push(text);
                     }
                 } else {
-                    println!("Ignored element: {:?}", element.value().name()); // Debug log
+                    debug!("Ignored element: {:?}", element.value().name()); // Debug log
                 }
             }
 
@@ -48,7 +51,7 @@ impl ContentExtract for HTMLExtractor {
         })
         .await
         .map_err(|_| FinanalizeError::InternalServerError)??;
-
+        debug!("Extracted texts: {:?}", extracted_texts);
         let markdown_extractor = MarkdownExtractor;
 
         // Convert extracted HTML content to Markdown using MarkdownExtractor
