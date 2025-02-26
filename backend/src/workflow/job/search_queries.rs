@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use chrono::Utc;
+use log::debug;
 use models::{RawSearchQueriesInput, SearchQueriesInput, SearchQueriesOutput, Section};
 
 use crate::llm::API;
@@ -42,6 +43,7 @@ pub struct GenerateSearchQueriesJob;
 #[async_trait]
 impl Job for GenerateSearchQueriesJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        debug!("Running GenerateSearchQueriesJob...");
         let prompt = prompting::get_prompt("search".into())?;
         let task = Task::new(&prompt);
         let mut sections = Vec::new();
@@ -53,6 +55,8 @@ impl Job for GenerateSearchQueriesJob {
             .into_iter()
             .zip(state.state.sub_sections.clone().unwrap())
         {
+            debug!("Section: {}", section);
+            debug!("Sub-sections: {:?}", sub_sections);
             sections.push(Section {
                 section,
                 sub_sections,
@@ -63,11 +67,15 @@ impl Job for GenerateSearchQueriesJob {
             date: Utc::now().to_rfc3339(),
             sections,
         };
+        debug!("Serialized input for search queries: {}", serde_json::to_string_pretty(&input)?);
         let raw_input = RawSearchQueriesInput {
             input: serde_json::to_string_pretty(&input)?,
         };
+        debug!("Running task to generate search queries...");
         let output: SearchQueriesOutput = task.run(API.clone(), &raw_input).await?;
+        debug!("Generated search queries successfully. Total queries: {}", output.queries.len());
         state.state.searches = Some(output.queries);
+        debug!("GenerateSearchQueriesJob completed");
         Ok(state)
     }
 }
