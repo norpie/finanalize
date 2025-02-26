@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use super::Figure; // Import the existing Figure struct
 use async_trait::async_trait;
-use scraper::{ElementRef, Html, Selector};
+use scraper::{Html, Selector};
 use tokio::task;
 
 use super::ContentExtract;
@@ -30,20 +30,22 @@ impl ContentExtract for FigureExtractor {
             for figure_element in document.select(&figure_selector) {
                 let img_element = figure_element.select(&img_selector).next();
                 if let Some(img) = img_element {
-                    let url = img.value().attr("src").unwrap_or_default().to_string();
-                    let alt_text = img.value().attr("alt").map(String::from);
-                    let caption = figure_element
-                        .select(&caption_selector)
-                        .next()
-                        .map(|caption| caption.text().collect::<Vec<_>>().join(" "));
-
-                    figures.push(Figure {
-                        url,
-                        alt_text,
-                        caption,
-                    });
+                    if let Some(url) = img.value().attr("src") {
+                        let alt_text = img.value().attr("alt").map(String::from);
+                        let caption = figure_element
+                            .select(&caption_selector)
+                            .next()
+                            .map(|caption| caption.text().collect::<Vec<_>>().join(" "));
+            
+                        figures.push(Figure {
+                            url: url.to_string(),
+                            alt_text,
+                            caption,
+                        });
+                    }
                 }
             }
+            
 
             Ok(figures) as Result<Vec<Figure>>
         })
@@ -89,6 +91,8 @@ mod tests {
                     assert_eq!(figures[1].url, "image2.png");
                     assert_eq!(figures[1].alt_text, None);
                     assert_eq!(figures[1].caption, Some("Figure 2 Caption".to_string()));
+                    assert!(figures.iter().all(|f| !f.url.is_empty()), "All figures must have a valid URL");
+
                 } else {
                     panic!("Expected Content::Figures variant");
                 }
