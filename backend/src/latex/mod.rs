@@ -92,7 +92,7 @@ impl Source {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct LatexCommand {
     command: String,
     args: String,
