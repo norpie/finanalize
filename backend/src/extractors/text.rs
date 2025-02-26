@@ -2,17 +2,20 @@ use super::FileType;
 use super::{Content, ContentExtract};
 use crate::prelude::*;
 use async_trait::async_trait;
+use log::debug;
 
 pub struct TextExtractor;
 
 #[async_trait]
 impl ContentExtract for TextExtractor {
     async fn extract(&self, file: FileType) -> Result<Vec<Content>> {
+        debug!("Extracting text content...");
         let FileType::Text(input) = file else {
             return Err(FinanalizeError::ParseError(
                 "Invalid input type".to_string(),
             ));
         };
+        debug!("Received valid input: {}", input);
         let mut chunks = Vec::new();
         let mut current_chunk = String::new();
 
@@ -20,6 +23,7 @@ impl ContentExtract for TextExtractor {
             if current_chunk.len() + word.len() >= 512 {
                 // Wrap the chunk as `Content::Text` and push it to the vector
                 chunks.push(Content::Text(current_chunk.clone()));
+                debug!("Pushed chunk with length: {}", current_chunk.len());
                 current_chunk.clear();
             }
             if !current_chunk.is_empty() {
@@ -29,9 +33,10 @@ impl ContentExtract for TextExtractor {
         }
 
         if !current_chunk.is_empty() {
+            debug!("Pushing the last chunk with length: {}", current_chunk.len());
             chunks.push(Content::Text(current_chunk));
         }
-
+        debug!("Finished extracting text content. Returning {} chunks", chunks.len());
         Ok(chunks)
     }
 }
