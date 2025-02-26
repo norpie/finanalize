@@ -1,6 +1,7 @@
 use crate::{llm, prelude::*, prompting, tasks::Task};
 
 use async_trait::async_trait;
+use log::debug;
 use models::ValidationOutput;
 
 use crate::workflow::WorkflowState;
@@ -28,13 +29,20 @@ pub struct ValidationJob;
 impl Job for ValidationJob {
     /// Expects the previous state to be a `Report`
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        debug!("Running ValidationJob...");
         let prompt = prompting::get_prompt("validation".into())?;
         let task = Task::new(&prompt);
         let input = models::ValidationInput {
             message: state.state.user_input.clone(),
         };
+        debug!("Prepared input: {:#?}", input);
+        debug!("Running task...");
         let output: ValidationOutput = task.run(llm::API.clone(), &input).await?;
+        debug!("Task completed");
         state.state.validation = Some(output);
+        debug!("Validation: {:#?}", state.state.validation);
+        dbg!(&state.state.validation);
+        debug!("ValidationJob completed");
         Ok(state)
     }
 }
