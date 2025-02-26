@@ -21,9 +21,9 @@ impl ContentExtract for FigureExtractor {
 
         let extracted_figures = task::spawn_blocking(move || {
             let document = Html::parse_document(&input);
-            let figure_selector = Selector::parse("figure").unwrap();
-            let img_selector = Selector::parse("img").unwrap();
-            let caption_selector = Selector::parse("figcaption").unwrap();
+            let figure_selector = Selector::parse("figure")?;
+            let img_selector = Selector::parse("img")?;
+            let caption_selector = Selector::parse("figcaption")?;
 
             let mut figures = Vec::new();
 
