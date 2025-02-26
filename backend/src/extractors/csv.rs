@@ -26,7 +26,7 @@ impl ContentExtract for CsvExtractor {
                     .collect(),
             });
         }
-
+        debug!("Columns: {:?}", columns);
         // TODO: Generate actual title and description from DataFrame metadata
         let title = "CSV Data Analysis".to_string();
         let description = format!(
@@ -41,7 +41,7 @@ impl ContentExtract for CsvExtractor {
             description,
             columns,
         };
-
+        debug!("Data: {:?}", data);
         // Return as Vec<Content> by converting Data into Content::Csv
         Ok(vec![Content::Csv(serde_json::to_string(&data)?)])
 
