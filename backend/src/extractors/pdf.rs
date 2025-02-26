@@ -44,7 +44,10 @@ impl ContentExtract for PdfExtractor {
         .await??;
 
         let result = HTMLExtractor.extract(FileType::Html(html_content)).await?;
-        debug!("Content extracted successfully from PDF: {} chunks", result.len());
+        debug!(
+            "Content extracted successfully from PDF: {} chunks",
+            result.len()
+        );
         // Return the extracted HTML content wrapped in Content::Html
         Ok(result)
     }

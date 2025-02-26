@@ -57,7 +57,10 @@ pub async fn create_report(
             Default::default(),
         )
         .await?;
-    debug!("Published workflow status update: {:#?}", workflow_status_update);
+    debug!(
+        "Published workflow status update: {:#?}",
+        workflow_status_update
+    );
     Ok(ApiResponse::new(created_report))
 }
 

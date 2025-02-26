@@ -17,7 +17,10 @@ impl Job for GenerateReportJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         debug!("Running GenerateReportJob...");
         let mut components = Vec::new();
-        debug!("Generating report for: {}", state.state.title.clone().unwrap());
+        debug!(
+            "Generating report for: {}",
+            state.state.title.clone().unwrap()
+        );
         for (section, sub_sections) in state.state.sections.clone().unwrap().into_iter().zip(
             state
                 .state

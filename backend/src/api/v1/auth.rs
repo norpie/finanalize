@@ -57,7 +57,7 @@ pub async fn refresh(token_factory: Data<TokenFactory>, req: HttpRequest) -> imp
         Some(cookie) => cookie.value().to_string(),
         None => return Err(FinanalizeError::Unauthorized(AuthError::InvalidToken)),
     };
-    
+
     let subject = token_factory.subject(&refresh_token)?;
     let pair = token_factory.generate_token(subject)?;
     debug!("Generated new token pair: {:?}", pair);

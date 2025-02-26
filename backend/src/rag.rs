@@ -1,8 +1,8 @@
 use crate::{llm::LLMApi, prelude::*};
 
-use std::sync::Arc;
 use log::debug;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use surrealdb::sql::Thing;
 
 use crate::db::SurrealDb;

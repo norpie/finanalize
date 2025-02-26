@@ -1,6 +1,6 @@
+use crate::prelude::*;
 use include_dir::{include_dir, Dir};
 use log::debug;
-use crate::prelude::*;
 
 static PROMPTS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/prompts");
 

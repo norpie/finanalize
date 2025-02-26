@@ -57,8 +57,11 @@ async fn get_latest_filing_links(cik: &str) -> Option<Vec<String>> {
         .send()
         .await
         .ok()?;
-    debug!("Received response from SEC filings API for CIK {:#?}: {:#?}", cik, response);
-    
+    debug!(
+        "Received response from SEC filings API for CIK {:#?}: {:#?}",
+        cik, response
+    );
+
     let text = response.text().await.ok()?;
     let filings: serde_json::Value = serde_json::from_str(&text).ok()?;
 
