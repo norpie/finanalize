@@ -3,6 +3,7 @@ use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowStat
 use super::{validation::models::ValidationInput, Job};
 
 use async_trait::async_trait;
+use log::debug;
 use models::TitleOutput;
 
 pub mod models {
@@ -19,13 +20,20 @@ pub struct TitleJob;
 #[async_trait]
 impl Job for TitleJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        debug!("Running TitleJob...");
         let prompt = prompting::get_prompt("title".into())?;
         let task = Task::new(&prompt);
         let input = ValidationInput {
             message: state.state.user_input.clone(),
         };
+        debug!("Prepared input: {:#?}", input);
+        debug!("Running task...");
         let output: TitleOutput = task.run(API.clone(), &input).await?;
+        debug!("Task completed");
         state.state.title = Some(output.title);
+        debug!("Title: {:#?}", state.state.title);
+        dbg!(&state.state.title);
+        debug!("TitleJob completed");
         Ok(state)
     }
 }
