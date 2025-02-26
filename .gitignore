@@ -3,3 +3,4 @@
 ollama
 .direnv
 .envrc
+.env-docker
