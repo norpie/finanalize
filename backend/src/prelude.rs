@@ -3,6 +3,7 @@ use derive_more::derive::Display;
 use fantoccini::error::{CmdError, NewSessionError};
 use selectors::parser::SelectorParseErrorKind;
 use thiserror::Error;
+use scraper::error::SelectorErrorKind;
 
 pub type StdResult<T, E> = std::result::Result<T, E>;
 pub type Result<T> = std::result::Result<T, FinanalizeError>;
@@ -95,10 +96,15 @@ impl From<NewSessionError> for FinanalizeError {
     }
 }
 
-impl From<SelectorParseErrorKind<'_>> for FinanalizeError {
-    fn from(error: SelectorParseErrorKind<'_>) -> Self {
-        // Manually format the error as a string using `Debug`
+impl<'a> From<SelectorParseErrorKind<'a>> for FinanalizeError {
+    fn from(error: SelectorParseErrorKind<'a>) -> Self {
         FinanalizeError::ParseError(format!("{:?}", error)) // Convert to FinanalizeError::ParseError
+    }
+}
+impl<'a> From<SelectorErrorKind<'a>> for FinanalizeError {
+    fn from(error: SelectorErrorKind<'a>) -> Self {
+        // Wrap `SelectorErrorKind` in your `ParseError` variant
+        FinanalizeError::ParseError(format!("{:?}", error))
     }
 }
 
