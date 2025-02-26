@@ -1,9 +1,9 @@
 use actix_web::Error;
 use derive_more::derive::Display;
 use fantoccini::error::{CmdError, NewSessionError};
+use scraper::error::SelectorErrorKind;
 use selectors::parser::SelectorParseErrorKind;
 use thiserror::Error;
-use scraper::error::SelectorErrorKind;
 
 pub type StdResult<T, E> = std::result::Result<T, E>;
 pub type Result<T> = std::result::Result<T, FinanalizeError>;
