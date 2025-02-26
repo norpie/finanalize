@@ -2,6 +2,7 @@ use crate::prelude::*;
 
 use chrono::{Duration, Utc};
 use jsonwebtoken::{DecodingKey, EncodingKey};
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone)]
@@ -12,16 +13,19 @@ pub struct TokenFactory {
 
 impl TokenFactory {
     pub fn generate_token(&self, sub: String) -> Result<TokenPair> {
+        debug!("Generating token for {}", sub);
         let access = Claims::new(sub.clone(), &TokenType::Access);
         let refresh = Claims::new(sub, &TokenType::Refresh);
 
         let access_jwt = self.generate_token_from_claims(access)?;
+        debug!("Generated access token successfully");
         let refresh_jwt = self.generate_token_from_claims(refresh)?;
-
+        debug!("Generated refresh token successfully");
         TokenPair::new(access_jwt, refresh_jwt)
     }
 
     fn generate_token_from_claims(&self, claims: Claims) -> Result<String> {
+        debug!("Generating token for {}", claims.sub);
         Ok(jsonwebtoken::encode(
             &jsonwebtoken::Header::default(),
             &claims,
@@ -30,11 +34,13 @@ impl TokenFactory {
     }
 
     pub fn subject(&self, token: &str) -> Result<String> {
+        debug!("Decoding token...");
         let token = jsonwebtoken::decode::<Claims>(
             token,
             &self.decoding,
             &jsonwebtoken::Validation::default(),
         )?;
+        debug!("Decoded token successfully");
         Ok(token.claims.sub)
     }
 }
@@ -64,6 +70,10 @@ struct Claims {
 
 impl Claims {
     fn new(sub: String, token_type: &TokenType) -> Self {
+        debug!(
+            "Creating claims for subject: {}, token type: {:?}",
+            sub, token_type
+            );
         Self {
             exp: token_type.valid_until(),
             iat: Utc::now().timestamp() as usize,
@@ -73,7 +83,7 @@ impl Claims {
     }
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 enum TokenType {
     Access,
     Refresh,
@@ -88,7 +98,10 @@ impl TokenType {
     }
 
     fn valid_until(&self) -> usize {
-        (Utc::now() + self.duration()).timestamp() as usize
+        debug!("Calculating valid_until for token type: {:?}", self);
+        let expiry = (Utc::now() + self.duration()).timestamp() as usize;
+        debug!("Token valid until: {:#?}", expiry);
+        expiry
     }
 }
 
