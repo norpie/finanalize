@@ -1,6 +1,7 @@
 use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowState};
 
 use async_trait::async_trait;
+use log::debug;
 use models::{SubSectionsInput, SubSectionsOutput};
 
 use super::Job;
@@ -29,17 +30,25 @@ pub struct SubSectionsJob;
 #[async_trait]
 impl Job for SubSectionsJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        debug!("Running SubSectionsJob...");
         let prompt = prompting::get_prompt("subsection".into())?;
         let task = Task::new(&prompt);
         let task = task.clone();
         let input = SubSectionsInput {
             sections: state.state.sections.clone().unwrap(),
         };
+        debug!("Prepared input: {:#?}", input);
         let raw_input = models::RawSubSectionsInput {
             input: serde_json::to_string(&input)?,
         };
+        debug!("Serialized input for task: {:#?}", raw_input.input);
+        debug!("Running task...");
         let output: SubSectionsOutput = task.run(API.clone(), &raw_input).await?;
+        debug!("Task completed");
         state.state.sub_sections = Some(output.sub_sections);
+        debug!("Sub-sections: {:#?}", state.state.sub_sections);
+        dbg!(&state.state.sub_sections);
+        debug!("SubSectionsJob completed");
         Ok(state)
     }
 }
