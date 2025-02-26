@@ -6,7 +6,7 @@ use actix_web::{
     Error, HttpMessage, HttpResponse,
 };
 use futures_util::future::LocalBoxFuture;
-
+use log::debug;
 use crate::jwt::TokenFactory;
 
 // There are two steps in middleware processing.
@@ -20,6 +20,7 @@ pub struct Auth {
 
 impl Auth {
     pub fn new(token_factory: TokenFactory) -> Self {
+        debug!("Initializing Auth Middleware...");
         Self { token_factory }
     }
 }
@@ -40,6 +41,7 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
+        debug!("Creating AuthMiddleware instance...");
         ready(Ok(AuthMiddleware {
             service,
             token_factory: self.token_factory.clone(),
@@ -66,29 +68,34 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
+        debug!("AuthMiddleware processing request: {:?}", req.path());
         let Some(token) = get_token(&req) else {
+            debug!("No Authorization token found. Rejecting request.");
             return Box::pin(async {
                 Ok(req.into_response(HttpResponse::Unauthorized().finish().map_into_right_body()))
             });
         };
-
+        debug!("Extracted token: {:?}", token);
         let Ok(sub) = self.token_factory.subject(token) else {
+            debug!("Invalid or expired token. Rejecting request.");
             return Box::pin(async {
                 Ok(req.into_response(HttpResponse::Unauthorized().finish().map_into_right_body()))
             });
         };
-
+        debug!("Token successfully verified. Injecting subject into request.");
         req.extensions_mut().insert(sub);
         let fut = self.service.call(req);
 
         Box::pin(async move {
             let res = fut.await?;
+            debug!("Token successfully verified. Injecting subject into request.");
             Ok(res.map_into_left_body())
         })
     }
 }
 
 fn get_token(req: &ServiceRequest) -> Option<&str> {
+    debug!("Extracting authentication token...");
     req.headers()
         .get("Authorization")?
         .to_str()
