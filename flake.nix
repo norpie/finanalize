@@ -29,9 +29,11 @@
               })
               openssl
               pkg-config
+              # ra-multiplex
             ];
 
             shellHook = ''
+              # systemd-run --user --same-dir --service-type=exec --setenv=PATH --setenv=CARGO_HOME "$SHELL" ra-multiplex server
             '';
           };
       }
