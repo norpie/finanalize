@@ -28,23 +28,26 @@ impl ContentExtract for FigureExtractor {
             let mut figures = Vec::new();
 
             for figure_element in document.select(&figure_selector) {
-                let img_element = figure_element.select(&img_selector).next();
-                if let Some(img) = img_element {
-                    if let Some(url) = img.value().attr("src") {
-                        let alt_text = img.value().attr("alt").map(String::from);
-                        let caption = figure_element
-                            .select(&caption_selector)
-                            .next()
-                            .map(|caption| caption.text().collect::<Vec<_>>().join(" "));
-
-                        figures.push(Figure {
-                            url: url.to_string(),
-                            alt_text,
-                            caption,
-                        });
-                    }
+                let Some(img) = figure_element.select(&img_selector).next() else {
+                    continue; // Continue to the next iteration if no image is found
+                };
+            
+                if let Some(url) = img.value().attr("src") {
+                    let alt_text = img.value().attr("alt").map(String::from);
+                    let caption = figure_element
+                        .select(&caption_selector)
+                        .next()
+                        .map(|caption| caption.text().collect::<Vec<_>>().join(" "));
+            
+                    figures.push(Figure {
+                        url: url.to_string(),
+                        alt_text,
+                        caption,
+                    });
                 }
             }
+            
+            
 
             Ok(figures) as Result<Vec<Figure>>
         })
