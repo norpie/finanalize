@@ -103,50 +103,55 @@ mod tests {
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
-            state: FullReport {
-                id: "sjaudnhcrlas".into(),
-                user_input: "Apple stock in 2025".into(),
-                status: JobType::Pending,
-                created_at: chrono::Utc::now(),
-                updated_at: chrono::Utc::now(),
-                validation: None,
-                title: Some("State of Apple in 2025".into()),
-                sections: Some(vec![
-                    "Introduction to Apple".into(),
-                    "Market Analysis and Forecast".into(),
-                    "Financial Analysis of Apple".into(),
+            state: FullReport::new("sjaudnhcrlas".into(), "Apple stock in 2025".into())
+                .with_title("State of Apple in 2025".into())
+                .with_sections(vec![
+                    "Introduction".into(),
+                    "Market Analysis".into(),
+                    "Financial Analysis".into(),
                     "Conclusion".into(),
-                ]),
-                sub_sections: Some(vec![
+                ])
+                .with_sub_sections(vec![
                     vec!["Background".into(), "Problem Statement".into()],
                     vec!["Market Size".into(), "Market Share".into()],
                     vec!["Revenue".into(), "Profit".into()],
                     vec!["Recommendation".into()],
+                ])
+                .with_searches(vec![
+                    "background on apple company 2025".into(),
+                    "history of apple corporation 2025".into(),
+                    "origins of apple technology 2025".into(),
+                    "apple problem statement 2025".into(),
+                    "challenges faced by apple in 2025".into(),
+                    "issues affecting apple business in 2025".into(),
+                    "apple market size forecast 2025".into(),
+                    "growth projection for apple market 2025".into(),
+                    "expected apple market value 2025".into(),
+                    "apple market share analysis 2025".into(),
+                    "market position of apple in 2025".into(),
+                    "apple's share in global tech market 2025".into(),
+                    "revenue trends for apple 2025".into(),
+                    "apple financial performance revenue 2025".into(),
+                    "annual revenue forecast for apple 2025".into(),
+                    "profit analysis of apple 2025".into(),
+                    "net profit forecast for apple 2025".into(),
+                    "apple's profitability in 2025".into(),
+                ])
+                .with_search_results(vec![
+                    "https://backlinko.com/apple-statistics".into(),
+                    "https://blog.tbrc.info/2025/02/apples-market-demand/".into(),
+                    "https://capital.com/en-eu/analysis/apple-stock-price-in-10-years".into(),
+                    "https://coincodex.com/stock/AAPL/price-prediction/".into(),
+                    "https://cyble.com/blog/apple-fixes-cve-2025-24085-security-update/".into(),
+                    "https://www.businessofapps.com/data/apple-statistics/".into(),
+                    "https://www.captide.co/insights/apple-q1-2025".into(),
+                    "https://www.cnbc.com/2025/01/30/apple-aapl-q1-earnings-2025.html".into(),
+                    "https://www.cultofmac.com/apple-history/apple-incorporation".into(),
+                    "https://www.nasdaq.com/articles/history-apple-company-and-stock".into(),
+                    "https://www.nasdaq.com/articles/what-lies-ahead-apple-stock-etfs-2025".into(),
+                    "https://www.officetimeline.com/blog/apple-inc-timeline".into(),
+                    "https://www.technavio.com/report/fresh-apples-market-industry-analysis".into(),
                 ]),
-                searches: None,
-                search_results: Some(
-                    vec![
-                        "https://backlinko.com/apple-statistics",
-                        "https://blog.tbrc.info/2025/02/apples-market-demand/",
-                        "https://capital.com/en-eu/analysis/apple-stock-price-in-10-years",
-                        "https://coincodex.com/stock/AAPL/price-prediction/",
-                        "https://cyble.com/blog/apple-fixes-cve-2025-24085-security-update/",
-                        "https://www.businessofapps.com/data/apple-statistics/",
-                        "https://www.captide.co/insights/apple-q1-2025",
-                        "https://www.cnbc.com/2025/01/30/apple-aapl-q1-earnings-2025.html",
-                        "https://www.cultofmac.com/apple-history/apple-incorporation",
-                        "https://www.nasdaq.com/articles/history-apple-company-and-stock",
-                        "https://www.nasdaq.com/articles/what-lies-ahead-apple-stock-etfs-2025",
-                        "https://www.officetimeline.com/blog/apple-inc-timeline",
-                        "https://www.technavio.com/report/fresh-apples-market-industry-analysis",
-                    ]
-                    .into_iter()
-                    .map(Into::into)
-                    .collect(),
-                ),
-                sources: None,
-                report: None,
-            },
         };
         let state = job.run(state).await.unwrap();
         dbg!(state.state.report.unwrap());
