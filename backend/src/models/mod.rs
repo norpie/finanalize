@@ -161,3 +161,73 @@ pub struct FullReport {
     pub sources: Option<Vec<String>>,
     pub report: Option<String>,
 }
+
+#[cfg(test)]
+mod tests {
+    use chrono::Utc;
+
+    use crate::workflow::{job::validation::models::ValidationOutput, JobType};
+
+    use super::FullReport;
+
+    impl FullReport {
+        pub fn new(id: String, user_input: String) -> Self {
+            Self {
+                id,
+                status: JobType::Pending,
+                user_input,
+                created_at: Utc::now(),
+                updated_at: Utc::now(),
+
+                validation: None,
+                title: None,
+                sections: None,
+                sub_sections: None,
+                searches: None,
+                search_results: None,
+                raw_sources: None,
+                report: None,
+            }
+        }
+
+        pub fn with_validation(mut self, validation: ValidationOutput) -> Self {
+            self.validation = Some(validation);
+            self
+        }
+
+        pub fn with_title(mut self, title: String) -> Self {
+            self.title = Some(title);
+            self
+        }
+
+        pub fn with_sections(mut self, sections: Vec<String>) -> Self {
+            self.sections = Some(sections);
+            self
+        }
+
+        pub fn with_sub_sections(mut self, sub_sections: Vec<Vec<String>>) -> Self {
+            self.sub_sections = Some(sub_sections);
+            self
+        }
+
+        pub fn with_searches(mut self, searches: Vec<String>) -> Self {
+            self.searches = Some(searches);
+            self
+        }
+
+        pub fn with_search_results(mut self, search_results: Vec<String>) -> Self {
+            self.search_results = Some(search_results);
+            self
+        }
+
+        pub fn with_sources(mut self, sources: Vec<String>) -> Self {
+            self.raw_sources = Some(sources);
+            self
+        }
+
+        pub fn with_report(mut self, report: String) -> Self {
+            self.report = Some(report);
+            self
+        }
+    }
+}

@@ -63,21 +63,7 @@ mod tests {
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
-            state: FullReport {
-                id: "sjaudnhcrlas".into(),
-                user_input: "Hello, World!".into(),
-                status: JobType::Pending,
-                created_at: chrono::Utc::now(),
-                updated_at: chrono::Utc::now(),
-                validation: None,
-                title: None,
-                sections: None,
-                sub_sections: None,
-                searches: None,
-                search_results: None,
-                sources: None,
-                report: None,
-            },
+            state: FullReport::new("sjaudnhcrlas".into(), "Hello, World!".into()),
         };
         let new_state = job.run(state).await.unwrap();
         assert!(!new_state.state.validation.unwrap().valid);
@@ -90,21 +76,7 @@ mod tests {
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
-            state: FullReport {
-                id: "sjaudnhcrlas".into(),
-                user_input: "Apple stock in 2025".into(),
-                status: JobType::Pending,
-                created_at: chrono::Utc::now(),
-                updated_at: chrono::Utc::now(),
-                validation: None,
-                title: None,
-                sections: None,
-                sub_sections: None,
-                searches: None,
-                search_results: None,
-                sources: None,
-                report: None,
-            },
+            state: FullReport::new("sjaudnhcrlas".into(), "Apple stock in 2025".into()),
         };
         let new_state = job.run(state).await.unwrap();
         assert!(new_state.state.validation.unwrap().valid);

@@ -70,26 +70,14 @@ mod tests {
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
-            state: FullReport {
-                id: "sjaudnhcrlas".into(),
-                user_input: "Apple stock in 2025".into(),
-                status: JobType::Pending,
-                created_at: chrono::Utc::now(),
-                updated_at: chrono::Utc::now(),
-                validation: None,
-                title: Some("State of Apple in 2025".into()),
-                sections: Some(vec![
+            state: FullReport::new("sjaudnhcrlas".into(), "Apple stock in 2025".into())
+                .with_title("State of Apple in 2025".into())
+                .with_sections(vec![
                     "Introduction".into(),
                     "Market Analysis".into(),
                     "Financial Analysis".into(),
                     "Conclusion".into(),
                 ]),
-                sub_sections: None,
-                searches: None,
-                search_results: None,
-                sources: None,
-                report: None,
-            },
         };
         let state = job.run(state).await.unwrap();
         dbg!(state.state.sub_sections.unwrap());

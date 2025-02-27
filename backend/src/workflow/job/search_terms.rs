@@ -60,55 +60,40 @@ mod tests {
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
-            state: FullReport {
-                id: "sjaudnhcrlas".into(),
-                user_input: "Apple stock in 2025".into(),
-                status: JobType::Pending,
-                created_at: chrono::Utc::now(),
-                updated_at: chrono::Utc::now(),
-                validation: None,
-                title: Some("State of Apple in 2025".into()),
-                sections: Some(vec![
-                    "Introduction to Apple".into(),
-                    "Market Analysis and Forecast".into(),
-                    "Financial Analysis of Apple".into(),
+            state: FullReport::new("sjaudnhcrlas".into(), "Apple stock in 2025".into())
+                .with_title("State of Apple in 2025".into())
+                .with_sections(vec![
+                    "Introduction".into(),
+                    "Market Analysis".into(),
+                    "Financial Analysis".into(),
                     "Conclusion".into(),
-                ]),
-                sub_sections: Some(vec![
+                ])
+                .with_sub_sections(vec![
                     vec!["Background".into(), "Problem Statement".into()],
                     vec!["Market Size".into(), "Market Share".into()],
                     vec!["Revenue".into(), "Profit".into()],
                     vec!["Recommendation".into()],
+                ])
+                .with_searches(vec![
+                    "background on apple company 2025".into(),
+                    "history of apple corporation 2025".into(),
+                    "origins of apple technology 2025".into(),
+                    "apple problem statement 2025".into(),
+                    "challenges faced by apple in 2025".into(),
+                    "issues affecting apple business in 2025".into(),
+                    "apple market size forecast 2025".into(),
+                    "growth projection for apple market 2025".into(),
+                    "expected apple market value 2025".into(),
+                    "apple market share analysis 2025".into(),
+                    "market position of apple in 2025".into(),
+                    "apple's share in global tech market 2025".into(),
+                    "revenue trends for apple 2025".into(),
+                    "apple financial performance revenue 2025".into(),
+                    "annual revenue forecast for apple 2025".into(),
+                    "profit analysis of apple 2025".into(),
+                    "net profit forecast for apple 2025".into(),
+                    "apple's profitability in 2025".into(),
                 ]),
-                searches: Some(
-                    vec![
-                        "background on apple company 2025",
-                        "history of apple corporation 2025",
-                        "origins of apple technology 2025",
-                        "apple problem statement 2025",
-                        "challenges faced by apple in 2025",
-                        "issues affecting apple business in 2025",
-                        "apple market size forecast 2025",
-                        "growth projection for apple market 2025",
-                        "expected apple market value 2025",
-                        "apple market share analysis 2025",
-                        "market position of apple in 2025",
-                        "apple's share in global tech market 2025",
-                        "revenue trends for apple 2025",
-                        "apple financial performance revenue 2025",
-                        "annual revenue forecast for apple 2025",
-                        "profit analysis of apple 2025",
-                        "net profit forecast for apple 2025",
-                        "apple's profitability in 2025",
-                    ]
-                    .into_iter()
-                    .map(Into::into)
-                    .collect(),
-                ),
-                search_results: None,
-                sources: None,
-                report: None,
-            },
         };
         let state = job.run(state).await.unwrap();
         dbg!(state.state.search_results.unwrap());
