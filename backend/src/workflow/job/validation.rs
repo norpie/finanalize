@@ -37,7 +37,7 @@ impl Job for ValidationJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: ValidationOutput = task.run(llm::API.clone(), &input).await?;
+        let output: ValidationOutput = task.run_structured(llm::API.clone(), &input).await?;
         debug!("Task completed");
         state.state.validation = Some(output);
         debug!("Validation: {:#?}", state.state.validation);

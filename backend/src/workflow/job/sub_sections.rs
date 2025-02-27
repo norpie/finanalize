@@ -43,7 +43,7 @@ impl Job for SubSectionsJob {
         };
         debug!("Serialized input for task: {:#?}", raw_input.input);
         debug!("Running task...");
-        let output: SubSectionsOutput = task.run(API.clone(), &raw_input).await?;
+        let output: SubSectionsOutput = task.run_structured(API.clone(), &raw_input).await?;
         debug!("Task completed");
         state.state.sub_sections = Some(output.sub_sections);
         debug!("Sub-sections: {:#?}", state.state.sub_sections);

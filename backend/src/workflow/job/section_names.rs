@@ -37,7 +37,7 @@ impl Job for SectionNamesJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: SectionNamesOutput = task.run(API.clone(), &input).await?;
+        let output: SectionNamesOutput = task.run_structured(API.clone(), &input).await?;
         debug!("Task completed");
         state.state.sections = Some(output.sections);
         debug!("Sections: {:#?}", state.state.sections);

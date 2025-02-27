@@ -53,7 +53,15 @@ impl Task {
         self
     }
 
-    pub async fn run<T, U>(&self, api: Arc<dyn LLMApi>, input: &T) -> Result<U>
+    pub async fn run_raw<T>(&self, api: Arc<dyn LLMApi>, input: &T) -> Result<String>
+    where
+        T: Serialize,
+    {
+        api.generate(Handlebars::default().render_template(&self.prompt, input)?)
+            .await
+    }
+
+    pub async fn run_structured<T, U>(&self, api: Arc<dyn LLMApi>, input: &T) -> Result<U>
     where
         T: Serialize,
         U: DeserializeOwned + std::fmt::Debug,
@@ -271,7 +279,7 @@ The following are complete examples of the input and output:
 
         let api = Arc::new(UllmApi::default());
 
-        let result: ExampleTaskOutput = task.run(api, &input).await.unwrap();
+        let result: ExampleTaskOutput = task.run_structured(api, &input).await.unwrap();
 
         assert_eq!(result, output);
     }

@@ -75,7 +75,7 @@ impl Job for GenerateSearchQueriesJob {
             input: serde_json::to_string_pretty(&input)?,
         };
         debug!("Running task to generate search queries...");
-        let output: SearchQueriesOutput = task.run(API.clone(), &raw_input).await?;
+        let output: SearchQueriesOutput = task.run_structured(API.clone(), &raw_input).await?;
         debug!(
             "Generated search queries successfully. Total queries: {}",
             output.queries.len()

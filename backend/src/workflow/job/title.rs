@@ -28,7 +28,7 @@ impl Job for TitleJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: TitleOutput = task.run(API.clone(), &input).await?;
+        let output: TitleOutput = task.run_structured(API.clone(), &input).await?;
         debug!("Task completed");
         state.state.title = Some(output.title);
         debug!("Title: {:#?}", state.state.title);
