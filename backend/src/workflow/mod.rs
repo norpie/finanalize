@@ -141,7 +141,7 @@ mod tests {
                 sub_sections: None,
                 searches: None,
                 search_results: None,
-                sources: None,
+                raw_sources: None,
                 report: None,
             },
         };
