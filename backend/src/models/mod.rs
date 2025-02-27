@@ -121,7 +121,7 @@ pub struct FullSDBReport {
     pub sub_sections: Option<Vec<Vec<String>>>,
     pub searches: Option<Vec<String>>,
     pub search_results: Option<Vec<String>>,
-    pub sources: Option<Vec<String>>,
+    pub raw_sources: Option<Vec<String>>,
     pub report: Option<String>,
 }
 
@@ -139,7 +139,7 @@ impl From<FullSDBReport> for FullReport {
             sub_sections: report.sub_sections,
             searches: report.searches,
             search_results: report.search_results,
-            sources: report.sources,
+            raw_sources: report.raw_sources,
             report: report.report,
         }
     }
@@ -158,7 +158,7 @@ pub struct FullReport {
     pub sub_sections: Option<Vec<Vec<String>>>,
     pub searches: Option<Vec<String>>,
     pub search_results: Option<Vec<String>>,
-    pub sources: Option<Vec<String>>,
+    pub raw_sources: Option<Vec<String>>,
     pub report: Option<String>,
 }
 
@@ -220,7 +220,7 @@ mod tests {
             self
         }
 
-        pub fn with_sources(mut self, sources: Vec<String>) -> Self {
+        pub fn with_raw_sources(mut self, sources: Vec<String>) -> Self {
             self.raw_sources = Some(sources);
             self
         }
