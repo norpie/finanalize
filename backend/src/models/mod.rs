@@ -224,10 +224,5 @@ mod tests {
             self.raw_sources = Some(sources);
             self
         }
-
-        pub fn with_report(mut self, report: String) -> Self {
-            self.report = Some(report);
-            self
-        }
     }
 }
