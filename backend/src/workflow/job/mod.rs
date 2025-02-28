@@ -11,6 +11,7 @@ pub mod section_names;
 pub mod sub_sections;
 pub mod title;
 pub mod validation;
+pub mod classify_sources;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
@@ -25,12 +26,15 @@ impl JobType {
             // Doing
             JobType::Validation => Some(JobType::GenerateTitle),
             JobType::GenerateTitle => Some(JobType::GenerateSectionNames),
-            JobType::GenerateSectionNames => Some(JobType::GenerateSubSections),
-            JobType::GenerateSubSections => Some(JobType::GenerateSearchQueries),
+            JobType::GenerateSectionNames => Some(JobType::GenerateSubSectionNames),
+            JobType::GenerateSubSectionNames => Some(JobType::GenerateSearchQueries),
             JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
             JobType::SearchQueries => Some(JobType::ScrapeTopResults),
-            JobType::ScrapeTopResults => Some(JobType::GeneratePDFReport),
-            JobType::GeneratePDFReport => Some(JobType::Done),
+            JobType::ScrapeTopResults => Some(JobType::ExtractContent), // TODO: Implement
+                                                                        // ExtractContent
+            JobType::ExtractContent => Some(JobType::ClassifyContent),
+            JobType::ClassifyContent => Some(JobType::Done), // TODO: Add more steps
+            // JobType::GeneratePDFReport => Some(JobType::Done),
             // Done
             JobType::Invalid => None,
             JobType::Done => None,
@@ -44,13 +48,14 @@ impl JobType {
             JobType::Validation => Some(Box::new(validation::ValidationJob)),
             JobType::GenerateTitle => Some(Box::new(title::TitleJob)),
             JobType::GenerateSectionNames => Some(Box::new(section_names::SectionNamesJob)),
-            JobType::GenerateSubSections => Some(Box::new(sub_sections::SubSectionsJob)),
+            JobType::GenerateSubSectionNames => Some(Box::new(sub_sections::SubSectionsJob)),
             JobType::GenerateSearchQueries => {
                 Some(Box::new(search_queries::GenerateSearchQueriesJob))
             }
             JobType::SearchQueries => Some(Box::new(search_terms::SearchJob)),
             JobType::ScrapeTopResults => Some(Box::new(scrape_pages::ScrapePagesJob)),
-            JobType::GeneratePDFReport => Some(Box::new(generate_report::GenerateReportJob)),
+            JobType::ExtractContent => Some(Box::new(classify_sources::ClassifySourcesJob)),
+            JobType::RenderLaTeXPdf => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }
     }
