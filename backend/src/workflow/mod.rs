@@ -90,13 +90,27 @@ pub enum JobType {
     Pending,
     // Main workflow
     Validation,
+
+    // Generate the report title
     GenerateTitle,
+    // Generate the section names
     GenerateSectionNames,
-    GenerateSubSections,
+    // Generate the subsections
+    GenerateSubSectionNames,
+    // Generate questions to be answered in each subsection
+    GenerateSubSectionQuestions,
+    // Generate search queries to answer the questions
     GenerateSearchQueries,
+    // Search the queries
     SearchQueries,
+    // Scrape the results of the searches
     ScrapeTopResults,
+    // Extract the content of the scraped pages
     ExtractContent,
+    // Classify the content
+    ClassifyContent,
+
+    // TODO: The rest
     ExtractStructuredData,
     ChunkText,
     RAGPrepareChunks,
@@ -108,7 +122,8 @@ pub enum JobType {
     GenerateVisualizations,
     FinalizeSection,
     CompileSections,
-    GeneratePDFReport,
+
+    RenderLaTeXPdf,
     // The two end conditions
     Invalid,
     Done,
