@@ -118,8 +118,6 @@ pub enum JobType {
 mod tests {
     use std::time::Duration;
 
-    use chrono::Utc;
-
     use super::*;
 
     #[tokio::test]
@@ -129,21 +127,7 @@ mod tests {
         let mut state = WorkflowState {
             id: "test".to_string(),
             last_job_type: JobType::Pending,
-            state: FullReport {
-                id: "asdlfjhasldfjh".into(),
-                user_input: "Apple in 2025".into(),
-                status: JobType::Pending,
-                created_at: Utc::now(),
-                updated_at: Utc::now(),
-                validation: None,
-                title: None,
-                sections: None,
-                sub_sections: None,
-                searches: None,
-                search_results: None,
-                raw_sources: None,
-                report: None,
-            },
+            state: FullReport::new("asdlfjhasldfjh".into(), "Apple in 2025".into()),
         };
         loop {
             println!("{:?}", state.state.status);
