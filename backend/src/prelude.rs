@@ -76,6 +76,16 @@ pub enum FinanalizeError {
     DrawingArea(String),
     #[error("Regex error: {0}")]
     Regex(#[from] regex::Error),
+    #[error("Insufficient funds in wallet")]
+    InsufficientFunds,
+    #[error("Database error: {0}")]
+    DatabaseError(String),
+    #[error("Unexpected error: {0}")]
+    Unexpected(String),
+    #[error("Invalid amount: {0}")]
+    InvalidAmount(String),
+    #[error("Deserialization error: {0}")]
+    DeserializationError(String),
 }
 
 impl<E> From<DrawingAreaErrorKind<E>> for FinanalizeError
@@ -91,6 +101,7 @@ impl From<actix_web::Error> for FinanalizeError {
     fn from(value: actix_web::Error) -> Self {
         Self::Websocket(value.to_string())
     }
+
 }
 
 // #[error("Fantoccini error: {0}")]
