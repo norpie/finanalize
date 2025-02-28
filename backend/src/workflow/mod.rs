@@ -109,20 +109,13 @@ pub enum JobType {
     ExtractContent,
     // Classify the content
     ClassifyContent,
-
-    // TODO: The rest
-    ExtractStructuredData,
-    ChunkText,
-    RAGPrepareChunks,
-    GenerateBulletTexts,
-    CombineBulletsIntoParagraph,
-    AssembleSectionContent,
-    AddCitations,
-    IdentifyVisualizationNeeds,
-    GenerateVisualizations,
-    FinalizeSection,
-    CompileSections,
-
+    // Chunk content
+    ChunkContent,
+    // Index the chunks
+    IndexChunks,
+    // Answer the questions with RAG
+    AnswerQuestions,
+    // Put all the content in the template, render it, then compile it to a PDF
     RenderLaTeXPdf,
     // The two end conditions
     Invalid,
