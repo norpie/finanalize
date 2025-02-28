@@ -14,7 +14,7 @@ pub fn get_prompt(id: String) -> Result<String> {
         .ok_or_else(|| FinanalizeError::MissingPromptUTF8(prompt_path))?
         .trim_end()
         .to_string();
-    debug!("Found prompt: {:#?}", prompt.as_bytes());
+    debug!("Found prompt: {:#?}", prompt);
     Ok(prompt)
 }
 
