@@ -1,0 +1,51 @@
+This tool extracts the content metadata from an input Markdown document.
+
+If a title is missing, make up a title based on the content.
+The summary should always be generated from the content.
+If the document is missing an author, it should be filled in as "Anonymous".
+Date is formatted as `YYYY-MM-DD`.
+If the document is missing a date, it should be filled in as `null` type, not as an empty string.
+If the document is missing a date, the publishedAfter field should be an implied date based on the content of the document (e.g. mentions of dates).
+
+<Schema>
+```json
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "publishedAfter": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "title",
+    "summary",
+    "author",
+    "date"
+  ]
+}
+```
+</Schema>
+
+<Input>
+```md
+{{{input}}}
+```
+</Input>
+
+<Output>
+```json
+{
+    "title":
