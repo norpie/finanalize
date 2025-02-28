@@ -2,7 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-use crate::workflow::{job::validation::models::ValidationOutput, JobType};
+use crate::workflow::{job::{classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput}, JobType};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -122,6 +122,7 @@ pub struct FullSDBReport {
     pub searches: Option<Vec<String>>,
     pub search_results: Option<Vec<String>>,
     pub raw_sources: Option<Vec<String>>,
+    pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub report: Option<String>,
 }
 
@@ -140,6 +141,7 @@ impl From<FullSDBReport> for FullReport {
             searches: report.searches,
             search_results: report.search_results,
             raw_sources: report.raw_sources,
+            sources: report.sources,
             report: report.report,
         }
     }
@@ -159,6 +161,7 @@ pub struct FullReport {
     pub searches: Option<Vec<String>>,
     pub search_results: Option<Vec<String>>,
     pub raw_sources: Option<Vec<String>>,
+    pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub report: Option<String>,
 }
 
@@ -166,7 +169,7 @@ pub struct FullReport {
 mod tests {
     use chrono::Utc;
 
-    use crate::workflow::{job::validation::models::ValidationOutput, JobType};
+    use crate::workflow::{job::{classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput}, JobType};
 
     use super::FullReport;
 
@@ -186,6 +189,7 @@ mod tests {
                 searches: None,
                 search_results: None,
                 raw_sources: None,
+                sources: None,
                 report: None,
             }
         }
@@ -222,6 +226,11 @@ mod tests {
 
         pub fn with_raw_sources(mut self, sources: Vec<String>) -> Self {
             self.raw_sources = Some(sources);
+            self
+        }
+
+        pub fn with_sources(mut self, sources: Vec<ClassifySourcesOutput>) -> Self {
+            self.sources = Some(sources);
             self
         }
     }
