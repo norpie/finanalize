@@ -62,6 +62,17 @@ pub enum FinanalizeError {
     Excel(#[from] calamine::XlsxError),
     #[error("Lopdf error: {0}")]
     LopdfError(#[from] lopdf::Error),
+
+    #[error("Insufficient funds in wallet")]
+    InsufficientFunds,
+    #[error("Database error: {0}")]
+    DatabaseError(String),
+    #[error("Unexpected error: {0}")]
+    Unexpected(String),
+    #[error("Invalid amount: {0}")]
+    InvalidAmount(String),
+    #[error("Deserialization error: {0}")]
+    DeserializationError(String),
 }
 
 // #[error("Fantoccini error: {0}")]

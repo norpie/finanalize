@@ -35,5 +35,6 @@ log = "0.4.25"
 env_logger = "0.11.6"
 rust_decimal = "1.32"
 rust_decimal_macros = "1.32"
-uuid = { version = "1.6", features = ["v4", "serde"] }
+uuid = "1.0"
+
 
