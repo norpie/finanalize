@@ -151,7 +151,8 @@ mod tests {
                     "https://www.nasdaq.com/articles/what-lies-ahead-apple-stock-etfs-2025".into(),
                     "https://www.officetimeline.com/blog/apple-inc-timeline".into(),
                     "https://www.technavio.com/report/fresh-apples-market-industry-analysis".into(),
-                ]),
+                ])
+                .with_sources(Vec::new()),
         };
         let state = job.run(state).await.unwrap();
         dbg!(state.state.report.unwrap());
