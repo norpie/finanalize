@@ -3,15 +3,16 @@ use async_trait::async_trait;
 
 use super::{JobType, WorkflowState};
 
+pub mod classify_sources;
 pub mod generate_report;
 pub mod scrape_pages;
 pub mod search_queries;
 pub mod search_terms;
 pub mod section_names;
 pub mod sub_sections;
+pub mod sub_section_questions;
 pub mod title;
 pub mod validation;
-pub mod classify_sources;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
@@ -27,11 +28,12 @@ impl JobType {
             JobType::Validation => Some(JobType::GenerateTitle),
             JobType::GenerateTitle => Some(JobType::GenerateSectionNames),
             JobType::GenerateSectionNames => Some(JobType::GenerateSubSectionNames),
-            JobType::GenerateSubSectionNames => Some(JobType::GenerateSearchQueries),
+            JobType::GenerateSubSectionNames => Some(JobType::GenerateSubSectionQuestions),
+            JobType::GenerateSubSectionQuestions => Some(JobType::GenerateSearchQueries),
             JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
             JobType::SearchQueries => Some(JobType::ScrapeTopResults),
             JobType::ScrapeTopResults => Some(JobType::ExtractContent), // TODO: Implement
-                                                                        // ExtractContent
+            // ExtractContent
             JobType::ExtractContent => Some(JobType::ClassifyContent),
             JobType::ClassifyContent => Some(JobType::Done), // TODO: Add more steps
             // JobType::GeneratePDFReport => Some(JobType::Done),
@@ -49,6 +51,9 @@ impl JobType {
             JobType::GenerateTitle => Some(Box::new(title::TitleJob)),
             JobType::GenerateSectionNames => Some(Box::new(section_names::SectionNamesJob)),
             JobType::GenerateSubSectionNames => Some(Box::new(sub_sections::SubSectionsJob)),
+            JobType::GenerateSubSectionQuestions => {
+                Some(Box::new(sub_section_questions::SubSectionQuestionsJob))
+            }
             JobType::GenerateSearchQueries => {
                 Some(Box::new(search_queries::GenerateSearchQueriesJob))
             }
