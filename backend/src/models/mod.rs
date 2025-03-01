@@ -119,7 +119,7 @@ pub struct FullSDBReport {
     pub title: Option<String>,
     pub sections: Option<Vec<String>>,
     pub sub_sections: Option<Vec<Vec<String>>>,
-    pub sub_sections_questions: Option<Vec<Vec<Vec<String>>>>,
+    pub sub_section_questions: Option<Vec<Vec<Vec<String>>>>,
     pub searches: Option<Vec<String>>,
     pub search_results: Option<Vec<String>>,
     pub raw_sources: Option<Vec<String>>,
@@ -139,7 +139,7 @@ impl From<FullSDBReport> for FullReport {
             title: report.title,
             sections: report.sections,
             sub_sections: report.sub_sections,
-            sub_sections_questions: report.sub_sections_questions,
+            sub_section_questions: report.sub_section_questions,
             searches: report.searches,
             search_results: report.search_results,
             raw_sources: report.raw_sources,
@@ -160,7 +160,7 @@ pub struct FullReport {
     pub title: Option<String>,
     pub sections: Option<Vec<String>>,
     pub sub_sections: Option<Vec<Vec<String>>>,
-    pub sub_sections_questions: Option<Vec<Vec<Vec<String>>>>,
+    pub sub_section_questions: Option<Vec<Vec<Vec<String>>>>,
     pub searches: Option<Vec<String>>,
     pub search_results: Option<Vec<String>>,
     pub raw_sources: Option<Vec<String>>,
@@ -189,7 +189,7 @@ mod tests {
                 title: None,
                 sections: None,
                 sub_sections: None,
-                sub_sections_questions: None,
+                sub_section_questions: None,
                 searches: None,
                 search_results: None,
                 raw_sources: None,
@@ -215,6 +215,11 @@ mod tests {
 
         pub fn with_sub_sections(mut self, sub_sections: Vec<Vec<String>>) -> Self {
             self.sub_sections = Some(sub_sections);
+            self
+        }
+
+        pub fn with_sub_section_questions(mut self, sub_section_questions: Vec<Vec<Vec<String>>>) -> Self {
+            self.sub_section_questions = Some(sub_section_questions);
             self
         }
 
