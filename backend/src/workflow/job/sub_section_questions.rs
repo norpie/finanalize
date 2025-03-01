@@ -9,7 +9,7 @@ use models::{RawSubSectionQuestionsInput, SubSectionQuestionsInput, SubSectionQu
 
 use crate::workflow::WorkflowState;
 
-use super::{search_queries::models::SearchQueriesInput, Job};
+use super::Job;
 
 pub mod models {
     use serde::{Deserialize, Serialize};

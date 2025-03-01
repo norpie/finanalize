@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use chrono::Utc;
 use itertools::izip;
 use log::debug;
-use models::{RawSearchQueriesInput, SearchQueriesInput, SearchQueriesOutput, Section};
+use models::{RawSearchQueriesInput, SearchQueriesInput, SearchQueriesOutput};
 
 use crate::llm::API;
 use crate::tasks::Task;
