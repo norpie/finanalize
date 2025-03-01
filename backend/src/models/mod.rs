@@ -2,7 +2,10 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
-use crate::workflow::{job::{classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput}, JobType};
+use crate::workflow::{
+    job::{classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput},
+    JobType,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -172,7 +175,12 @@ pub struct FullReport {
 mod tests {
     use chrono::Utc;
 
-    use crate::workflow::{job::{classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput}, JobType};
+    use crate::workflow::{
+        job::{
+            classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput,
+        },
+        JobType,
+    };
 
     use super::FullReport;
 
@@ -218,7 +226,10 @@ mod tests {
             self
         }
 
-        pub fn with_sub_section_questions(mut self, sub_section_questions: Vec<Vec<Vec<String>>>) -> Self {
+        pub fn with_sub_section_questions(
+            mut self,
+            sub_section_questions: Vec<Vec<Vec<String>>>,
+        ) -> Self {
             self.sub_section_questions = Some(sub_section_questions);
             self
         }

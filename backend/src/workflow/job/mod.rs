@@ -9,8 +9,8 @@ pub mod scrape_pages;
 pub mod search_queries;
 pub mod search_terms;
 pub mod section_names;
-pub mod sub_sections;
 pub mod sub_section_questions;
+pub mod sub_sections;
 pub mod title;
 pub mod validation;
 
