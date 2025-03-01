@@ -1,0 +1,69 @@
+Generate a list of 1-3 questions for each sub-section in each section of the input.
+These should be self-contained and require repeating information from other sections.
+
+Output schema:
+```json
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "sections": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "section": {
+              "type": "string"
+            },
+            "sub_sections": {
+              "type": "array",
+              "items": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "sub_section": {
+                      "type": "string"
+                    },
+                    "questions": {
+                      "type": "array",
+                      "items": [
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "sub_section",
+                    "questions"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "section",
+            "sub_sections"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "sections"
+  ]
+}
+```
+
+
+<Input>
+```json
+{{{input}}}
+```
+</Input>
+
+<Output>
+```json
+{
+    "sections":
