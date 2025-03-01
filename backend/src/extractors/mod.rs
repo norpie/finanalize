@@ -10,7 +10,7 @@ pub mod text;
 pub mod pdf;
 
 #[async_trait]
-trait ContentExtract {
+pub trait ContentExtract {
     async fn extract(&self, file_type: FileType) -> Result<Vec<Content>>;
 }
 
