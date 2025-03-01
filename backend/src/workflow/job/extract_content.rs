@@ -98,7 +98,7 @@ mod tests {
                     "https://www.officetimeline.com/blog/apple-inc-timeline".into(),
                     "https://www.technavio.com/report/fresh-apples-market-industry-analysis".into(),
                 ])
-                .with_raw_sources(vec![
+                .with_html_sources(vec![
                     include_str!("../../../tests/scraped/capital.html").into(),
                     include_str!("../../../tests/scraped/captide.html").into(),
                     include_str!("../../../tests/scraped/tbrc.html").into(),
