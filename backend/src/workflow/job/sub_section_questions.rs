@@ -88,7 +88,7 @@ impl Job for SubSectionQuestionsJob {
             }
             sections.push(sub_sections);
         }
-        state.state.sub_sections_questions = Some(sections);
+        state.state.sub_section_questions = Some(sections);
         Ok(state)
     }
 }
@@ -126,6 +126,6 @@ mod tests {
                 ]),
         };
         let state = job.run(state).await.unwrap();
-        dbg!(state.state.sub_sections_questions.unwrap());
+        dbg!(state.state.sub_section_questions.unwrap());
     }
 }
