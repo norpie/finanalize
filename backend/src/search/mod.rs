@@ -56,7 +56,7 @@ impl SearchEngine for SearxNG {
         let response = self.client.get(&url).send().await?;
         let results: SearxNGResult = response.json().await?;
         urls.extend(results.results.into_iter().map(|r| r.url));
-        Ok(urls)
+        Ok(urls.into_iter().take(3).collect())
     }
 }
 
