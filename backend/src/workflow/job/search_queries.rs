@@ -1,10 +1,14 @@
 use async_trait::async_trait;
 use chrono::Utc;
+use itertools::izip;
 use log::debug;
 use models::{RawSearchQueriesInput, SearchQueriesInput, SearchQueriesOutput, Section};
 
 use crate::llm::API;
 use crate::tasks::Task;
+use crate::workflow::job::sub_section_questions::models::{
+    SectionWithQuestions, SubSectionWithQuestions,
+};
 use crate::{prelude::*, prompting};
 
 use crate::workflow::WorkflowState;
@@ -13,6 +17,8 @@ use super::Job;
 
 pub mod models {
     use serde::{Deserialize, Serialize};
+
+    use crate::workflow::job::sub_section_questions::models::SectionWithQuestions;
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
     pub struct RawSearchQueriesInput {
@@ -23,7 +29,7 @@ pub mod models {
     pub struct SearchQueriesInput {
         pub date: String,
         pub title: String,
-        pub sections: Vec<Section>,
+        pub sections: Vec<SectionWithQuestions>,
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,19 +53,28 @@ impl Job for GenerateSearchQueriesJob {
         let prompt = prompting::get_prompt("search".into())?;
         let task = Task::new(&prompt);
         let mut sections = Vec::new();
-        for (section, sub_sections) in state
-            .state
-            .sections
-            .clone()
-            .unwrap()
-            .into_iter()
-            .zip(state.state.sub_sections.clone().unwrap())
-        {
+        for (section, sub_sections, sub_section_questions) in izip!(
+            state.state.sections.clone().unwrap().into_iter(),
+            state.state.sub_sections.clone().unwrap().into_iter(),
+            state
+                .state
+                .sub_section_questions
+                .clone()
+                .unwrap()
+                .into_iter(),
+        ) {
             debug!("Section: {}", section);
-            debug!("Sub-sections: {:?}", sub_sections);
-            sections.push(Section {
+            let mut sub_sections2 = Vec::new();
+            for (sub_section, questions) in sub_sections.into_iter().zip(sub_section_questions) {
+                debug!("Sub-section: {}", sub_section);
+                sub_sections2.push(SubSectionWithQuestions {
+                    sub_section,
+                    questions,
+                });
+            }
+            sections.push(SectionWithQuestions {
                 section,
-                sub_sections,
+                sub_sections: sub_sections2,
             });
         }
         let input = SearchQueriesInput {
@@ -116,7 +131,45 @@ mod tests {
                     vec!["Market Size".into(), "Market Share".into()],
                     vec!["Revenue".into(), "Profit".into()],
                     vec!["Recommendation".into()],
-                ]),
+                ])
+                .with_sub_section_questions(vec![
+                    vec![
+                        vec![
+                            "What significant events shaped Apple's position in the market up to 2025?".into(),
+                        ],
+                        vec![
+                            "What are the main challenges Apple faces in maintaining its competitive edge by 2025?".into(),
+                        ],
+                    ],
+                    vec![
+                        vec![
+                            "How has the overall market size for technology products evolved, impacting Apple's growth in 2025?".into(),
+                            "What factors contribute to the projected changes in market size relevant to Apple?".into(),
+                        ],
+                        vec![
+                            "In comparison to its competitors, what percentage of the market does Apple control in 2025?".into(),
+                            "How has this market share changed from previous years, and what strategies have influenced these changes?".into(),
+                        ],
+                    ],
+                    vec![
+                        vec![
+                            "What is Apple's total revenue in 2025, and how has it grown compared to previous years?".into(),
+                            "Which product lines contribute the most to this revenue growth?".into(),
+                        ],
+                        vec![
+                            "How does Apple's profit margin compare with its market share in 2025?".into(),
+                            "What cost factors have influenced Apple's profitability in 2025?".into(),
+                        ],
+                    ],
+                    vec![
+                        vec![
+                            "Based on the market and financial analysis, what strategic recommendations are made for Apple to sustain its growth in 2025?".into(),
+                            "How do these recommendations address the challenges outlined in the problem statement?".into(),
+                        ],
+                    ],
+                ])
+                ,
+
         };
         let state = job.run(state).await.unwrap();
         dbg!(state.state.searches.unwrap());
