@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use super::{JobType, WorkflowState};
 
 pub mod classify_sources;
+pub mod extract_content;
 pub mod generate_report;
 pub mod scrape_pages;
 pub mod search_queries;
@@ -32,8 +33,7 @@ impl JobType {
             JobType::GenerateSubSectionQuestions => Some(JobType::GenerateSearchQueries),
             JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
             JobType::SearchQueries => Some(JobType::ScrapeTopResults),
-            JobType::ScrapeTopResults => Some(JobType::ExtractContent), // TODO: Implement
-            // ExtractContent
+            JobType::ScrapeTopResults => Some(JobType::ExtractContent),
             JobType::ExtractContent => Some(JobType::ClassifyContent),
             JobType::ClassifyContent => Some(JobType::Done), // TODO: Add more steps
             // JobType::GeneratePDFReport => Some(JobType::Done),
@@ -59,7 +59,8 @@ impl JobType {
             }
             JobType::SearchQueries => Some(Box::new(search_terms::SearchJob)),
             JobType::ScrapeTopResults => Some(Box::new(scrape_pages::ScrapePagesJob)),
-            JobType::ExtractContent => Some(Box::new(classify_sources::ClassifySourcesJob)),
+            JobType::ExtractContent => Some(Box::new(extract_content::ExtractContentJob)),
+            JobType::ClassifyContent => Some(Box::new(classify_sources::ClassifySourcesJob)),
             JobType::RenderLaTeXPdf => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }
