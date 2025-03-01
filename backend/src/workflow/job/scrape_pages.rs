@@ -97,7 +97,7 @@ impl Job for ScrapePagesJob {
             browser.close().await?;
         }
         debug!("Closed all browser instances");
-        state.state.raw_sources = Some(sources.lock().await.clone());
+        state.state.html_sources = Some(sources.lock().await.clone());
         debug!("ScrapePagesJob completed");
         Ok(state)
     }

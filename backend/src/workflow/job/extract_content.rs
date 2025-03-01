@@ -15,7 +15,7 @@ impl Job for ExtractContentJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         let extractor = HTMLExtractor;
         let mut mds = vec![];
-        for html in state.state.raw_sources.clone().unwrap() {
+        for html in state.state.html_sources.clone().unwrap() {
             let content = extractor
                 .extract(FileType::Html(html))
                 .await?
