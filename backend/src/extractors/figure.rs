@@ -31,28 +31,27 @@ impl ContentExtract for FigureExtractor {
                 let Some(img) = figure_element.select(&img_selector).next() else {
                     continue; // Continue to the next iteration if no image is found
                 };
-            
-                if let Some(url) = img.value().attr("src") {
-                    let alt_text = img.value().attr("alt").map(String::from);
-                    let caption = figure_element
-                        .select(&caption_selector)
-                        .next()
-                        .map(|caption| caption.text().collect::<Vec<_>>().join(" "));
-            
-                    figures.push(Figure {
-                        url: url.to_string(),
-                        alt_text,
-                        caption,
-                    });
-                }
+                
+                let Some(url) = img.value().attr("src") else {
+                    continue; // Skip figures without source URLs
+                };
+
+                let alt_text = img.value().attr("alt").map(String::from);
+                let caption = figure_element
+                    .select(&caption_selector)
+                    .next()
+                    .map(|caption| caption.text().collect::<Vec<_>>().join(" "));
+        
+                figures.push(Figure {
+                    url: url.to_string(),
+                    alt_text,
+                    caption,
+                });
             }
-            
-            
 
             Ok(figures) as Result<Vec<Figure>>
         })
-        .await
-        .map_err(|_| FinanalizeError::InternalServerError)??;
+        .await??;
 
         Ok(vec![Content::Figures(extracted_figures)])
     }
