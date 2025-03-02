@@ -4,7 +4,7 @@ use surrealdb::sql::Thing;
 
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
-    job::{classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput},
+    job::{chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput},
     JobType,
 };
 
@@ -129,6 +129,7 @@ pub struct FullSDBReport {
     pub html_sources: Option<Vec<String>>,
     pub raw_sources: Option<Vec<String>>,
     pub sources: Option<Vec<ClassifySourcesOutput>>,
+    pub chunks: Option<Vec<Chunk>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
@@ -152,6 +153,7 @@ impl From<FullSDBReport> for FullReport {
             html_sources: report.html_sources,
             raw_sources: report.raw_sources,
             sources: report.sources,
+            chunks: report.chunks,
             report: report.report,
             texts: report.texts,
             graphics: report.graphics,
@@ -176,6 +178,7 @@ pub struct FullReport {
     pub html_sources: Option<Vec<String>>,
     pub raw_sources: Option<Vec<String>>,
     pub sources: Option<Vec<ClassifySourcesOutput>>,
+    pub chunks: Option<Vec<Chunk>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
@@ -213,6 +216,7 @@ mod tests {
                 html_sources: None,
                 raw_sources: None,
                 sources: None,
+                chunks: None,
                 report: None,
                 texts: None,
                 graphics: None,
