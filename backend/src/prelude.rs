@@ -22,6 +22,8 @@ pub enum FinanalizeError {
     MissingPromptFile(String),
     #[error("Missing prompt UTF-8: {0}")]
     MissingPromptUTF8(String),
+    #[error("Invalid state: {0}")]
+    InvalidState(String),
 
     #[error("Some retry logic generated the following errors: {0:#?}")]
     MultipleErrors(Vec<FinanalizeError>),
