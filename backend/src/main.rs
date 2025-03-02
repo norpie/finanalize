@@ -42,6 +42,8 @@ mod sec;
 mod tasks;
 #[allow(dead_code)]
 mod workflow;
+#[allow(dead_code)]
+mod graphing;
 
 #[tokio::main]
 async fn main() -> Result<()> {
