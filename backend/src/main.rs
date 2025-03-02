@@ -22,6 +22,8 @@ mod auth_middleware;
 mod db;
 #[allow(dead_code)]
 mod extractors;
+#[allow(dead_code)]
+mod graphing;
 mod jwt;
 #[allow(dead_code)]
 mod latex;
@@ -42,8 +44,6 @@ mod sec;
 mod tasks;
 #[allow(dead_code)]
 mod workflow;
-#[allow(dead_code)]
-mod graphing;
 
 #[tokio::main]
 async fn main() -> Result<()> {
