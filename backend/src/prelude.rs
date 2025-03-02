@@ -1,7 +1,7 @@
-use actix_web::Error;
 use derive_more::derive::Display;
 use fantoccini::error::{CmdError, NewSessionError};
 use scraper::error::SelectorErrorKind;
+use plotters::prelude::DrawingAreaErrorKind;
 use selectors::parser::SelectorParseErrorKind;
 use thiserror::Error;
 
@@ -72,10 +72,20 @@ pub enum FinanalizeError {
     Output(#[from] pdf_extract::OutputError),
     #[error("Actix Websocket error: {0}")]
     Websocket(String),
+    #[error("Drawing area error: {0}")]
+    DrawingArea(String)
+}
+
+impl<E> From<DrawingAreaErrorKind<E>> for FinanalizeError
+    where E: std::error::Error + Send + Sync
+{
+    fn from(error: DrawingAreaErrorKind<E>) -> Self {
+        FinanalizeError::DrawingArea(format!("{:?}", error))
+    }
 }
 
 impl From<actix_web::Error> for FinanalizeError {
-    fn from(value: Error) -> Self {
+    fn from(value: actix_web::Error) -> Self {
         Self::Websocket(value.to_string())
     }
 }
