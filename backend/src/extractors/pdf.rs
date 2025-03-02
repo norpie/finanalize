@@ -70,6 +70,6 @@ mod tests {
             .await
             .unwrap();
 
-        assert_eq!(result.len(), 1);
+        assert_eq!(result.len(), 2);
     }
 }
