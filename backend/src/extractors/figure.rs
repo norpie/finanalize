@@ -31,7 +31,7 @@ impl ContentExtract for FigureExtractor {
                 let Some(img) = figure_element.select(&img_selector).next() else {
                     continue; // Continue to the next iteration if no image is found
                 };
-                
+
                 let Some(url) = img.value().attr("src") else {
                     continue; // Skip figures without source URLs
                 };
@@ -41,7 +41,7 @@ impl ContentExtract for FigureExtractor {
                     .select(&caption_selector)
                     .next()
                     .map(|caption| caption.text().collect::<Vec<_>>().join(" "));
-        
+
                 figures.push(Figure {
                     url: url.to_string(),
                     alt_text,
