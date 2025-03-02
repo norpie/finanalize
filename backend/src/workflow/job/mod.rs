@@ -36,7 +36,9 @@ impl JobType {
             JobType::SearchQueries => Some(JobType::ScrapeTopResults),
             JobType::ScrapeTopResults => Some(JobType::ExtractContent),
             JobType::ExtractContent => Some(JobType::ClassifyContent),
-            JobType::ClassifyContent => Some(JobType::Done), // TODO: Add more steps
+            JobType::ClassifyContent => Some(JobType::ChunkContent), // TODO: Add more steps
+            JobType::ChunkContent => Some(JobType::IndexChunks),
+            JobType::IndexChunks => Some(JobType::AnswerQuestions),
             // JobType::GeneratePDFReport => Some(JobType::Done),
             // Done
             JobType::Invalid => None,
