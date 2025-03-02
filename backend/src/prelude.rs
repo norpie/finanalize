@@ -73,11 +73,12 @@ pub enum FinanalizeError {
     #[error("Actix Websocket error: {0}")]
     Websocket(String),
     #[error("Drawing area error: {0}")]
-    DrawingArea(String)
+    DrawingArea(String),
 }
 
 impl<E> From<DrawingAreaErrorKind<E>> for FinanalizeError
-    where E: std::error::Error + Send + Sync
+where
+    E: std::error::Error + Send + Sync,
 {
     fn from(error: DrawingAreaErrorKind<E>) -> Self {
         FinanalizeError::DrawingArea(format!("{:?}", error))
