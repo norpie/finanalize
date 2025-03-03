@@ -2,11 +2,11 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
+use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
     job::{classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput},
     JobType,
 };
-use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -178,21 +178,21 @@ pub struct FullReport {
     pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
-    pub graphics: Option<Vec<Graphic>>
+    pub graphics: Option<Vec<Graphic>>,
 }
 
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
 
+    use super::FullReport;
+    use crate::workflow::job::graphic_identifier::models::Text;
     use crate::workflow::{
         job::{
             classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput,
         },
         JobType,
     };
-    use crate::workflow::job::graphic_identifier::models::Text;
-    use super::FullReport;
 
     impl FullReport {
         pub fn new(id: String, user_input: String) -> Self {
@@ -271,7 +271,7 @@ mod tests {
             self.sources = Some(sources);
             self
         }
-        
+
         pub fn with_texts(mut self, texts: Vec<Text>) -> Self {
             self.texts = Some(texts);
             self
