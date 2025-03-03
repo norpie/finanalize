@@ -6,6 +6,7 @@ use super::{JobType, WorkflowState};
 pub mod classify_sources;
 pub mod extract_content;
 pub mod generate_report;
+pub mod graphic_identifier;
 pub mod scrape_pages;
 pub mod search_queries;
 pub mod search_terms;
@@ -14,7 +15,6 @@ pub mod sub_section_questions;
 pub mod sub_sections;
 pub mod title;
 pub mod validation;
-pub mod graphic_identifier;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
