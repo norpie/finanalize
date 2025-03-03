@@ -4,7 +4,10 @@ use surrealdb::sql::Thing;
 
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
-    job::{chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput, index_chunks::models::EmbeddedChunk, validation::models::ValidationOutput},
+    job::{
+        chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
+        index_chunks::models::EmbeddedChunk, validation::models::ValidationOutput,
+    },
     JobType,
 };
 
@@ -195,7 +198,8 @@ mod tests {
     use crate::workflow::job::graphic_identifier::models::Text;
     use crate::workflow::{
         job::{
-            chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput
+            chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
+            validation::models::ValidationOutput,
         },
         JobType,
     };
