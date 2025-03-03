@@ -6,6 +6,7 @@ use crate::workflow::{
     job::{classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput},
     JobType,
 };
+use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -129,6 +130,8 @@ pub struct FullSDBReport {
     pub raw_sources: Option<Vec<String>>,
     pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub report: Option<String>,
+    pub texts: Option<Vec<Text>>,
+    pub graphics: Option<Vec<Graphic>>,
 }
 
 impl From<FullSDBReport> for FullReport {
@@ -150,6 +153,8 @@ impl From<FullSDBReport> for FullReport {
             raw_sources: report.raw_sources,
             sources: report.sources,
             report: report.report,
+            texts: report.texts,
+            graphics: report.graphics,
         }
     }
 }
@@ -172,6 +177,8 @@ pub struct FullReport {
     pub raw_sources: Option<Vec<String>>,
     pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub report: Option<String>,
+    pub texts: Option<Vec<Text>>,
+    pub graphics: Option<Vec<Graphic>>
 }
 
 #[cfg(test)]
@@ -184,7 +191,7 @@ mod tests {
         },
         JobType,
     };
-
+    use crate::workflow::job::graphic_identifier::models::Text;
     use super::FullReport;
 
     impl FullReport {
@@ -207,6 +214,8 @@ mod tests {
                 raw_sources: None,
                 sources: None,
                 report: None,
+                texts: None,
+                graphics: None,
             }
         }
 
@@ -260,6 +269,11 @@ mod tests {
 
         pub fn with_sources(mut self, sources: Vec<ClassifySourcesOutput>) -> Self {
             self.sources = Some(sources);
+            self
+        }
+        
+        pub fn with_texts(mut self, texts: Vec<Text>) -> Self {
+            self.texts = Some(texts);
             self
         }
     }
