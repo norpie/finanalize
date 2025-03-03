@@ -8,6 +8,7 @@ pub mod classify_sources;
 pub mod extract_content;
 pub mod generate_report;
 pub mod graphic_identifier;
+pub mod index_chunks;
 pub mod scrape_pages;
 pub mod search_queries;
 pub mod search_terms;
@@ -66,7 +67,7 @@ impl JobType {
             JobType::ExtractContent => Some(Box::new(extract_content::ExtractContentJob)),
             JobType::ClassifyContent => Some(Box::new(classify_sources::ClassifySourcesJob)),
             JobType::ChunkContent => Some(Box::new(chunk_content::ChunkContentJob)),
-            // JobType::IndexChunks => Some(Box::new(index_chunks::IndexChunksJob)),
+            JobType::IndexChunks => Some(Box::new(index_chunks::IndexChunksJob)),
             JobType::RenderLaTeXPdf => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }

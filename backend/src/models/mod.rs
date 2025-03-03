@@ -4,7 +4,7 @@ use surrealdb::sql::Thing;
 
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
-    job::{chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput},
+    job::{chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput, index_chunks::models::EmbeddedChunk, validation::models::ValidationOutput},
     JobType,
 };
 
@@ -130,6 +130,7 @@ pub struct FullSDBReport {
     pub raw_sources: Option<Vec<String>>,
     pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub chunks: Option<Vec<Chunk>>,
+    pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
@@ -154,6 +155,7 @@ impl From<FullSDBReport> for FullReport {
             raw_sources: report.raw_sources,
             sources: report.sources,
             chunks: report.chunks,
+            chunk_embeddings: report.chunk_embeddings,
             report: report.report,
             texts: report.texts,
             graphics: report.graphics,
@@ -179,6 +181,7 @@ pub struct FullReport {
     pub raw_sources: Option<Vec<String>>,
     pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub chunks: Option<Vec<Chunk>>,
+    pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
@@ -192,7 +195,7 @@ mod tests {
     use crate::workflow::job::graphic_identifier::models::Text;
     use crate::workflow::{
         job::{
-            classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput,
+            chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput, validation::models::ValidationOutput
         },
         JobType,
     };
@@ -217,6 +220,8 @@ mod tests {
                 raw_sources: None,
                 sources: None,
                 chunks: None,
+                chunk_embeddings: None,
+
                 report: None,
                 texts: None,
                 graphics: None,
@@ -278,6 +283,11 @@ mod tests {
 
         pub fn with_texts(mut self, texts: Vec<Text>) -> Self {
             self.texts = Some(texts);
+            self
+        }
+
+        pub fn with_chunks(mut self, chunks: Vec<Chunk>) -> Self {
+            self.chunks = Some(chunks);
             self
         }
     }
