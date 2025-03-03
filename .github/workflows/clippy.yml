@@ -12,5 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get install -y fontconfig libfontconfig-dev
       - name: Run Clippy
         run: cd backend && cargo clippy --all-targets --all-features
