@@ -7,7 +7,7 @@ RUN cargo install --path . --debug
 
 FROM debian:bookworm-slim
 RUN apt-get update
-RUN apt-get install -y chromium libssl3 libssl-dev
+RUN apt-get install -y chromium libssl3 libssl-dev fontconfig libfontconfig-dev
 RUN apt-get clean
 RUN rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/cargo/bin/backend /usr/local/bin/backend
