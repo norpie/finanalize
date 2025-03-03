@@ -1,7 +1,7 @@
 use derive_more::derive::Display;
 use fantoccini::error::{CmdError, NewSessionError};
-use scraper::error::SelectorErrorKind;
 use plotters::prelude::DrawingAreaErrorKind;
+use scraper::error::SelectorErrorKind;
 use selectors::parser::SelectorParseErrorKind;
 use thiserror::Error;
 
