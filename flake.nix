@@ -28,6 +28,7 @@
                 extensions = ["rust-src" "rust-analyzer"];
               })
               openssl
+              fontconfig
               pkg-config
               # ra-multiplex
             ];
