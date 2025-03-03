@@ -175,10 +175,10 @@ fn create_line_graph(graph_data: GraphData, is_scatter: bool) -> Result<()> {
 fn create_histogram(histogram_data: HistogramData) -> Result<()> {
     let temp_dir = env::temp_dir();
     let output_dir = temp_dir.join(format!("{}.png", histogram_data.caption));
-    let out_file_name: &str = &output_dir.to_str().unwrap();
+    let out_file_name: &str = output_dir.to_str().unwrap();
     let root = BitMapBackend::new(out_file_name, (900, 600)).into_drawing_area();
     root.fill(&WHITE)?;
-    let x_values: Vec<u32> = histogram_data.x_values.iter().map(|x| x.clone()).collect();
+    let x_values: Vec<u32> = histogram_data.x_values.to_vec();
     let x_min = x_values.iter().cloned().min().unwrap();
     let x_max = x_values.iter().cloned().max().unwrap() + 1;
     let y_min = 0;
