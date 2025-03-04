@@ -136,7 +136,7 @@ mod tests {
         env_logger::init();
         DB.set(db::connect().await.unwrap()).unwrap();
         let mut state = WorkflowState {
-            id: "test".to_string(),
+            id: "asdlfjhasldfjh".to_string(),
             last_job_type: JobType::Pending,
             state: FullReport::new("asdlfjhasldfjh".into(), "Apple in 2025".into()),
         };
