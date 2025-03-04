@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use log::debug;
 
 use crate::extractors::html::HTMLExtractor;
 use crate::extractors::{Content, ContentExtract, FileType};
@@ -15,17 +16,21 @@ impl Job for ExtractContentJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         let extractor = HTMLExtractor;
         let mut mds = vec![];
-        for html in state.state.html_sources.clone().unwrap() {
-            let content = extractor
-                .extract(FileType::Html(html))
-                .await?
-                .into_iter()
-                .next()
-                .ok_or(FinanalizeError::ParseError("No content extracted".into()))?;
-            match content {
-                Content::MarkDown(md) => mds.push(md),
-                _ => continue,
-            }
+        let html_sources = state.state.html_sources.clone().unwrap();
+        let total = html_sources.len();
+        for (i, html) in html_sources.into_iter().enumerate() {
+            debug!("Extracting content from HTML source ({}/{})", i + 1, total);
+            // let content = extractor
+            //     .extract(FileType::Html(html))
+            //     .await?
+            //     .into_iter()
+            //     .next()
+            //     .ok_or(FinanalizeError::ParseError("No content extracted".into()))?;
+            // match content {
+            //     Content::MarkDown(md) => mds.push(md),
+            //     _ => continue,
+            // }
+            mds.push(mdka::from_html(&html))
         }
         state.state.raw_sources = Some(mds);
         Ok(state)
