@@ -61,7 +61,7 @@ impl Task {
             .await
     }
 
-    pub async fn run_structured<T, U>(&self, api: Arc<dyn LLMApi>, input: &T) -> Result<U>
+    pub async fn run_structured<T, U>(&self, api: Arc<dyn LLMApi>, input: &T, schema: String) -> Result<U>
     where
         T: Serialize,
         U: DeserializeOwned + std::fmt::Debug,
@@ -72,11 +72,11 @@ impl Task {
             self.retry_strategy
         );
         match self.retry_strategy {
-            RetryStrategy::None => self.try_run(api, prompt).await,
+            RetryStrategy::None => self.try_run(api, prompt, schema).await,
             RetryStrategy::Count(count) => {
                 let mut errors = Vec::new();
                 for i in 0..count {
-                    let res = self.try_run::<U>(api.clone(), prompt.clone()).await;
+                    let res = self.try_run::<U>(api.clone(), prompt.clone(), schema.clone()).await;
                     match res {
                         Ok(value) => return Ok(value),
                         Err(err) => {
@@ -88,7 +88,7 @@ impl Task {
                 Err(FinanalizeError::MultipleErrors(errors))
             }
             RetryStrategy::UntilSuccess => loop {
-                let res = self.try_run::<U>(api.clone(), prompt.clone()).await;
+                let res = self.try_run::<U>(api.clone(), prompt.clone(), schema.clone()).await;
                 match res {
                     Ok(value) => return Ok(value),
                     Err(err) => {
@@ -99,12 +99,12 @@ impl Task {
         }
     }
 
-    async fn try_run<U>(&self, api: Arc<dyn LLMApi>, prompt: String) -> Result<U>
+    async fn try_run<U>(&self, api: Arc<dyn LLMApi>, prompt: String, schema: String) -> Result<U>
     where
         U: DeserializeOwned + std::fmt::Debug,
     {
         debug!("Starting generation.");
-        let generated = api.generate(prompt.clone()).await?;
+        let generated = api.generate_json(prompt.clone(), schema).await?;
         info!("Generated");
         let full = format!("{}{}", prompt, generated);
         debug!("Parsing output.");
