@@ -3,6 +3,7 @@ use chrono::Utc;
 use itertools::izip;
 use log::debug;
 use models::{RawSearchQueriesInput, SearchQueriesInput, SearchQueriesOutput};
+use schemars::schema_for;
 
 use crate::llm::API;
 use crate::tasks::Task;
@@ -16,6 +17,7 @@ use crate::workflow::WorkflowState;
 use super::Job;
 
 pub mod models {
+    use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
     use crate::workflow::job::sub_section_questions::models::SectionWithQuestions;
@@ -38,7 +40,7 @@ pub mod models {
         pub sub_sections: Vec<String>,
     }
 
-    #[derive(Debug, Clone, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
     pub struct SearchQueriesOutput {
         pub queries: Vec<String>,
     }
@@ -90,7 +92,13 @@ impl Job for GenerateSearchQueriesJob {
             input: serde_json::to_string_pretty(&input)?,
         };
         debug!("Running task to generate search queries...");
-        let output: SearchQueriesOutput = task.run_structured(API.clone(), &raw_input).await?;
+        let output: SearchQueriesOutput = task
+            .run_structured(
+                API.clone(),
+                &raw_input,
+                serde_json::to_string_pretty(&schema_for!(SearchQueriesOutput))?,
+            )
+            .await?;
         debug!(
             "Generated search queries successfully. Total queries: {}",
             output.queries.len()

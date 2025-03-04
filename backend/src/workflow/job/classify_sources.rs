@@ -1,11 +1,13 @@
 use async_trait::async_trait;
 use models::{ClassifySourcesInput, ClassifySourcesOutput};
+use schemars::schema_for;
 
 use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowState};
 
 use super::Job;
 
 pub mod models {
+    use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Serialize, Deserialize)]
@@ -13,7 +15,7 @@ pub mod models {
         pub input: String,
     }
 
-    #[derive(Debug, Clone, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
     pub struct ClassifySourcesOutput {
         pub title: String,
         pub summary: String,
@@ -34,7 +36,13 @@ impl Job for ClassifySourcesJob {
         let mut sources = Vec::new();
         for source in state.state.raw_sources.clone().unwrap() {
             let input = ClassifySourcesInput { input: source };
-            let output: ClassifySourcesOutput = task.run_structured(API.clone(), &input).await?;
+            let output: ClassifySourcesOutput = task
+                .run_structured(
+                    API.clone(),
+                    &input,
+                    serde_json::to_string_pretty(&schema_for!(ClassifySourcesOutput))?,
+                )
+                .await?;
             sources.push(output);
         }
         state.state.sources = Some(sources);
