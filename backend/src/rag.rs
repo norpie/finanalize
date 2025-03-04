@@ -13,7 +13,7 @@ pub struct DistancedChunk {
 }
 
 static VECTOR_SEARCH_QUERY: &str = r#"
-SELECT report_id, source_id, chunk, vector::similarity::cosine(embeddings, $embedding) AS distance FROM embedded_chunk WHERE report_id = $report_id;
+SELECT report_id, source_id, chunk, vector::similarity::cosine(embeddings, $embedding) AS distance FROM embedded_chunk WHERE report_id = $report_id LIMIT 20;
 "#;
 
 pub async fn vector_search(report: Thing, query: String) -> Result<Vec<DistancedChunk>> {
