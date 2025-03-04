@@ -1,24 +1,5 @@
-This tool generates a concise 3-5 word title for a financial analysis query, ensuring it captures the key topic of the input message.
-The title should be clear, direct, and contextually relevant, avoiding quotation marks or unnecessary special formatting.
-If the message does not contain a recognizable financial topic or company to analyse, the tool returns an error message indicating that no relevant content was found.
-
-Output schema:
-```json
-{
-  "type": "object",
-  "properties": {
-    "title": {
-      "type": "string"
-    },
-    "error": {
-      "type": "string"
-    }
-  },
-  "required": [
-    "title"
-  ]
-}
-```
+This tool generates a precise title for a financial analysis report, ensuring it captures the key topic of the input message.
+The title should be clear, direct, and contextually relevant, it should be properly capitalized and punctuated.
 
 <Input>
 ```json
@@ -30,4 +11,3 @@ Output schema:
 
 <Output>
 ```json
-{
