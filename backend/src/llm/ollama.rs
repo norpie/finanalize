@@ -119,7 +119,7 @@ mod tests {
     #[ignore = "Depends on external service"]
     async fn test_embed() {
         let ollama = Ollama::default();
-        let response = ollama.embed("Hello, world!".to_string()).await;
+        let response = ollama.embed("What significant events shaped Apple's position in the market up to 2025?".to_string()).await;
         assert!(response.is_ok());
         dbg!(response.unwrap());
     }
