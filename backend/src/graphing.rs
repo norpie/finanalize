@@ -10,7 +10,6 @@ use std::env;
 #[derive(Debug)]
 enum GraphType {
     Line,
-    Scatter,
     Bar,
     Pie,
     Stock,
@@ -20,7 +19,6 @@ impl GraphType {
     fn from_str(s: &str) -> Option<GraphType> {
         match s {
             "line" => Some(GraphType::Line),
-            "scatter" => Some(GraphType::Scatter),
             "bar" => Some(GraphType::Bar),
             "pie" => Some(GraphType::Pie),
             "stock" => Some(GraphType::Stock),
@@ -63,42 +61,44 @@ pub struct StockChartData {
     caption: String,
 }
 
+pub struct Chart {
+    pub chart_type: String,
+    pub chart_file: String,
+}
+
 pub fn create_graph(
     graph_type: String,
     graph_data: Option<GraphData>,
     histogram_data: Option<HistogramData>,
     pie_chart_data: Option<PieChartData>,
     stock_chart_data: Option<StockChartData>,
-) -> Result<()> {
+) -> Result<Chart> {
     let graph_type = GraphType::from_str(&graph_type).unwrap();
     match graph_type {
-        GraphType::Line | GraphType::Scatter => match graph_type {
-            GraphType::Line => {
-                let graph_data = graph_data.unwrap();
-                create_line_graph(graph_data, false)
-            }
-            GraphType::Scatter => {
-                let graph_data = graph_data.unwrap();
-                create_line_graph(graph_data, true)
-            }
-            _ => unreachable!(),
-        },
+        GraphType::Line => {
+            let graph_data = graph_data.unwrap();
+            let chart = create_line_graph(graph_data).expect("Unable to create line graph");
+            Ok(chart)
+        }
         GraphType::Bar => {
             let histogram_data = histogram_data.unwrap();
-            create_histogram(histogram_data)
+            let chart = create_histogram(histogram_data).expect("Unable to create histogram");
+            Ok(chart)
         }
         GraphType::Pie => {
             let pie_chart_data = pie_chart_data.unwrap();
-            create_pie_chart(pie_chart_data)
+            let chart = create_pie_chart(pie_chart_data).expect("Unable to create pie");
+            Ok(chart)
         }
         GraphType::Stock => {
             let stock_chart_data = stock_chart_data.unwrap();
-            create_stock_chart(stock_chart_data)
+            let chart = create_stock_chart(stock_chart_data).expect("Unable to create stock chart");
+            Ok(chart)
         }
     }
 }
 
-fn create_line_graph(graph_data: GraphData, is_scatter: bool) -> Result<()> {
+fn create_line_graph(graph_data: GraphData) -> Result<Chart> {
     let temp_dir = env::temp_dir();
     let output_dir = temp_dir.join(format!("{}.png", graph_data.caption));
     let out_file_name: &str = output_dir.to_str().unwrap();
@@ -157,22 +157,22 @@ fn create_line_graph(graph_data: GraphData, is_scatter: bool) -> Result<()> {
             .map(|(x, y)| (*x, *y)),
         &BLACK,
     ))?;
-
-    if is_scatter {
-        chart.draw_series(
-            graph_data
-                .x_values
-                .iter()
-                .zip(graph_data.y_values.iter())
-                .map(|(x, y)| Circle::new((*x, *y), 5, BLACK.mix(0.5).filled())),
-        )?;
-    }
+    chart.draw_series(
+        graph_data
+            .x_values
+            .iter()
+            .zip(graph_data.y_values.iter())
+            .map(|(x, y)| Circle::new((*x, *y), 5, BLACK.mix(0.5).filled())),
+    )?;
     root.present().expect("Unable to save result");
     println!("Graph created at: {}", out_file_name);
-    Ok(())
+    Ok(Chart {
+        chart_type: "line".to_string(),
+        chart_file: out_file_name.to_string(),
+    })
 }
 
-fn create_histogram(histogram_data: HistogramData) -> Result<()> {
+fn create_histogram(histogram_data: HistogramData) -> Result<Chart> {
     let temp_dir = env::temp_dir();
     let output_dir = temp_dir.join(format!("{}.png", histogram_data.caption));
     let out_file_name: &str = output_dir.to_str().unwrap();
@@ -219,10 +219,13 @@ fn create_histogram(histogram_data: HistogramData) -> Result<()> {
     )?;
     root.present().expect("Unable to save result");
     println!("Bar chart created at: {}", out_file_name);
-    Ok(())
+    Ok(Chart {
+        chart_type: "bar".to_string(),
+        chart_file: out_file_name.to_string(),
+    })
 }
 
-fn create_pie_chart(pie_chart_data: PieChartData) -> Result<()> {
+fn create_pie_chart(pie_chart_data: PieChartData) -> Result<Chart> {
     let temp_dir = env::temp_dir();
     let output_dir = temp_dir.join(format!("{}.png", pie_chart_data.caption));
     let out_file_name: &str = output_dir.to_str().unwrap();
@@ -253,14 +256,17 @@ fn create_pie_chart(pie_chart_data: PieChartData) -> Result<()> {
     root.draw(&pie)?;
     root.present().expect("Unable to save result");
     println!("Pie chart created at: {}", out_file_name);
-    Ok(())
+    Ok(Chart {
+        chart_type: "pie".to_string(),
+        chart_file: out_file_name.to_string(),
+    })
 }
 
 fn parse_time(date_str: &str) -> NaiveDate {
     NaiveDate::parse_from_str(date_str, "%Y-%m-%d").unwrap()
 }
 
-fn create_stock_chart(stock_data: StockChartData) -> Result<()> {
+fn create_stock_chart(stock_data: StockChartData) -> Result<Chart> {
     let temp_dir = env::temp_dir();
     let output_dir = temp_dir.join(format!("{}.png", stock_data.caption));
     let out_file_name: &str = output_dir.to_str().unwrap();
@@ -305,7 +311,10 @@ fn create_stock_chart(stock_data: StockChartData) -> Result<()> {
     }))?;
     root.present().expect("Unable to save result");
     println!("Stock chart created at: {}", out_file_name);
-    Ok(())
+    Ok(Chart {
+        chart_type: "stock".to_string(),
+        chart_file: out_file_name.to_string(),
+    })
 }
 
 #[cfg(test)]
