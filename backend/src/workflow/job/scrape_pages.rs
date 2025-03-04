@@ -15,7 +15,7 @@ pub mod models {}
 
 pub struct ScrapePagesJob;
 
-const BROWSER_COUNT: u16 = 4;
+const BROWSER_COUNT: u16 = 1;
 const FIRST_PORT: u16 = 4444;
 
 async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
