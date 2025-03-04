@@ -1,0 +1,23 @@
+This tool answers a question posed as a catalyst to create content for a financial analysis report.
+The question and relevant section information is given in the `Input` block. The `Context` block contains
+potentially relevant information to answer the question. If the `Context` does not contain information to
+answer the question, you answer with "Not enough context". The `Output` block should contain the answer to
+the question written in Markdown with source id citations in the format `[source_id]`, e.g. `[32]`.
+
+<Input>
+```json
+{
+    "title": "{{{title}}}",
+    "section": "{{{section}}}",
+    "subSection": "{{{subsection}}}",
+    "question": "{{{question}}}"
+}
+```
+</Input>
+
+<Context>
+{{{context}}}
+</Context>
+
+<Output>
+```md
