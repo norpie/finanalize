@@ -15,7 +15,7 @@ impl ContentExtract for TextExtractor {
                 "Invalid input type".to_string(),
             ));
         };
-        debug!("Received valid input: {}", input);
+        // debug!("Received valid input: {}", input);
         let mut chunks = Vec::new();
         let mut current_chunk = String::new();
 
