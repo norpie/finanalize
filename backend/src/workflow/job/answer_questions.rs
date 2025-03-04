@@ -10,7 +10,7 @@ use crate::{prelude::*, prompting, rag};
 use crate::workflow::WorkflowState;
 
 use super::index_chunks::models::EmbeddedChunk;
-use super::Job;
+use super::{sub_sections, Job};
 
 pub mod models {
     use serde::{Deserialize, Serialize};
@@ -64,7 +64,7 @@ impl Job for AnswerQuestionsJob {
         let prompt = prompting::get_prompt("answer-questions".into())?;
         let task = Task::new(&prompt);
         let mut pairs = Vec::new();
-        for (section, sub_sections, sub_section_questions) in izip!(
+        for (section_name, sub_sections, sub_section_questions) in izip!(
             state.state.sections.clone().unwrap().into_iter(),
             state.state.sub_sections.clone().unwrap().into_iter(),
             state
@@ -74,7 +74,9 @@ impl Job for AnswerQuestionsJob {
                 .unwrap()
                 .into_iter(),
         ) {
-            for (sub_section, questions) in sub_sections.into_iter().zip(sub_section_questions) {
+            let mut section = Vec::new();
+            for (sub_section_name, questions) in sub_sections.into_iter().zip(sub_section_questions) {
+                let mut sub_section = Vec::new();
                 for question in questions.into_iter() {
                     let context = rag::vector_search(
                         ("report", state.id.as_str()).into(),
@@ -87,14 +89,16 @@ impl Job for AnswerQuestionsJob {
                     let input = AnswerQuestionsInput {
                         context: W(context).into_context(4096),
                         title: state.state.title.clone().unwrap(),
-                        section: section.clone(),
-                        sub_section: sub_section.clone(),
+                        section: section_name.clone(),
+                        sub_section: sub_section_name.clone(),
                         question: question.clone(),
                     };
                     let answer = task.run_raw(API.clone(), &input).await?;
-                    pairs.push(QuestionAnswer { question, answer });
+                    sub_section.push(QuestionAnswer { question, answer });
                 }
+                section.push(sub_section);
             }
+            pairs.push(section);
         }
         state.state.question_answer_pairs = Some(pairs);
         Ok(state)
