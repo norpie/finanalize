@@ -42,7 +42,7 @@ impl JobType {
             JobType::ClassifyContent => Some(JobType::ChunkContent), // TODO: Add more steps
             JobType::ChunkContent => Some(JobType::IndexChunks),
             JobType::IndexChunks => Some(JobType::AnswerQuestions),
-            // JobType::GeneratePDFReport => Some(JobType::Done),
+            JobType::AnswerQuestions => Some(JobType::RenderLaTeXPdf),
             // Done
             JobType::Invalid => None,
             JobType::Done => None,
