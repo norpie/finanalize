@@ -59,7 +59,6 @@ impl Job for GenerateReportJob {
             .into_iter()
             .enumerate()
         {
-            debug!("Adding source: {}", source);
             sources.push(Source::new(
                 "Website".into(),
                 i.to_string(),
@@ -70,23 +69,14 @@ impl Job for GenerateReportJob {
                 source,
             ));
         }
-        debug!("Adding content");
-        components.push(LatexComponent::Text(
-            "This is some content in the last subsection".into(),
-        ));
-
-        for source in &sources {
-            debug!("Adding citation for source: {}", source.url);
-            components.push(LatexComponent::Citation(source.citation_key.clone()));
-        }
 
         let commands = latex::get_commands(components)?;
         debug!("Received {:?} commands", commands.len());
         let report = latex::renderer::construct_report(
             sources,
             commands,
-            "Report Title".into(),
-            "Report Subtitle".into(),
+            state.state.title.clone().unwrap(),
+            " ".into(),
         )?;
 
         debug!("Report can be found at: {}", &report.report_path);
