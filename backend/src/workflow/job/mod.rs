@@ -3,6 +3,7 @@ use async_trait::async_trait;
 
 use super::{JobType, WorkflowState};
 
+pub mod answer_questions;
 pub mod chunk_content;
 pub mod classify_sources;
 pub mod extract_content;
@@ -68,6 +69,7 @@ impl JobType {
             JobType::ClassifyContent => Some(Box::new(classify_sources::ClassifySourcesJob)),
             JobType::ChunkContent => Some(Box::new(chunk_content::ChunkContentJob)),
             JobType::IndexChunks => Some(Box::new(index_chunks::IndexChunksJob)),
+            JobType::AnswerQuestions => Some(Box::new(answer_questions::AnswerQuestionsJob)),
             JobType::RenderLaTeXPdf => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }
