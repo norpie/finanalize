@@ -6,6 +6,7 @@ pub mod renderer;
 pub enum LatexComponent {
     Section(Section),
     Subsection(Subsection),
+    Paragraph(Paragraph),
     Text(String),
     Figure(Figure),
     Table(Table),
@@ -22,6 +23,10 @@ pub struct Section {
 
 pub struct Subsection {
     pub heading: String,
+}
+
+pub struct Paragraph {
+    pub text: String,
 }
 
 pub struct Figure {
@@ -112,6 +117,12 @@ pub fn get_commands(components: Vec<LatexComponent>) -> Result<Vec<LatexCommand>
                 commands.push(LatexCommand {
                     command: format!(r"\subsection{{{}}}", subsection.heading.clone()),
                     args: "".to_string(),
+                });
+            }
+            LatexComponent::Paragraph(paragraph) => {
+                commands.push(LatexCommand {
+                    command: format!(r"\paragraph{{{}}}", paragraph.text.clone()),
+                    args: paragraph.text.clone(),
                 });
             }
             LatexComponent::Text(text) => {
