@@ -61,7 +61,12 @@ impl Task {
             .await
     }
 
-    pub async fn run_structured<T, U>(&self, api: Arc<dyn LLMApi>, input: &T, schema: String) -> Result<U>
+    pub async fn run_structured<T, U>(
+        &self,
+        api: Arc<dyn LLMApi>,
+        input: &T,
+        schema: String,
+    ) -> Result<U>
     where
         T: Serialize,
         U: DeserializeOwned + std::fmt::Debug,
@@ -76,7 +81,9 @@ impl Task {
             RetryStrategy::Count(count) => {
                 let mut errors = Vec::new();
                 for i in 0..count {
-                    let res = self.try_run::<U>(api.clone(), prompt.clone(), schema.clone()).await;
+                    let res = self
+                        .try_run::<U>(api.clone(), prompt.clone(), schema.clone())
+                        .await;
                     match res {
                         Ok(value) => return Ok(value),
                         Err(err) => {
@@ -88,7 +95,9 @@ impl Task {
                 Err(FinanalizeError::MultipleErrors(errors))
             }
             RetryStrategy::UntilSuccess => loop {
-                let res = self.try_run::<U>(api.clone(), prompt.clone(), schema.clone()).await;
+                let res = self
+                    .try_run::<U>(api.clone(), prompt.clone(), schema.clone())
+                    .await;
                 match res {
                     Ok(value) => return Ok(value),
                     Err(err) => {
@@ -151,7 +160,13 @@ impl Task {
             .contains(&FixStrategy::InsertClosedBrace)
         {
             info!("Skipping inserting closing brace.");
-            return Ok(serde_json::from_str(&json)?);
+            return match serde_json::from_str(&json) {
+                Ok(val) => Ok(val),
+                Err(e) => {
+                    error!("Failed to parse JSON: {}", json);
+                    Err(e.into())
+                }
+            };
         }
 
         let mut errors = Vec::new();
@@ -161,7 +176,7 @@ impl Task {
                 Ok(value) => return Ok(value),
                 Err(err) => {
                     json.push('}');
-                    warn!("Failed to parse JSON, retrying: {}/3", i + 1);
+                    warn!("Failed to parse JSON, retrying: {}/3: {}", i + 1, &json);
                     errors.push(err.into());
                 }
             }
