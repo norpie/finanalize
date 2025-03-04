@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use itertools::izip;
+use log::debug;
 use models::{AnswerQuestionsInput, QuestionAnswer};
 
 use crate::llm::API;
@@ -9,8 +10,7 @@ use crate::{prelude::*, prompting, rag};
 
 use crate::workflow::WorkflowState;
 
-use super::index_chunks::models::EmbeddedChunk;
-use super::{sub_sections, Job};
+use super::Job;
 
 pub mod models {
     use serde::{Deserialize, Serialize};
@@ -61,6 +61,7 @@ impl W {
 #[async_trait]
 impl Job for AnswerQuestionsJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
+        debug!("Running AnswerQuestionsJob for report {}", state.id);
         let prompt = prompting::get_prompt("answer-questions".into())?;
         let task = Task::new(&prompt);
         let mut pairs = Vec::new();
@@ -120,7 +121,7 @@ mod tests {
     use crate::{
         db::{self, DB},
         models::FullReport,
-        workflow::{job::classify_sources::models::ClassifySourcesOutput, JobType, WorkflowState},
+        workflow::{job::classify_sources::models::{ClassifiedSource, ClassifySourcesOutput}, JobType, WorkflowState},
     };
 
     #[tokio::test]
@@ -130,9 +131,9 @@ mod tests {
         DB.set(db::connect().await.unwrap()).unwrap();
         let job = AnswerQuestionsJob;
         let state = WorkflowState {
-            id: "sjaudnhcrlas".into(),
+            id: "asdlfjhasldfjh".into(),
             last_job_type: JobType::Pending,
-            state: FullReport::new("sjaudnhcrlas".into(), "Apple stock in 2025".into())
+            state: FullReport::new("asdlfjhasldfjh".into(), "Apple stock in 2025".into())
                 .with_title("State of Apple in 2025".into())
                 .with_sections(vec![
                     "Introduction".into(),
@@ -147,7 +148,8 @@ mod tests {
                     vec!["Recommendation".into()],
                 ])
                 .with_sources(vec![
-                    ClassifySourcesOutput {
+                    ClassifiedSource {
+                        id: "0".into(),
                         title: "Apple shares rise 3% as boost in services revenue overshadows iPhone miss".into(),
                         summary: "Apple’s overall revenue rose 4% in its first fiscal quarter, but it missed on Wall Street’s iPhone sales expectations and saw sales in China decline 11.1%, the company reported Thursday.".into(),
                         author: "Anonymous".into(),
