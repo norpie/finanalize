@@ -25,6 +25,9 @@ pub enum FinanalizeError {
     #[error("Invalid state: {0}")]
     InvalidState(String),
 
+    #[error("Scraper timed out on page: {0}")]
+    ScraperTimemout(String),
+
     #[error("Some retry logic generated the following errors: {0:#?}")]
     MultipleErrors(Vec<FinanalizeError>),
 
