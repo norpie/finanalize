@@ -3,12 +3,14 @@ use crate::{llm::API, prelude::*, prompting, tasks::Task};
 use async_trait::async_trait;
 use log::debug;
 use models::{SectionNamesInput, SectionNamesOutput};
+use schemars::schema_for;
 
 use crate::workflow::WorkflowState;
 
 use super::Job;
 
 pub mod models {
+    use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -17,7 +19,7 @@ pub mod models {
         pub message: String,
     }
 
-    #[derive(Debug, Clone, Deserialize, Serialize)]
+    #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
     pub struct SectionNamesOutput {
         pub sections: Vec<String>,
     }
@@ -37,7 +39,13 @@ impl Job for SectionNamesJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: SectionNamesOutput = task.run_structured(API.clone(), &input).await?;
+        let output: SectionNamesOutput = task
+            .run_structured(
+                API.clone(),
+                &input,
+                serde_json::to_string_pretty(&schema_for!(SectionNamesOutput))?,
+            )
+            .await?;
         debug!("Task completed");
         state.state.sections = Some(output.sections);
         debug!("Sections: {:#?}", state.state.sections);

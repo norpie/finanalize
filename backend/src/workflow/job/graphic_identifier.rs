@@ -4,8 +4,11 @@ use crate::workflow::WorkflowState;
 use crate::{llm::API, prelude::*, prompting, tasks::Task};
 use async_trait::async_trait;
 use log::debug;
+use models::GraphDataOutput;
+use schemars::schema_for;
 
 pub mod models {
+    use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -14,7 +17,7 @@ pub mod models {
         pub text: String,
     }
 
-    #[derive(Debug, Clone, Deserialize, Serialize)]
+    #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
     pub struct GraphDataOutput {
         pub graphics: Vec<GraphicOutput>,
     }
@@ -25,7 +28,7 @@ pub mod models {
         pub text: String,
     }
 
-    #[derive(Debug, Clone, Deserialize, Serialize)]
+    #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
     pub struct GraphicOutput {
         pub graph_type: String,
         pub purpose: String,
@@ -68,8 +71,13 @@ impl Job for GraphIdentifierJob {
                 };
                 debug!("Prepared input: {:#?}", input);
                 debug!("Running task...");
-                let output: models::GraphDataOutput =
-                    task.run_structured(API.clone(), &input).await?;
+                let output: models::GraphDataOutput = task
+                    .run_structured(
+                        API.clone(),
+                        &input,
+                        serde_json::to_string_pretty(&schema_for!(GraphDataOutput))?,
+                    )
+                    .await?;
                 graphics.extend(output.graphics.into_iter().map(|g| Graphic {
                     text_id: text.id.clone(),
                     graph_type: g.graph_type,

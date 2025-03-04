@@ -3,20 +3,22 @@ use crate::{llm, prelude::*, prompting, tasks::Task};
 use async_trait::async_trait;
 use log::debug;
 use models::ValidationOutput;
+use schemars::schema_for;
 
 use crate::workflow::WorkflowState;
 
 use super::Job;
 
 pub mod models {
+    use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
-    #[derive(Clone, Debug, Serialize, Deserialize)]
+    #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
     pub struct ValidationInput {
         pub message: String,
     }
 
-    #[derive(Clone, Debug, Serialize, Deserialize)]
+    #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
     pub struct ValidationOutput {
         pub valid: bool,
         pub error: Option<String>,
@@ -37,7 +39,13 @@ impl Job for ValidationJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: ValidationOutput = task.run_structured(llm::API.clone(), &input).await?;
+        let output: ValidationOutput = task
+            .run_structured(
+                llm::API.clone(),
+                &input,
+                serde_json::to_string_pretty(&schema_for!(ValidationOutput))?,
+            )
+            .await?;
         debug!("Task completed");
         state.state.validation = Some(output);
         debug!("Validation: {:#?}", state.state.validation);

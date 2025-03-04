@@ -5,11 +5,13 @@ use super::{validation::models::ValidationInput, Job};
 use async_trait::async_trait;
 use log::debug;
 use models::TitleOutput;
+use schemars::schema_for;
 
 pub mod models {
+    use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
-    #[derive(Clone, Debug, Serialize, Deserialize)]
+    #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
     pub struct TitleOutput {
         pub title: String,
     }
@@ -28,7 +30,13 @@ impl Job for TitleJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: TitleOutput = task.run_structured(API.clone(), &input).await?;
+        let output: TitleOutput = task
+            .run_structured(
+                API.clone(),
+                &input,
+                serde_json::to_string_pretty(&schema_for!(TitleOutput))?,
+            )
+            .await?;
         debug!("Task completed");
         state.state.title = Some(output.title);
         debug!("Title: {:#?}", state.state.title);

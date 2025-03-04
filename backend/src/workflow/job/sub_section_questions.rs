@@ -6,12 +6,14 @@ use async_trait::async_trait;
 use chrono::Utc;
 use log::debug;
 use models::{RawSubSectionQuestionsInput, SubSectionQuestionsInput, SubSectionQuestionsOutput};
+use schemars::schema_for;
 
 use crate::workflow::WorkflowState;
 
 use super::Job;
 
 pub mod models {
+    use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
     use crate::workflow::job::search_queries::models::Section;
@@ -28,19 +30,19 @@ pub mod models {
         pub sections: Vec<Section>,
     }
 
-    #[derive(Debug, Clone, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
     pub struct SectionWithQuestions {
         pub section: String,
         pub sub_sections: Vec<SubSectionWithQuestions>,
     }
 
-    #[derive(Debug, Clone, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
     pub struct SubSectionWithQuestions {
         pub sub_section: String,
         pub questions: Vec<String>,
     }
 
-    #[derive(Debug, Clone, Serialize, Deserialize)]
+    #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
     pub struct SubSectionQuestionsOutput {
         pub sections: Vec<SectionWithQuestions>,
     }
@@ -77,8 +79,13 @@ impl Job for SubSectionQuestionsJob {
         };
         let prompt = prompting::get_prompt("sub-section-questions".into())?;
         let task = Task::new(&prompt);
-        let output: SubSectionQuestionsOutput =
-            task.run_structured(API.clone(), &raw_input).await?;
+        let output: SubSectionQuestionsOutput = task
+            .run_structured(
+                API.clone(),
+                &raw_input,
+                serde_json::to_string_pretty(&schema_for!(SubSectionQuestionsOutput))?,
+            )
+            .await?;
         let mut sections: Vec<Vec<Vec<String>>> = Vec::new();
         for section in output.sections {
             let mut sub_sections: Vec<Vec<String>> = Vec::new();
