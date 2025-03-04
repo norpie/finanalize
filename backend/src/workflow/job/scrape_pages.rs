@@ -1,4 +1,4 @@
-use std::{env, sync::Arc};
+use std::{env, sync::Arc, time::Duration};
 
 use crate::{prelude::*, workflow::WorkflowState};
 
@@ -9,13 +9,13 @@ use deadpool::unmanaged::{Object, Pool};
 use fantoccini::{Client, ClientBuilder};
 use log::debug;
 use serde_json::json;
-use tokio::{sync::Mutex, task::JoinSet};
+use tokio::{sync::Mutex, task::JoinSet, time::timeout};
 
 pub mod models {}
 
 pub struct ScrapePagesJob;
 
-const BROWSER_COUNT: u16 = 1;
+const BROWSER_COUNT: u16 = 4;
 const FIRST_PORT: u16 = 4444;
 
 async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
@@ -45,9 +45,18 @@ async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
 }
 
 async fn scrape_page(browser: &Object<Client>, url: &str) -> Result<String> {
-    browser.goto(url).await?;
-    let source = browser.source().await?;
-    Ok(source)
+    // browser.goto(url).await?;
+    let goto_result = timeout(Duration::from_secs(2), browser.goto(url)).await;
+    match goto_result {
+        Ok(Ok(_)) => {
+            let source = browser.source().await?;
+            Ok(source)
+        }
+        Ok(Err(e)) => Err(e.into()), // Handle `goto` errors
+        Err(_) => Err(FinanalizeError::ScraperTimemout(url.into()))
+    }
+    // let source = browser.source().await?;
+    // Ok(source)
 }
 
 fn split_evenly(items: Vec<String>, n: usize) -> Vec<Vec<String>> {
@@ -78,12 +87,13 @@ impl Job for ScrapePagesJob {
                     return Err(FinanalizeError::InternalServerError);
                 };
                 debug!("Scraping ({}/{}): {}", i + 1, total, source);
-                let Ok(source) = scrape_page(&browser, &source).await else {
+                let Ok(html) = scrape_page(&browser, &source).await else {
                     debug!("Failed to scrape page: {}", source);
-                    return Err(FinanalizeError::InternalServerError);
+                    // return Err(FinanalizeError::InternalServerError);
+                    return Ok(());
                 };
                 debug!("Scraped ({}/{}): {}", i + 1, total, source);
-                sources.clone().lock().await.push(source);
+                sources.clone().lock().await.push(html);
                 Ok(())
             });
         }
