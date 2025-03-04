@@ -1,22 +1,7 @@
-This tool extracts the company name from a user's message and validates whether the company meets the criteria for
-financial analysis. The company must be publicly traded and listed on either the NASDAQ or NYSE. If the company meets
-these two conditions, the tool returns a true value. If the company fails to meet any of the conditions, the tool
+This tool is part of a stock analysis platform, it validates whether the company meets the criteria for
+analysis. The company must be a large publicly traded. If the company meets this condition,
+the tool returns a true value. If the company fails to meet any of the conditions, the tool
 returns a false value along with an error message specifying which condition was not met.
-
-Output schema:
-```json
-{
-  "type": "object",
-  "properties": {
-    "valid": {
-      "type": "boolean"
-    }
-  },
-  "required": [
-    "valid"
-  ]
-}
-```
 
 The following are complete examples of the input and output:
 
@@ -37,22 +22,22 @@ The following are complete examples of the input and output:
     ```
 </Example>
 
-<Example> 
-    <Input> 
-    ```json 
+<Example>
+    <Input>
+    ```json
     {
         "message": "Check OpenAI stock price"
-    } 
-    ``` 
-    </Input> 
-    <Output> 
-    ```json 
+    }
+    ```
+    </Input>
+    <Output>
+    ```json
     {
         "valid": false,
         "error": "OpenAI is not publicly traded on NASDAQ or NYSE."
-    } 
-    ``` 
-    </Output> 
+    }
+    ```
+    </Output>
 </Example>
 
 <Input>
@@ -65,4 +50,3 @@ The following are complete examples of the input and output:
 
 <Output>
 ```json
-{
