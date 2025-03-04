@@ -1,7 +1,8 @@
 use async_trait::async_trait;
+use itertools::izip;
 use log::debug;
 
-use crate::latex::{self, LatexComponent, Section, Source, Subsection};
+use crate::latex::{self, LatexComponent, Paragraph, Section, Source, Subsection};
 use crate::prelude::*;
 
 use crate::workflow::WorkflowState;
@@ -21,22 +22,31 @@ impl Job for GenerateReportJob {
             "Generating report for: {}",
             state.state.title.clone().unwrap()
         );
-        for (section, sub_sections) in state.state.sections.clone().unwrap().into_iter().zip(
+        for (section_name, sub_sections, sub_section_questions) in izip!(
+            state.state.sections.clone().unwrap().into_iter(),
+            state.state.sub_sections.clone().unwrap().into_iter(),
             state
                 .state
-                .sub_sections
+                .question_answer_pairs
                 .clone()
                 .unwrap()
-                .into_iter()
-                .map(|sub_sections| sub_sections.into_iter()),
+                .into_iter(),
         ) {
-            debug!("Adding section: {}", section);
-            components.push(LatexComponent::Section(Section { heading: section }));
-            for sub_section in sub_sections {
-                debug!("Adding sub-section: {}", sub_section);
+            components.push(LatexComponent::Section(Section {
+                heading: section_name,
+            }));
+            for (sub_section_name, question_answer_pairs) in
+                sub_sections.into_iter().zip(sub_section_questions)
+            {
                 components.push(LatexComponent::Subsection(Subsection {
-                    heading: sub_section,
+                    heading: sub_section_name,
                 }));
+                for pair in question_answer_pairs.into_iter() {
+                    components.push(LatexComponent::Paragraph(Paragraph {
+                        text: pair.question,
+                    }));
+                    components.push(LatexComponent::Text(pair.answer));
+                }
             }
         }
 
