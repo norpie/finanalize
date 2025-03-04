@@ -31,6 +31,11 @@ pub mod models {
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+    pub struct SubSectionQuestionsOutput {
+        pub sections: Vec<SectionWithQuestions>,
+    }
+
+    #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
     pub struct SectionWithQuestions {
         pub section: String,
         pub sub_sections: Vec<SubSectionWithQuestions>,
@@ -40,11 +45,6 @@ pub mod models {
     pub struct SubSectionWithQuestions {
         pub sub_section: String,
         pub questions: Vec<String>,
-    }
-
-    #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-    pub struct SubSectionQuestionsOutput {
-        pub sections: Vec<SectionWithQuestions>,
     }
 }
 
@@ -75,8 +75,9 @@ impl Job for SubSectionQuestionsJob {
             sections,
         };
         let raw_input = RawSubSectionQuestionsInput {
-            input: serde_json::to_string(&input)?,
+            input: serde_json::to_string_pretty(&input)?,
         };
+        println!("input: {}", &raw_input.input);
         let prompt = prompting::get_prompt("sub-section-questions".into())?;
         let task = Task::new(&prompt);
         let output: SubSectionQuestionsOutput = task
