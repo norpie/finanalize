@@ -135,7 +135,7 @@ pub struct FullSDBReport {
     pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
-    pub question_answer_pairs: Option<Vec<QuestionAnswer>>,
+    pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
