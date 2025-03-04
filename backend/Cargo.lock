@@ -884,6 +884,7 @@ dependencies = [
  "lapin",
  "log",
  "lopdf 0.34.0",
+ "mdka",
  "once_cell",
  "pdf",
  "pdf-extract",
@@ -3834,6 +3835,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "markup5ever_rcdom"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "edaa21ab3701bfee5099ade5f7e1f84553fd19228cf332f13cd6e964bf59be18"
+dependencies = [
+ "html5ever 0.27.0",
+ "markup5ever 0.12.1",
+ "tendril",
+ "xml5ever",
+]
+
+[[package]]
 name = "matches"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3864,6 +3877,16 @@ name = "md5"
 version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "490cc448043f947bae3cbee9c203358d62dbee0db12107a74be5c30ccfd09771"
+
+[[package]]
+name = "mdka"
+version = "1.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e23b232a9bbaa0938113e9c7a4bc4b6fa92d49bfe8af802c843d21000752a908"
+dependencies = [
+ "html5ever 0.27.0",
+ "markup5ever_rcdom",
+]
 
 [[package]]
 name = "memchr"
@@ -8261,6 +8284,17 @@ dependencies = [
  "rusticata-macros",
  "thiserror 2.0.11",
  "time 0.3.37",
+]
+
+[[package]]
+name = "xml5ever"
+version = "0.18.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bbb26405d8e919bc1547a5aa9abc95cbfa438f04844f5fdd9dc7596b748bf69"
+dependencies = [
+ "log",
+ "mac",
+ "markup5ever 0.12.1",
 ]
 
 [[package]]
