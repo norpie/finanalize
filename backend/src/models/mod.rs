@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
+use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
     job::{
@@ -134,6 +135,7 @@ pub struct FullSDBReport {
     pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
+    pub question_answer_pairs: Option<Vec<QuestionAnswer>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
@@ -159,6 +161,7 @@ impl From<FullSDBReport> for FullReport {
             sources: report.sources,
             chunks: report.chunks,
             chunk_embeddings: report.chunk_embeddings,
+            question_answer_pairs: report.question_answer_pairs,
             report: report.report,
             texts: report.texts,
             graphics: report.graphics,
@@ -185,6 +188,7 @@ pub struct FullReport {
     pub sources: Option<Vec<ClassifySourcesOutput>>,
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
+    pub question_answer_pairs: Option<Vec<QuestionAnswer>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
@@ -234,6 +238,8 @@ mod tests {
                 sources: None,
                 chunks: None,
                 chunk_embeddings: None,
+
+                question_answer_pairs: None,
 
                 report: None,
                 texts: None,
