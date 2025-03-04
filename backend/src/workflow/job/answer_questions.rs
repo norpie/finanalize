@@ -75,7 +75,8 @@ impl Job for AnswerQuestionsJob {
                 .into_iter(),
         ) {
             let mut section = Vec::new();
-            for (sub_section_name, questions) in sub_sections.into_iter().zip(sub_section_questions) {
+            for (sub_section_name, questions) in sub_sections.into_iter().zip(sub_section_questions)
+            {
                 let mut sub_section = Vec::new();
                 for question in questions.into_iter() {
                     let context = rag::vector_search(
@@ -84,7 +85,12 @@ impl Job for AnswerQuestionsJob {
                     )
                     .await?;
                     if context.is_empty() {
-                        panic!("Empty context for report:{}({}) and question: {}", state.id.clone(), state.state.id.clone(), question);
+                        panic!(
+                            "Empty context for report:{}({}) and question: {}",
+                            state.id.clone(),
+                            state.state.id.clone(),
+                            question
+                        );
                     }
                     let input = AnswerQuestionsInput {
                         context: W(context).into_context(4096),
