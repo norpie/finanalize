@@ -80,7 +80,7 @@ pub fn construct_report(
         "Cleaning up {:?}, removing all files except the report PDF",
         destination_folder.display()
     );
-    cleanup_destination_folder(destination_folder)?;
+    // cleanup_destination_folder(destination_folder)?;
     debug!("Report compiled successfully: {:?}", pdf_path.display());
     Ok(PdfReport {
         uuid,
@@ -150,11 +150,12 @@ fn compile_latex(input: &Path, output: &Path, is_bib: bool) -> Result<()> {
             .output()?;
         return Ok(());
     }
-    Command::new("pdflatex")
+    let output = Command::new("pdflatex")
         .arg("-output-directory")
         .arg(output)
         .arg(input)
         .output()?;
+    dbg!(output);
     Ok(())
 }
 
