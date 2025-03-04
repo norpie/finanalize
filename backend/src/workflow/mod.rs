@@ -126,12 +126,15 @@ pub enum JobType {
 mod tests {
     use std::time::Duration;
 
+    use crate::db;
+
     use super::*;
 
     #[tokio::test]
     #[ignore = "Depends on external services"]
     async fn test_process_state() {
         env_logger::init();
+        DB.set(db::connect().await.unwrap()).unwrap();
         let mut state = WorkflowState {
             id: "test".to_string(),
             last_job_type: JobType::Pending,
