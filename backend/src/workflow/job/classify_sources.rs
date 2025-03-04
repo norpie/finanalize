@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use models::{ClassifySourcesInput, ClassifySourcesOutput};
+use models::{ClassifiedSource, ClassifySourcesInput, ClassifySourcesOutput};
 use schemars::schema_for;
 
 use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowState};
@@ -24,6 +24,30 @@ pub mod models {
         #[serde(rename = "publishedAfter")]
         pub published_after: Option<String>,
     }
+
+    impl ClassifiedSource {
+        pub fn from_id(id: String, value: ClassifySourcesOutput) -> Self {
+            Self {
+                id,
+                title: value.title,
+                summary: value.summary,
+                author: value.author,
+                date: value.date,
+                published_after: value.published_after,
+            }
+        }
+    }
+
+    #[derive(Debug, Clone, Serialize, Deserialize)]
+    pub struct ClassifiedSource {
+        pub id: String,
+        pub title: String,
+        pub summary: String,
+        pub author: String,
+        pub date: Option<String>,
+        #[serde(rename = "publishedAfter")]
+        pub published_after: Option<String>,
+    }
 }
 
 pub struct ClassifySourcesJob;
@@ -34,7 +58,14 @@ impl Job for ClassifySourcesJob {
         let prompt = prompting::get_prompt("content-classifier".into())?;
         let task = Task::new(&prompt);
         let mut sources = Vec::new();
-        for source in state.state.raw_sources.clone().unwrap() {
+        for (i, source) in state
+            .state
+            .raw_sources
+            .clone()
+            .unwrap()
+            .into_iter()
+            .enumerate()
+        {
             let input = ClassifySourcesInput { input: source };
             let output: ClassifySourcesOutput = task
                 .run_structured(
@@ -43,7 +74,7 @@ impl Job for ClassifySourcesJob {
                     serde_json::to_string_pretty(&schema_for!(ClassifySourcesOutput))?,
                 )
                 .await?;
-            sources.push(output);
+            sources.push(ClassifiedSource::from_id(i.to_string(), output));
         }
         state.state.sources = Some(sources);
         Ok(state)

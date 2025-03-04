@@ -26,7 +26,7 @@ impl Job for ChunkContentJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         let mut chunks = Vec::new();
         let extractor = TextExtractor;
-        for (_info, source) in state
+        for (info, source) in state
             .state
             .sources
             .clone()
@@ -37,7 +37,7 @@ impl Job for ChunkContentJob {
             let mut source_chunks = Vec::new();
             for chunk in extractor.extract(FileType::Text(source)).await?.into_iter() {
                 source_chunks.push(models::Chunk {
-                    source_id: "0".into(), // TODO: Add source ID
+                    source_id: info.id.clone(),
                     content: match chunk {
                         Content::Text(content) => content,
                         _ => Err(FinanalizeError::InvalidState(
@@ -61,7 +61,7 @@ mod tests {
 
     use crate::{
         models::FullReport,
-        workflow::{job::classify_sources::models::ClassifySourcesOutput, JobType, WorkflowState},
+        workflow::{job::classify_sources::models::{ClassifiedSource, ClassifySourcesOutput}, JobType, WorkflowState},
     };
 
     #[tokio::test]
@@ -188,7 +188,8 @@ Apple said it would pay a dividend of 25 cents per share and spent $30 billion o
 **WATCH:** [Apple’s superficial problem is there’s not enough demand, says Jim Cramer](https://www.cnbc.com/video/2025/01/21/apples-superficial-problem-is-theres-not-enough-demand-says-jim-cramer.html)"#.into()
                 ])
                 .with_sources(vec![
-                    ClassifySourcesOutput {
+                    ClassifiedSource {
+                        id: "0".into(),
                         title: "Apple shares rise 3% as boost in services revenue overshadows iPhone miss".into(),
                         summary: "Apple’s overall revenue rose 4% in its first fiscal quarter, but it missed on Wall Street’s iPhone sales expectations and saw sales in China decline 11.1%, the company reported Thursday.".into(),
                         author: "Anonymous".into(),

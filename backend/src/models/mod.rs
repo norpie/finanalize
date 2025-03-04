@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
+use crate::workflow::job::classify_sources::models::ClassifiedSource;
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
     job::{
@@ -132,7 +133,7 @@ pub struct FullSDBReport {
     pub search_results: Option<Vec<String>>,
     pub html_sources: Option<Vec<String>>,
     pub raw_sources: Option<Vec<String>>,
-    pub sources: Option<Vec<ClassifySourcesOutput>>,
+    pub sources: Option<Vec<ClassifiedSource>>,
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
     pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
@@ -185,7 +186,7 @@ pub struct FullReport {
     pub search_results: Option<Vec<String>>,
     pub html_sources: Option<Vec<String>>,
     pub raw_sources: Option<Vec<String>>,
-    pub sources: Option<Vec<ClassifySourcesOutput>>,
+    pub sources: Option<Vec<ClassifiedSource>>,
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
     pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
@@ -208,12 +209,10 @@ mod tests {
     use chrono::Utc;
 
     use super::FullReport;
+    use crate::workflow::job::classify_sources::models::ClassifiedSource;
     use crate::workflow::job::graphic_identifier::models::Text;
     use crate::workflow::{
-        job::{
-            chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
-            validation::models::ValidationOutput,
-        },
+        job::{chunk_content::models::Chunk, validation::models::ValidationOutput},
         JobType,
     };
 
@@ -295,7 +294,7 @@ mod tests {
             self
         }
 
-        pub fn with_sources(mut self, sources: Vec<ClassifySourcesOutput>) -> Self {
+        pub fn with_sources(mut self, sources: Vec<ClassifiedSource>) -> Self {
             self.sources = Some(sources);
             self
         }

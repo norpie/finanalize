@@ -63,7 +63,10 @@ mod tests {
         db,
         models::FullReport,
         workflow::{
-            job::{chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput},
+            job::{
+                chunk_content::models::Chunk,
+                classify_sources::models::{ClassifiedSource, ClassifySourcesOutput},
+            },
             JobType, WorkflowState,
         },
     };
@@ -193,7 +196,8 @@ Apple said it would pay a dividend of 25 cents per share and spent $30 billion o
 **WATCH:** [Apple’s superficial problem is there’s not enough demand, says Jim Cramer](https://www.cnbc.com/video/2025/01/21/apples-superficial-problem-is-theres-not-enough-demand-says-jim-cramer.html)"#.into()
                 ])
                 .with_sources(vec![
-                    ClassifySourcesOutput {
+                    ClassifiedSource {
+                        id: "test_id".into(),
                         title: "Apple shares rise 3% as boost in services revenue overshadows iPhone miss".into(),
                         summary: "Apple’s overall revenue rose 4% in its first fiscal quarter, but it missed on Wall Street’s iPhone sales expectations and saw sales in China decline 11.1%, the company reported Thursday.".into(),
                         author: "Anonymous".into(),

@@ -1,8 +1,6 @@
 use async_trait::async_trait;
 use log::debug;
 
-use crate::extractors::html::HTMLExtractor;
-use crate::extractors::{Content, ContentExtract, FileType};
 use crate::prelude::*;
 
 use crate::workflow::WorkflowState;
@@ -14,7 +12,7 @@ pub struct ExtractContentJob;
 #[async_trait]
 impl Job for ExtractContentJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
-        let extractor = HTMLExtractor;
+        // let extractor = HTMLExtractor;
         let mut mds = vec![];
         let html_sources = state.state.html_sources.clone().unwrap();
         let total = html_sources.len();
