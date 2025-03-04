@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use log::debug;
 use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use serde_json::{Number, Value};
 
 use crate::prelude::*;
 
@@ -39,7 +39,7 @@ pub struct OllamaCompletionRequest<'a> {
     prompt: String,
     format: Option<Value>,
     stream: bool,
-    options: HashMap<&'a str, Vec<&'a str>>,
+    options: HashMap<&'a str, Value>,
     raw: bool,
 }
 
@@ -63,7 +63,8 @@ pub struct OllamaCompletionResponse {
 impl LLMApi for Ollama {
     async fn generate(&self, prompt: String) -> Result<String> {
         let mut options = HashMap::new();
-        options.insert("stop", vec!["```"]);
+        options.insert("stop", Value::Array(vec!["```".into()]));
+        options.insert("num_ctx", Value::Number(Number::from_u128(12228).unwrap()));
         let request = OllamaCompletionRequest {
             model: self.completion_model.clone(),
             prompt,
@@ -86,10 +87,12 @@ impl LLMApi for Ollama {
     }
 
     async fn generate_json(&self, prompt: String, json_schema: String) -> Result<String> {
+        let mut options = HashMap::new();
+        options.insert("num_ctx", Value::Number(Number::from_u128(12228).unwrap()));
         let request = OllamaCompletionRequest {
             model: self.completion_model.clone(),
             prompt,
-            options: HashMap::new(),
+            options,
             stream: false,
             raw: true,
             format: Some(serde_json::from_str(&json_schema)?),
