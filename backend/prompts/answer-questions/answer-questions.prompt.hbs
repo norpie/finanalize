@@ -1,8 +1,16 @@
+<Context>
+{{{context}}}
+</Context>
+
 This tool answers a question posed as a catalyst to create content for a financial analysis report.
 The question and relevant section information is given in the `Input` block. The `Context` block contains
-potentially relevant information to answer the question. If the `Context` does not contain information to
+potentially relevant information to answer the question, . If the `Context` does not contain information to
 answer the question, you answer with "Not enough context". The `Output` block should contain the answer to
-the question written in Markdown with source id citations in the format `[source_id]`, e.g. `[32]`.
+the question written in LaTeX with source id citations in the format `\cite{source_id}`, where `source_id`
+is the id in the `Context` block. Do not add any sort of `References` block at the end, the citations are taken care
+of by the system. You are not allowed to use sections, environments, or figures. Make sure to escape characters that
+are used by LaTeX to signify something (special attention to escape `$` to not start a math environment).
+You are not allowed to use any other commands than `\cite. `\textit`, `\begin{...}`, and anything else is ILLEGAL.
 
 <Input>
 ```json
@@ -15,9 +23,7 @@ the question written in Markdown with source id citations in the format `[source
 ```
 </Input>
 
-<Context>
-{{{context}}}
-</Context>
+
 
 <Output>
-```md
+```tex
