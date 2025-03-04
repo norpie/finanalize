@@ -7,7 +7,7 @@ use ollama::Ollama;
 use once_cell::sync::Lazy;
 
 pub mod ollama;
-pub mod ullm;
+// pub mod ullm;
 
 pub static API: Lazy<Arc<dyn LLMApi>> = Lazy::new(|| Arc::new(Ollama::default()));
 
@@ -15,5 +15,6 @@ pub static API: Lazy<Arc<dyn LLMApi>> = Lazy::new(|| Arc::new(Ollama::default())
 pub trait LLMApi: Send + Sync + 'static {
     /// Generate a response to a prompt, return the tokens as a string
     async fn generate(&self, prompt: String) -> Result<String>;
+    async fn generate_json(&self, prompt: String, json_schema: String) -> Result<String>;
     async fn embed(&self, text: String) -> Result<Vec<f32>>;
 }

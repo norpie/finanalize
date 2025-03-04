@@ -37,6 +37,7 @@ impl Default for Ollama {
 pub struct OllamaCompletionRequest<'a> {
     model: String,
     prompt: String,
+    format: Option<Value>,
     stream: bool,
     options: HashMap<&'a str, Vec<&'a str>>,
     raw: bool,
@@ -66,6 +67,7 @@ impl LLMApi for Ollama {
         let request = OllamaCompletionRequest {
             model: self.completion_model.clone(),
             prompt,
+            format: None,
             options,
             stream: false,
             raw: true,
@@ -80,6 +82,32 @@ impl LLMApi for Ollama {
             .json::<Value>()
             .await?;
         debug!("Ollama response");
+        Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
+    }
+
+    async fn generate_json(&self, prompt: String, json_schema: String) -> Result<String> {
+        let request = OllamaCompletionRequest {
+            model: self.completion_model.clone(),
+            prompt,
+            options: HashMap::new(),
+            stream: false,
+            raw: true,
+            format: Some(serde_json::from_str(&json_schema)?),
+        };
+
+        debug!("Ollama JSON request");
+
+        let value = self
+            .client
+            .post(format!("{}/api/generate", self.base_url))
+            .json(&request)
+            .send()
+            .await?
+            .json::<Value>()
+            .await?;
+
+        debug!("Ollama JSON response");
+
         Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
     }
 
@@ -110,6 +138,36 @@ mod tests {
         let ollama = Ollama::default();
         let response = ollama
             .generate("Q: How tall is the Madou Tower in Brussels?\nA:".to_string())
+            .await;
+        assert!(response.is_ok());
+        dbg!(response.unwrap());
+    }
+
+    #[tokio::test]
+    #[ignore = "Depends on external service"]
+    async fn test_generate_json() {
+        let ollama = Ollama::default();
+        let response = ollama
+            .generate_json(
+                "Ollama is 22 years old and is busy saving the world. Respond using JSON"
+                    .to_string(),
+                r#"{
+            "type": "object",
+            "properties": {
+              "age": {
+                "type": "integer"
+              },
+              "available": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "age",
+              "available"
+            ]
+          }"#
+                .to_string(),
+            )
             .await;
         assert!(response.is_ok());
         dbg!(response.unwrap());
