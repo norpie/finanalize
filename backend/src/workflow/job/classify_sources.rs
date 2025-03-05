@@ -1,6 +1,10 @@
+use std::sync::Arc;
+
 use async_trait::async_trait;
+use log::debug;
 use models::{ClassifiedSource, ClassifySourcesInput, ClassifySourcesOutput};
 use schemars::schema_for;
+use tokio::{sync::Semaphore, task::JoinHandle};
 
 use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowState};
 
@@ -57,7 +61,10 @@ impl Job for ClassifySourcesJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         let prompt = prompting::get_prompt("content-classifier".into())?;
         let task = Task::new(&prompt);
-        let mut sources = Vec::new();
+        let raw_sources = state.state.raw_sources.clone().unwrap();
+        let semaphore = Arc::new(Semaphore::new(5));
+        let mut handles = Vec::with_capacity(raw_sources.len());
+
         for (i, source) in state
             .state
             .raw_sources
@@ -66,16 +73,35 @@ impl Job for ClassifySourcesJob {
             .into_iter()
             .enumerate()
         {
+            debug!("Processing source {} of {}", i + 1, raw_sources.len()); // Log the loop count and total number of sources
             let input = ClassifySourcesInput { input: source };
-            let output: ClassifySourcesOutput = task
-                .run_structured(
-                    API.clone(),
-                    &input,
-                    serde_json::to_string_pretty(&schema_for!(ClassifySourcesOutput))?,
-                )
-                .await?;
-            sources.push(ClassifiedSource::from_id(i.to_string(), output));
+            let task_clone = task.clone();
+            let semaphore = Arc::clone(&semaphore);
+            let permit = semaphore.acquire_owned().await.unwrap();
+
+            let handle: JoinHandle<Result<ClassifiedSource>> = tokio::spawn(async move {
+                let task_clone2 = task_clone.clone();
+                let output: ClassifySourcesOutput = task_clone2
+                    .run_structured(
+                        API.clone(),
+                        &input,
+                        serde_json::to_string_pretty(&schema_for!(ClassifySourcesOutput))?,
+                    )
+                    .await?;
+                drop(permit);
+                Ok(ClassifiedSource::from_id(i.to_string(), output))
+            });
+
+            handles.push(handle);
         }
+
+        let mut sources = Vec::new();
+        for (i, handle) in handles.into_iter().enumerate() {
+            debug!("Waiting for source {} of {}", i + 1, raw_sources.len());
+            let source = handle.await??;
+            sources.push(source);
+        }
+
         state.state.sources = Some(sources);
         Ok(state)
     }
