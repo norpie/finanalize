@@ -12,9 +12,9 @@ pub struct GenerateGraphsJob;
 pub mod models {
     use crate::graphing::{GraphData, HistogramData, PieChartData, StockChartData};
     use serde::{Deserialize, Serialize};
-
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct GraphInput {
+        pub graph_type: String,
         pub text_id: String,
         pub data: String,
         pub purpose: String,
@@ -30,26 +30,26 @@ pub mod models {
 
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct LineDataOutput {
-        pub line_chart: GraphData,
+        pub graph_data: GraphData,
     }
 
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct BarDataOutput {
-        pub bar_chart: HistogramData,
+        pub graph_data: HistogramData,
     }
 
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct PieDataOutput {
-        pub pie_chart: PieChartData,
+        pub graph_data: PieChartData,
     }
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct StockDataOutput {
-        pub stock_chart: StockChartData,
+        pub graph_data: StockChartData,
     }
 
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct TableDataOutput {
-        pub table: TableOutput,
+        pub graph_data: TableOutput,
     }
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct TableOutput {
@@ -67,11 +67,10 @@ impl Job for GenerateGraphsJob {
         let mut tables = Vec::new();
         if let Some(graphics) = state.state.graphics.clone() {
             for graphic in graphics {
-                let graph_type = &graphic.graph_type;
-                let prompt =
-                    prompting::get_prompt(format!("graph-{}-generator", graph_type.clone()))?;
+                let prompt = prompting::get_prompt("graph-data-prep".to_string())?;
                 let task = Task::new(&prompt);
                 let input = models::GraphInput {
+                    graph_type: graphic.graph_type.clone(),
                     text_id: graphic.text_id.clone(),
                     data: graphic.data_used.clone(),
                     purpose: graphic.purpose.clone(),
@@ -80,13 +79,13 @@ impl Job for GenerateGraphsJob {
                 };
                 debug!("Prepared input: {:#?}", input);
                 debug!("Running task...");
-                match graph_type.as_str() {
+                match graphic.graph_type.as_str() {
                     "line" => {
                         let output: models::LineDataOutput =
                             task.run_structured(API.clone(), &input).await?;
                         let chart = graphing::create_graph(
                             "line".to_string(),
-                            Some(output.line_chart),
+                            Some(output.graph_data),
                             None,
                             None,
                             None,
@@ -98,13 +97,13 @@ impl Job for GenerateGraphsJob {
                         };
                         charts.push(graph_file_output);
                     }
-                    "histogram" => {
+                    "bar" => {
                         let output: models::BarDataOutput =
                             task.run_structured(API.clone(), &input).await?;
                         let chart = graphing::create_graph(
-                            "histogram".to_string(),
+                            "bar".to_string(),
                             None,
-                            Some(output.bar_chart),
+                            Some(output.graph_data),
                             None,
                             None,
                         )
@@ -122,7 +121,7 @@ impl Job for GenerateGraphsJob {
                             "pie".to_string(),
                             None,
                             None,
-                            Some(output.pie_chart),
+                            Some(output.graph_data),
                             None,
                         )
                         .expect("Could not create pie chart");
@@ -140,7 +139,7 @@ impl Job for GenerateGraphsJob {
                             None,
                             None,
                             None,
-                            Some(output.stock_chart),
+                            Some(output.graph_data),
                         )
                         .expect("Could not create stock graph");
                         let graph_file_output = models::GraphFileOutput {
@@ -152,7 +151,7 @@ impl Job for GenerateGraphsJob {
                     "table" => {
                         let output: models::TableDataOutput =
                             task.run_structured(API.clone(), &input).await?;
-                        tables.push(output.table);
+                        tables.push(output.graph_data);
                     }
                     _ => {}
                 }
@@ -180,7 +179,7 @@ mod tests {
     };
 
     #[tokio::test]
-    #[ignore = "Uses LLM API (External Service)"]
+    // #[ignore = "Uses LLM API (External Service)"]
     async fn test_generate_graphs_job() {
         env_logger::init();
         dotenvy::from_filename(".env").ok();
@@ -347,40 +346,48 @@ Apple said it would pay a dividend of 25 cents per share and spent $30 billion o
                     Text {
                         id: "k".to_string(),
                         text: "Apple's stock price remained relatively stable following the earnings announcement, with a slight uptick of 3% in after-hours trading. Investors reacted positively to the company’s long-term strategy and growth forecasts, despite short-term concerns over product-specific revenue trends.".to_string(),
-                    },
-                ]).with_graphics(
-                vec![
-                    Graphic {
-                        text_id: "a".to_string(),
-                        graph_type: "line".to_string(),
-                        data_used: r#"[{"x": 1, "y": 2}, {"x": 2, "y": 3}, {"x": 3, "y": 4}, {"x": 4, "y": 5}, {"x": 5, "y": 6}, 
-                          {"x": 6, "y": 7}, {"x": 7, "y": 8}, {"x": 8, "y": 9}, {"x": 9, "y": 10}, {"x": 10, "y": 11}]"#.to_string(),
-                        purpose: "Revenue trends".to_string(),
-                        x_label: "Quarter".to_string(),
-                        y_label: "Revenue".to_string(),
-                    },
-                    Graphic {
-                        text_id: "b".to_string(),
-                        graph_type: "table".to_string(),
-                        data_used: r#"{"rows": [["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8"], 
-                                     ["$100M", "$200M", "$300M", "$400M", "$500M", "$600M", "$700M", "$800M"]], 
-                          "columns": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8"]}"#.to_string(),
-                        purpose: "Revenue comparison".to_string(),
-                        x_label: "Quarter".to_string(),
-                        y_label: "Revenue".to_string(),
-                    },
-                    Graphic {
-                        text_id: "c".to_string(),
-                        graph_type: "bar".to_string(),
-                        data_used: r#"[{"category": "Product A", "value": 500}, {"category": "Product B", "value": 700}, 
-                          {"category": "Product C", "value": 800}, {"category": "Product D", "value": 600}, 
-                          {"category": "Product E", "value": 900}]"#.to_string(),
-                        purpose: "Product sales distribution".to_string(),
-                        x_label: "Product".to_string(),
-                        y_label: "Sales".to_string(),
-                    }
-                ]
-            )
+                    },]).with_graphics(vec![
+                Graphic {
+                    graph_type: "line".to_string(),
+                    text_id: "a".to_string(),
+                    data_used: "[{\"x\": 1, \"y\": 50.2}, {\"x\": 2, \"y\": 55.8}, {\"x\": 3, \"y\": 60.4}, {\"x\": 4, \"y\": 62.1}]".to_string(),
+                    purpose: "Revenue trends for Apple in 2025".to_string(),
+                    x_label: "Quarter".to_string(),
+                    y_label: "Revenue (in billions)".to_string(),
+                },
+                Graphic {
+                    graph_type: "bar".to_string(),
+                    text_id: "b".to_string(),
+                    data_used: "[{\"x\": 1, \"y\": 12.3}, {\"x\": 2, \"y\": 14.1}, {\"x\": 3, \"y\": 15.8}, {\"x\": 4, \"y\": 17.5}]".to_string(),
+                    purpose: "Profit analysis of Apple in 2025".to_string(),
+                    x_label: "Quarter".to_string(),
+                    y_label: "Profit (in billions)".to_string(),
+                },
+                Graphic {
+                    graph_type: "table".to_string(),
+                    text_id: "c".to_string(),
+                    data_used: "{\"rows\": [[\"Q1\", \"$50B\", \"$12B\"], [\"Q2\", \"$55B\", \"$14B\"], [\"Q3\", \"$60B\", \"$15.8B\"], [\"Q4\", \"$62B\", \"$17.5B\"]], \"columns\": [\"Quarter\", \"Revenue\", \"Profit\"]}".to_string(),
+                    purpose: "Quarterly financial data for Apple in 2025".to_string(),
+                    x_label: "Quarter".to_string(),  // Represents table columns
+                    y_label: "".to_string(),  // Not used for tables
+                },
+                Graphic {
+                    graph_type: "pie".to_string(),
+                    text_id: "d".to_string(),
+                    data_used: "{\"values\": [40, 30, 20, 10], \"labels\": [\"iPhone\", \"Mac\", \"iPad\", \"Services\"]}".to_string(),
+                    purpose: "Revenue distribution by product category".to_string(),
+                    x_label: "".to_string(),  // Not used for pie charts
+                    y_label: "".to_string(),  // Not used for pie charts
+                },
+                Graphic {
+                    graph_type: "stock".to_string(),
+                    text_id: "e".to_string(),
+                    data_used: "{\"dates\": [\"2025-01-01\", \"2025-01-02\", \"2025-01-03\", \"2025-01-04\"], \"open\": [150.5, 152.3, 153.7, 155.0], \"high\": [155.2, 157.8, 159.3, 160.0], \"low\": [149.8, 151.0, 152.5, 154.2], \"close\": [154.0, 156.5, 158.2, 159.8]}".to_string(),
+                    purpose: "Apple stock performance over time".to_string(),
+                    x_label: "Date".to_string(),
+                    y_label: "Stock Price (USD)".to_string(),
+                },
+            ])
         };
         let state = job.run(state).await.unwrap();
         dbg!(state.state.charts.unwrap());
