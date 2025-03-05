@@ -12,6 +12,7 @@ pub struct GenerateGraphsJob;
 pub mod models {
     use crate::graphing::{GraphData, HistogramData, PieChartData, StockChartData};
     use serde::{Deserialize, Serialize};
+
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct GraphInput {
         pub graph_type: String,
@@ -49,8 +50,7 @@ pub mod models {
 
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct TableDataOutput {
-        pub graph_data: TableOutput,
-    }
+        pub graph_data: TableOutput,    }
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct TableOutput {
         pub caption: String,
@@ -177,6 +177,7 @@ mod tests {
         models::FullReport,
         workflow::{JobType, WorkflowState},
     };
+    use crate::models::FullReport;
 
     #[tokio::test]
     // #[ignore = "Uses LLM API (External Service)"]
