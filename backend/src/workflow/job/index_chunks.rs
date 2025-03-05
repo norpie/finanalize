@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use log::debug;
 use models::EmbeddedChunk;
+use tokio::task::JoinHandle;
 
 use crate::db::DB;
 use crate::llm::API;
@@ -27,26 +28,36 @@ pub struct IndexChunksJob;
 #[async_trait]
 impl Job for IndexChunksJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
-        let mut chunks_embeddings = vec![];
         let chunks = state.state.chunks.clone().unwrap();
         let len = chunks.len();
         debug!("Indexing chunks");
-        for (i, chunk) in chunks.iter().enumerate() {
-            debug!("Indexing chunk({}/{}): {}", i, len, chunk.source_id);
-            let embeddings = API.clone().embed(chunk.content.clone()).await?;
-            let embedded_chunk = EmbeddedChunk {
-                report_id: state.state.id.clone(),
-                source_id: chunk.source_id.clone(),
-                chunk: chunk.content.clone(),
-                embeddings,
-            };
-            chunks_embeddings.push(embedded_chunk.clone());
-            let _: Option<EmbeddedChunk> = DB
-                .get()
-                .unwrap()
-                .create("embedded_chunk")
-                .content(embedded_chunk)
-                .await?;
+        let mut handles = vec![];
+        for (i, chunk) in chunks.into_iter().enumerate() {
+            let state = state.clone();
+            let handle: JoinHandle<Result<EmbeddedChunk>> = tokio::task::spawn(async move {
+                let state = state.clone();
+                debug!("Indexing chunk({}/{}): {}", i, len, chunk.source_id);
+                let embeddings = API.clone().embed(chunk.content.clone()).await?;
+                let embedded_chunk = EmbeddedChunk {
+                    report_id: state.state.id.clone(),
+                    source_id: chunk.source_id.clone(),
+                    chunk: chunk.content.clone(),
+                    embeddings,
+                };
+                let _: Option<EmbeddedChunk> = DB
+                    .get()
+                    .unwrap()
+                    .create("embedded_chunk")
+                    .content(embedded_chunk.clone())
+                    .await?;
+                Ok(embedded_chunk)
+            });
+            handles.push(handle);
+        }
+        let mut chunks_embeddings = vec![];
+        for (i, handle) in handles.into_iter().enumerate() {
+            debug!("Waiting for chunk({}/{}): {}", i, len, state.state.id);
+            chunks_embeddings.push(handle.await??);
         }
         state.state.chunk_embeddings = Some(chunks_embeddings);
         Ok(state)
@@ -63,10 +74,7 @@ mod tests {
         db,
         models::FullReport,
         workflow::{
-            job::{
-                chunk_content::models::Chunk,
-                classify_sources::models::{ClassifiedSource, ClassifySourcesOutput},
-            },
+            job::{chunk_content::models::Chunk, classify_sources::models::ClassifiedSource},
             JobType, WorkflowState,
         },
     };
