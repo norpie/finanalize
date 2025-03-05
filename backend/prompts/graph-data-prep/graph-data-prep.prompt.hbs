@@ -1,0 +1,101 @@
+This tool will prep the data given in the input based on the `graph_type` field in the input.
+If the `graph_type` is a bar or line, the tool will return an object with the fields `x_values`, `y_values`, `caption`, `x_label`, and `y_label`.
+If the `graph_type` is a pie chart, the tool will return an object with the fields `values`, `labels`, `caption`.
+If the `graph_type` is a table, the tool will return an object with the fields `rows`, `columns`, `caption`.
+If the `graph_type` is a stock chart, the tool will return an object with the fields `dates`, `open`, `high`, `low`, `close`, `caption`.
+
+Rules for data_used Formatting:
+
+For line, bar, and histogram charts:
+data_used must contain x_values and y_values, both as arrays of numbers.
+The length of x_values must match the length of y_values.
+
+For pie charts:
+data_used must contain values (array of numbers) and labels (array of strings).
+Both arrays must have the same length, with each label corresponding to a value.
+
+For stock charts:
+data_used must contain dates, open, high, low, and close.
+All arrays must have the same length, ensuring each date corresponds to a full set of stock data.
+
+For tables:
+data_used must contain rows (nested arrays of strings) and columns (array of column names).
+Each row must have the same number of elements as the columns array.
+The x_label field contains the column names, and the y_label field is not used.
+
+Each data structure must be complete and correctly formatted to allow direct use in graph or table generation.
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "graph_data": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "x_values": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
+                        "y_values": { "type": "array", "items": { "type": "number" }, "minItems": 1 }
+                    },
+                    "required": ["x_values", "y_values"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "values": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
+                        "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+                    },
+                    "required": ["values", "labels"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "dates": { "type": "array", "items": { "type": "string", "format": "date" }, "minItems": 1 },
+                        "open": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
+                        "high": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
+                        "low": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
+                        "close": { "type": "array", "items": { "type": "number" }, "minItems": 1 }
+                    },
+                    "required": ["dates", "open", "high", "low", "close"]
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "rows": {
+                            "type": "array",
+                            "items": { "type": "array", "items": { "type": "string" } },
+                            "minItems": 1
+                        },
+                        "columns": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+                    },
+                    "required": ["rows", "columns"]
+                }
+            ]
+        }
+    },
+    "required": ["graph_data"]
+}
+
+```
+
+
+
+
+
+<Input>
+```json
+{
+"graph_type": {{{graph_type}}},
+"text_id": {{{text_id}}},
+"data": {{{data}}},
+"purpose": {{{purpose}}},
+"x_label": {{{x_label}}},
+"y_label": {{{y_label}}},
+}
+```
+</Input>
+
+<Output>
+    {
+       "graph_data": {
