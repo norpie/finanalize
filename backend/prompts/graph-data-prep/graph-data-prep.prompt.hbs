@@ -1,29 +1,29 @@
-This tool will process the given input based on the `graph_type` field and return structured data necessary to construct a valid chart or table.
-The `data` field in the input provides the values needed to generate the chart.
-The tool will extract and format these values according to predefined data structures.
-If the `data` field does not conform to these rules, the tool will reject the chart and return an empty `graph_data` output.
+This tool will prep the data given in the input based on the `graph_type` field in the input.
+If the `graph_type` is a bar or line, the tool will return an object with the fields `x_values`, `y_values`, `caption`, `x_label`, and `y_label`.
+If the `graph_type` is a pie chart, the tool will return an object with the fields `values`, `labels`, `caption`.
+If the `graph_type` is a table, the tool will return an object with the fields `rows`, `columns`, `caption`.
+If the `graph_type` is a stock chart, the tool will return an object with the fields `dates`, `open`, `high`, `low`, `close`, `caption`.
 
-Rules for Data Validation and Formatting:
+Rules for data_used Formatting:
 
-For Line and Bar Charts:
-`data` must contain x_values and y_values, both as arrays of numbers.
-If the chart is a bar chart, x_values must contain integers (rounded if necessary).
-The lengths of x_values and y_values must be equal.
-For Pie Charts:
-`data` must contain values (array of numbers) and labels (array of strings).
-values and labels must be equal in length.
-For Stock Charts:
-`data` must contain dates, open, high, low, and close.
-All arrays must have the same length.
-For Tables:
-`data` must contain rows (nested arrays of strings) and columns (array of column names).
-Each row must match the length of columns.
+For line, bar, and histogram charts:
+data_used must contain x_values and y_values, both as arrays of numbers.
+The length of x_values must match the length of y_values.
 
-Chart Rejection Criteria:
+For pie charts:
+data_used must contain values (array of numbers) and labels (array of strings).
+Both arrays must have the same length, with each label corresponding to a value.
 
-If `data` does not match the expected format for the given `graph_type`, the tool will not generate a chart.
-If the input contains missing, inconsistent, or misformatted `data`, the tool will return an empty `graph_data` output instead of an invalid chart.
-The tool must not guess or infer missing values—only valid, structured data is accepted.
+For stock charts:
+data_used must contain dates, open, high, low, and close.
+All arrays must have the same length, ensuring each date corresponds to a full set of stock data.
+
+For tables:
+data_used must contain rows (nested arrays of strings) and columns (array of column names).
+Each row must have the same number of elements as the columns array.
+The x_label field contains the column names, and the y_label field is not used.
+
+Each data structure must be complete and correctly formatted to allow direct use in graph or table generation.
 
 ```json
 {
@@ -36,21 +36,17 @@ The tool must not guess or infer missing values—only valid, structured data is
                     "type": "object",
                     "properties": {
                         "x_values": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "y_values": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "caption": { "type": "string" },
-                        "x_label": { "type": "string" },
-                        "y_label": { "type": "string" }
+                        "y_values": { "type": "array", "items": { "type": "number" }, "minItems": 1 }
                     },
-                    "required": ["x_values", "y_values", "caption", "x_label", "y_label"]
+                    "required": ["x_values", "y_values"]
                 },
                 {
                     "type": "object",
                     "properties": {
                         "values": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-                        "caption": { "type": "string" }
+                        "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
                     },
-                    "required": ["values", "labels", "caption"]
+                    "required": ["values", "labels"]
                 },
                 {
                     "type": "object",
@@ -59,10 +55,9 @@ The tool must not guess or infer missing values—only valid, structured data is
                         "open": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
                         "high": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
                         "low": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "close": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "caption": { "type": "string" }
+                        "close": { "type": "array", "items": { "type": "number" }, "minItems": 1 }
                     },
-                    "required": ["dates", "open", "high", "low", "close", "caption"]
+                    "required": ["dates", "open", "high", "low", "close"]
                 },
                 {
                     "type": "object",
@@ -72,17 +67,21 @@ The tool must not guess or infer missing values—only valid, structured data is
                             "items": { "type": "array", "items": { "type": "string" } },
                             "minItems": 1
                         },
-                        "columns": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-                        "caption": { "type": "string" }
+                        "columns": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
                     },
-                    "required": ["rows", "columns", "caption"]
+                    "required": ["rows", "columns"]
                 }
             ]
         }
     },
     "required": ["graph_data"]
 }
+
 ```
+
+
+
+
 
 <Input>
 ```json
@@ -92,7 +91,7 @@ The tool must not guess or infer missing values—only valid, structured data is
 "data": {{{data}}},
 "purpose": {{{purpose}}},
 "x_label": {{{x_label}}},
-"y_label": {{{y_label}}}
+"y_label": {{{y_label}}},
 }
 ```
 </Input>
