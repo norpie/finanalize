@@ -4,7 +4,7 @@ use plotters::prelude::*;
 use plotters::style::full_palette::{
     BLUE_400, CYAN_400, DEEPORANGE_500, GREEN_400, LIGHTBLUE_400, RED_400, YELLOW_400,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::env;
 
 #[derive(Debug)]
@@ -27,7 +27,7 @@ impl GraphType {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct GraphData {
     x_values: Vec<f32>,
     y_values: Vec<f32>,
@@ -36,7 +36,7 @@ pub struct GraphData {
     y_label: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct HistogramData {
     x_values: Vec<u32>,
     y_values: Vec<f32>,
@@ -44,14 +44,14 @@ pub struct HistogramData {
     x_label: String,
     y_label: String,
 }
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PieChartData {
     values: Vec<f64>,
     labels: Vec<String>,
     caption: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct StockChartData {
     dates: Vec<String>,
     open: Vec<f32>,
