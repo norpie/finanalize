@@ -349,22 +349,38 @@ Apple said it would pay a dividend of 25 cents per share and spent $30 billion o
                         text: "Apple's stock price remained relatively stable following the earnings announcement, with a slight uptick of 3% in after-hours trading. Investors reacted positively to the company’s long-term strategy and growth forecasts, despite short-term concerns over product-specific revenue trends.".to_string(),
                     },
                 ]).with_graphics(
-                vec![Graphic {
-                    text_id: "a".to_string(),
-                    graph_type: "line".to_string(),
-                    data_used: r#"[{"x": 1, "y": 2}, {"x": 2, "y": 3}, {"x": 3, "y": 4}, {"x": 4, "y": 5}, {"x": 5, "y": 6}]"#.to_string(),
-                    purpose: "Revenue trends".to_string(),
-                    x_label: "Quarter".to_string(),
-                    y_label: "Revenue".to_string(),
-                }, Graphic {
-                    text_id: "b".to_string(),
-                    graph_type: "table".to_string(),
-                    data_used: r#"{"rows": [["Q1", "Q2", "Q3", "Q4"], ["$100M", "$200M", "$300M", "$400M"]], "columns": ["Q1", "Q2", "Q3", "Q4"]}"#.to_string(),
-                    purpose: "Revenue comparison".to_string(),
-                    x_label: "Quarter".to_string(),
-                    y_label: "Revenue".to_string(),
-                }]
-            ),
+                vec![
+                    Graphic {
+                        text_id: "a".to_string(),
+                        graph_type: "line".to_string(),
+                        data_used: r#"[{"x": 1, "y": 2}, {"x": 2, "y": 3}, {"x": 3, "y": 4}, {"x": 4, "y": 5}, {"x": 5, "y": 6}, 
+                          {"x": 6, "y": 7}, {"x": 7, "y": 8}, {"x": 8, "y": 9}, {"x": 9, "y": 10}, {"x": 10, "y": 11}]"#.to_string(),
+                        purpose: "Revenue trends".to_string(),
+                        x_label: "Quarter".to_string(),
+                        y_label: "Revenue".to_string(),
+                    },
+                    Graphic {
+                        text_id: "b".to_string(),
+                        graph_type: "table".to_string(),
+                        data_used: r#"{"rows": [["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8"], 
+                                     ["$100M", "$200M", "$300M", "$400M", "$500M", "$600M", "$700M", "$800M"]], 
+                          "columns": ["Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8"]}"#.to_string(),
+                        purpose: "Revenue comparison".to_string(),
+                        x_label: "Quarter".to_string(),
+                        y_label: "Revenue".to_string(),
+                    },
+                    Graphic {
+                        text_id: "c".to_string(),
+                        graph_type: "bar".to_string(),
+                        data_used: r#"[{"category": "Product A", "value": 500}, {"category": "Product B", "value": 700}, 
+                          {"category": "Product C", "value": 800}, {"category": "Product D", "value": 600}, 
+                          {"category": "Product E", "value": 900}]"#.to_string(),
+                        purpose: "Product sales distribution".to_string(),
+                        x_label: "Product".to_string(),
+                        y_label: "Sales".to_string(),
+                    }
+                ]
+            )
         };
         let state = job.run(state).await.unwrap();
         dbg!(state.state.charts.unwrap());
