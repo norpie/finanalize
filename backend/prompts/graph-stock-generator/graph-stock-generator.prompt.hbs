@@ -1,0 +1,78 @@
+This tool will return an object that contains fields for the creation of a stock chart.
+The object contains the following fields: `dates`, `open`, `high`, `low`, `close`, and `caption`.
+The `dates` field is an array of date strings representing the time series.
+The `open`, `high`, `low`, and `close` fields are arrays of numbers representing the opening, highest, lowest, and closing prices corresponding to each date.
+The `caption` field is a string that provides a brief description or title for the stock chart.
+The first element in each array corresponds to the first date in the `dates` array, and so on.
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "dates": {
+            "type": "array",
+            "description": "List of date strings representing the time series.",
+            "items": {
+                "type": "string",
+                "format": "date"
+            },
+            "minItems": 1
+        },
+        "open": {
+            "type": "array",
+            "description": "List of opening prices corresponding to each date.",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 1
+        },
+        "high": {
+            "type": "array",
+            "description": "List of highest prices corresponding to each date.",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 1
+        },
+        "low": {
+            "type": "array",
+            "description": "List of lowest prices corresponding to each date.",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 1
+        },
+        "close": {
+            "type": "array",
+            "description": "List of closing prices corresponding to each date.",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 1
+        },
+        "caption": {
+            "type": "string",
+            "description": "A brief description or title for the stock chart."
+        }
+    },
+    "required": ["dates", "open", "high", "low", "close", "caption"]
+}
+```
+
+<Input>
+```json
+{
+    "text_id": {{{text_id}}},
+    "data": {{{data}}},
+    "purpose": {{{purpose}}},
+    "x_label": {{{x_label}}},
+    "y_label": {{{y_label}}},
+}
+```
+</Input>
+
+<Output>
+```json
+{
+    "stock_chart": {
