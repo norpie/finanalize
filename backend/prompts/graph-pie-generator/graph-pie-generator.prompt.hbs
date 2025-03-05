@@ -1,0 +1,54 @@
+This tool will return an object that contains fields for the creation of a pie chart. 
+The object contains the following fields: `values`, `labels`, and `caption`. 
+The values field is an array of numbers representing the sizes of the pie chart segments. 
+The labels field is an array of strings corresponding to each value, representing the categories or segments in the chart. 
+The caption field is a string that provides a brief description or title for the pie chart.
+Each value in the values array corresponds to the label at the same index in the labels array. The sum of all values represents the whole pie.
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "values": {
+            "type": "array",
+            "description": "List of numerical values representing the pie chart segments.",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 1
+        },
+        "labels": {
+            "type": "array",
+            "description": "List of labels corresponding to each value in the pie chart.",
+            "items": {
+                "type": "string"
+            },
+            "minItems": 1
+        },
+        "caption": {
+            "type": "string",
+            "description": "A brief description or title for the pie chart."
+        }
+    },
+    "required": ["values", "labels", "caption"]
+}
+```
+
+<Input>
+```json
+{
+    "text_id": {{{text_id}}},
+    "data": {{{data}}},
+    "purpose": {{{purpose}}},
+    "x_label": {{{x_label}}},
+    "y_label": {{{y_label}}},
+}
+```
+</Input>
+
+<Output>
+```json
+{
+    "pie_chart": {
+
