@@ -329,7 +329,7 @@ mod tests {
             x_label: "x-values".to_string(),
             y_label: "y-values".to_string(),
         };
-        assert!(create_graph("scatter".to_string(), Some(graph_data), None, None, None).is_ok());
+        assert!(create_graph("line".to_string(), Some(graph_data), None, None, None).is_ok());
     }
 
     #[test]
