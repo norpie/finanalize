@@ -4,6 +4,15 @@ It selects from a predefined list of chart types and suggests a table if it's mo
 For each recommendation, the tool specifies the type, purpose, data used, and axis assignment.
 The `data_used` field contains all the necessary data to construct the graphic.
 
+Here are some formatting rules to be considered by the tool:
+
+- Line and Bar Charts: `data_used` must contain x_values and y_values as arrays of numbers, both represented in the same string and with the same length.
+Bar charts have integers as x_values, not floating-point numbers.
+- Pie Charts: `data_used` must contain values and labels as arrays of numbers and strings, respectively. Both are representend in the same string and have the same length.
+- Stock Charts: `data_used` must contain dates, open, high, low, and close as arrays, represented in the same string.
+All arrays must have the same length and are all represented in the same string.
+- Tables: `data_used` must contain rows as nested arrays of strings or numbers and columns as an array of column names. Each row must match the length of columns.
+
 Output schema:
 ```json
 {
