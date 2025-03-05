@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::classify_sources::models::ClassifiedSource;
+use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
     job::{
@@ -11,7 +12,9 @@ use crate::workflow::{
     },
     JobType,
 };
-use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -326,6 +329,7 @@ mod tests {
             self.chunks = Some(chunks);
             self
         }
+
         pub fn with_graphics(mut self, graphics: Vec<Graphic>) -> Self {
             self.graphics = Some(graphics);
             self
