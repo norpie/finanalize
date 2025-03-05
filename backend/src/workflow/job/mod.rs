@@ -23,6 +23,7 @@ pub mod sub_section_questions;
 pub mod sub_sections;
 pub mod title;
 pub mod validation;
+pub mod generate_graphs;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
