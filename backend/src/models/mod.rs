@@ -1,7 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
-
 use crate::extractors::Data;
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::classify_sources::models::ClassifiedSource;
@@ -13,6 +12,7 @@ use crate::workflow::{
     },
     JobType,
 };
+use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -145,6 +145,8 @@ pub struct FullSDBReport {
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
+    pub charts: Option<Vec<GraphFileOutput>>,
+    pub tables: Option<Vec<TableOutput>>
 }
 
 impl From<FullSDBReport> for FullReport {
@@ -175,6 +177,8 @@ impl From<FullSDBReport> for FullReport {
             report: report.report,
             texts: report.texts,
             graphics: report.graphics,
+            charts: report.charts,
+            tables: report.tables,
         }
     }
 }
@@ -212,6 +216,8 @@ pub struct FullReport {
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
+    pub charts: Option<Vec<GraphFileOutput>>,
+    pub tables: Option<Vec<TableOutput>>
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -226,14 +232,18 @@ pub struct FrontendReport {
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
-
     use super::{FullReport, PreClassificationSource};
     use crate::workflow::job::classify_sources::models::ClassifiedSource;
-    use crate::workflow::job::graphic_identifier::models::Text;
     use crate::workflow::{
         job::{chunk_content::models::Chunk, validation::models::ValidationOutput},
         JobType,
     };
+    use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
+    use crate::workflow::{job::{
+        chunk_content::models::Chunk,
+        validation::models::ValidationOutput,
+    }, JobType};
+
 
     impl FullReport {
         pub fn new(id: String, user_input: String) -> Self {
@@ -267,6 +277,8 @@ mod tests {
                 report: None,
                 texts: None,
                 graphics: None,
+                charts: None,
+                tables: None
             }
         }
 
@@ -330,6 +342,11 @@ mod tests {
 
         pub fn with_chunks(mut self, chunks: Vec<Chunk>) -> Self {
             self.chunks = Some(chunks);
+            self
+        }
+        
+        pub fn with_graphics(mut self, graphics: Vec<Graphic>) -> Self {
+            self.graphics = Some(graphics);
             self
         }
     }
