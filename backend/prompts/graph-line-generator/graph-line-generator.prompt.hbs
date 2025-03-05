@@ -1,0 +1,61 @@
+This tool will return an object that contains fields for the creation of a line chart.
+The object contains the following fields: `x_values`, `y_values`, `caption`, `x_label`, and `y_label`.
+The `x_values` field is an array of numbers representing the data points along the X-axis.
+The `y_values` field is an array of numbers representing the corresponding data points along the Y-axis.
+The `caption` field is a string that provides a brief description or title for the line chart.
+The `x_label` and `y_label` fields are strings representing the labels for the X-axis and Y-axis, respectively.
+Each value in the `x_values` array corresponds to the value at the same index in the `y_values` array.
+
+```json
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "properties": {
+        "x_values": {
+            "type": "array",
+            "description": "List of numerical values for the X-axis.",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 1
+        },
+        "y_values": {
+            "type": "array",
+            "description": "List of numerical values for the Y-axis.",
+            "items": {
+                "type": "number"
+            },
+            "minItems": 1
+        },
+        "caption": {
+            "type": "string",
+            "description": "A brief description or title for the graph.",
+        },
+        "x_label": {
+            "type": "string",
+            "description": "Label for the X-axis.",
+        },
+        "y_label": {
+            "type": "string",
+            "description": "Label for the Y-axis.",
+        }
+    },
+    "required": ["x_values", "y_values", "caption", "x_label", "y_label"]
+}
+```
+
+<Input>
+```json
+{
+    "text_id": {{{text_id}}},
+    "data": {{{data}}},
+    "purpose": {{{purpose}}},
+    "x_label": {{{x_label}}},
+    "y_label": {{{y_label}}},
+}
+```
+</Input>
+
+<Output>
+    {
+        "line_chart": {
