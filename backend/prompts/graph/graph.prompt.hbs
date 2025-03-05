@@ -2,6 +2,10 @@ This tool analyzes a given text and recommends charts or tables to effectively v
 A table or chart is not needed if the graphic does not add value to the text (empty `graphics` output).
 It selects from a predefined list of chart types and suggests a table if it's more suitable.
 For each recommendation, the tool specifies the type, purpose, data used, and axis assignment.
+The `data_used` field is a full description of the data that has to be used to create the graphic.
+This means that all the data needed to construct the graphic is included in this field.
+If the type of graphic is a table, the `data_used` field will contain all the elements needed to construct the rows of the table,
+and the `x_label` field contains all the columns for the table. The `y_label` field is not used in this case.
 
 Output schema:
 ```json
