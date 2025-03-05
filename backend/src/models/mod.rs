@@ -238,7 +238,10 @@ mod tests {
     use super::{FullReport, PreClassificationSource};
     use crate::workflow::job::classify_sources::models::ClassifiedSource;
     use crate::workflow::{
-        job::{chunk_content::models::Chunk, validation::models::ValidationOutput},
+        job::{
+            chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
+            validation::models::ValidationOutput,
+        },
         JobType,
     };
     use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
