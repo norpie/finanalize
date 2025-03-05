@@ -64,7 +64,6 @@ impl Job for GraphIdentifierJob {
                         "line".to_string(),
                         "bar".to_string(),
                         "pie".to_string(),
-                        "scatter".to_string(),
                         "stock".to_string(),
                     ],
                     text: text.text.clone(),
