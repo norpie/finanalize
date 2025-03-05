@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::classify_sources::models::ClassifiedSource;
+use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
     job::{
@@ -11,7 +12,6 @@ use crate::workflow::{
     },
     JobType,
 };
-use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -142,7 +142,7 @@ pub struct FullSDBReport {
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
     pub charts: Option<Vec<GraphFileOutput>>,
-    pub tables: Option<Vec<TableOutput>>
+    pub tables: Option<Vec<TableOutput>>,
 }
 
 impl From<FullSDBReport> for FullReport {
@@ -207,7 +207,7 @@ pub struct FullReport {
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
     pub charts: Option<Vec<GraphFileOutput>>,
-    pub tables: Option<Vec<TableOutput>>
+    pub tables: Option<Vec<TableOutput>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -229,10 +229,6 @@ mod tests {
         JobType,
     };
     use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
-    use crate::workflow::{job::{
-        chunk_content::models::Chunk,
-        validation::models::ValidationOutput,
-    }, JobType};
 
 
     impl FullReport {
@@ -265,7 +261,7 @@ mod tests {
                 texts: None,
                 graphics: None,
                 charts: None,
-                tables: None
+                tables: None,
             }
         }
 
@@ -331,7 +327,7 @@ mod tests {
             self.chunks = Some(chunks);
             self
         }
-        
+
         pub fn with_graphics(mut self, graphics: Vec<Graphic>) -> Self {
             self.graphics = Some(graphics);
             self
