@@ -203,7 +203,6 @@ mod tests {
     use super::FullReport;
     use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
     use crate::workflow::{
-        job,
         job::{
             chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
             validation::models::ValidationOutput,
