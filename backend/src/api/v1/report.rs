@@ -2,12 +2,14 @@ use crate::api::ApiResponse;
 use crate::db::SurrealDb;
 use crate::jwt::TokenFactory;
 use crate::models::{
-    FullReport, FullSDBReport, Report, ReportCreation, SurrealDBReport, SurrealDBUser,
+    FrontendReport, FullReport, FullSDBReport, Report, ReportCreation, SurrealDBReport,
+    SurrealDBUser,
 };
 use crate::prelude::FinanalizeError;
 use crate::prelude::*;
 use crate::rabbitmq::PUBLISHER;
-use crate::workflow::{JobType, WorkflowState};
+use crate::workflow::{JobType, SDBWorkflowState, WorkflowState};
+use actix_files::NamedFile;
 use actix_web::web::{self, Data, Json, Path};
 use actix_web::{get, post, rt, HttpRequest, Responder};
 use actix_ws::Message;
@@ -88,50 +90,46 @@ pub struct Source {
 
 #[get("/reports/{report_id}")]
 pub async fn get_report(
-    _user: SurrealDBUser,
-    _db: Data<SurrealDb>,
-    _report_id: Path<String>,
+    user: SurrealDBUser,
+    db: Data<SurrealDb>,
+    report_id: Path<String>,
 ) -> Result<impl Responder> {
-    // let report = db
-    //     .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
-    //     .bind(("user", user.id))
-    //     .bind(("report", Thing::from(("report", report_id.as_str()))))
-    //     .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
-    //
-    // let verdict = db
-    //     .query("SELECT * FROM (SELECT ->has_verdict->report_verdict as verdicts FROM $report FETCH verdicts).verdicts[0];")
-    //     .bind(("report", report.id.clone()))
-    //     .await?.take::<Option<Verdict>>(0)?;
-    //
-    // let title = db
-    //     .query("SELECT * FROM (SELECT ->has_title->report_title as titles FROM $report FETCH titles).titles[0]")
-    //     .bind(("report", report.id.clone()))
-    //     .await?.take::<Option<String>>((0, "title"))?;
-    //
-    // let headings = db
-    //     .query("SELECT * FROM (SELECT ->has_paragraph->paragraph as paragraphs FROM $report FETCH paragraphs)[0].paragraphs")
-    //     .bind(("report", report.id.clone()))
-    //     .await?.take::<Vec<Heading>>(0)?;
-    //
-    // let searches = db
-    //     .query("SELECT * FROM (SELECT ->has_search_query->search_query as searches FROM $report FETCH searches)[0].searches")
-    //     .bind(("report", report.id.clone()))
-    //     .await?.take::<Vec<Query>>(0)?;
-    //
-    // let sources = db
-    //     .query("SELECT * FROM (SELECT ->has_search_result->search_result as sources FROM $report FETCH sources)[0].sources")
-    //     .bind(("report", report.id.clone()))
-    //     .await?.take::<Vec<Source>>(0)?;
-    //
-    // Ok(ApiResponse::new(FullReport {
-    //     report: Report::from(report),
-    //     verdict,
-    //     title,
-    //     headings,
-    //     searches,
-    //     sources,
-    // }))
-    Ok(ApiResponse::new("disabled"))
+    let db_report_id = Thing::from(("report", report_id.as_str()));
+    let _report = db
+        .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
+        .bind(("user", user.id.clone()))
+        .bind(("report", db_report_id.clone()))
+        .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
+    debug!("Report: {:#?}", _report);
+
+    let workflow_state_id_thing: Thing = ("workflow_state", report_id.as_str()).into();
+
+    let workflow_state = db
+        .query("SELECT * FROM $workflow_state")
+        .bind(("workflow_state", workflow_state_id_thing))
+        .await?
+        .take::<Option<SDBWorkflowState>>(0)?
+        .ok_or(FinanalizeError::NotFound)?;
+
+    let user_input = workflow_state.state.user_input.clone();
+    let status = workflow_state.state.status.clone();
+    let title = workflow_state.state.title.clone();
+    let (valid, error) = workflow_state
+        .state
+        .validation
+        .map(|validation| (validation.valid, validation.error))
+        .unwrap_or((
+            false,
+            Some("Validation has not been performed yet.".to_string()),
+        ));
+    let frontend_report = FrontendReport {
+        user_input,
+        status,
+        title,
+        valid: Some(valid),
+        error,
+    };
+    Ok(ApiResponse::new(frontend_report))
 }
 
 #[post("/reports/{report_id}/retry")]
@@ -187,6 +185,30 @@ struct AuthQuery {
     bearer: String,
 }
 
+#[get("/reports/{report_id}/document.pdf")]
+pub async fn get_document(
+    db: Data<SurrealDb>,
+    report_id: Path<String>,
+) -> Result<impl Responder> {
+    let workflow_state_id_thing: Thing = ("workflow_state", report_id.as_str()).into();
+    dbg!("here");
+    let workflow_state = db
+        .query("SELECT * FROM $workflow_state")
+        .bind(("workflow_state", workflow_state_id_thing))
+        .await?
+        .take::<Option<SDBWorkflowState>>(0)?
+        .ok_or(FinanalizeError::NotFound)?;
+    dbg!("here2");
+
+    let Some(src) = workflow_state.state.report.clone() else {
+        dbg!("here3");
+        return Err(FinanalizeError::NotFound);
+    };
+    dbg!("here4");
+    let report = NamedFile::open_async(src).await?;
+    Ok(report)
+}
+
 #[get("/live/reports/{report_id}")]
 pub async fn get_live_report(
     req: HttpRequest,
@@ -211,8 +233,10 @@ pub async fn get_live_report(
     let (res, mut session, mut ws) = actix_ws::handle(&req, stream)?;
 
     let db = db.get_ref().clone();
-    let mut stream: surrealdb::method::Stream<Option<SurrealDBReport>> =
-        db.select(("report", report_id.as_str())).live().await?;
+    let mut stream: surrealdb::method::Stream<Option<SDBWorkflowState>> = db
+        .select(("workflow_state", report_id.as_str()))
+        .live()
+        .await?;
 
     rt::spawn(async move {
         debug!("starting live query stream");
@@ -223,8 +247,15 @@ pub async fn get_live_report(
             };
             debug!("update");
             let report = &notification.data;
+            let frontend_report = FrontendReport {
+                user_input: report.state.user_input.clone(),
+                status: report.state.status.clone(),
+                title: report.state.title.clone(),
+                valid: Some(report.state.validation.clone().unwrap().valid),
+                error: None,
+            };
             session
-                .text(serde_json::to_string_pretty(&report.status).unwrap())
+                .text(serde_json::to_string_pretty(&frontend_report).unwrap())
                 .await
                 .unwrap();
         }
