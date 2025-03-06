@@ -42,4 +42,5 @@ pdf-extract = "0.8.2"
 actix-ws = "0.3.0"
 itertools = "0.14.0"
 plotters = "0.3.7"
+actix-files = "0.6.6"
 
