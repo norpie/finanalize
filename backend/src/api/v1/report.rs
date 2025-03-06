@@ -112,7 +112,7 @@ pub async fn get_report(
         .ok_or(FinanalizeError::NotFound)?;
 
     let user_input = workflow_state.state.user_input.clone();
-    let status = workflow_state.state.status.clone();
+    let status = workflow_state.state.status;
     let title = workflow_state.state.title.clone();
     let (valid, error) = workflow_state
         .state
@@ -249,7 +249,7 @@ pub async fn get_live_report(
             let report = &notification.data;
             let frontend_report = FrontendReport {
                 user_input: report.state.user_input.clone(),
-                status: report.state.status.clone(),
+                status: report.state.status,
                 title: report.state.title.clone(),
                 valid: Some(report.state.validation.clone().unwrap().valid),
                 error: None,
