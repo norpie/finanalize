@@ -134,7 +134,7 @@ pub fn get_commands(components: Vec<LatexComponent>) -> Result<Vec<LatexCommand>
             }
             LatexComponent::Citation(citation_key) => {
                 commands.push(LatexCommand {
-                    command: format!(r"\textcite{{{}}}", citation_key.clone()),
+                    command: format!(r"\cite{{{}}}", citation_key.clone()),
                     args: "".to_string(),
                 });
             }
@@ -305,7 +305,7 @@ fn format_table_command(table: &Table, is_column: bool) -> LatexCommand {
 }
 
 fn escape_special_chars(input: String) -> String {
-    let special_chars: &[char] = &['&', '%', '$', '#', '_', '{', '}', '~', '^', '€', '\\'];
+    let special_chars: &[char] = &['&', '%', '$', '#', '_', '~', '^', '€'];
     let mut escaped = String::with_capacity(input.len());
     for ch in input.chars() {
         if special_chars.contains(&ch) {
