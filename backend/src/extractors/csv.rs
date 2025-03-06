@@ -36,14 +36,14 @@ impl DataExtract for CsvExtractor {
         for col_name in df.get_column_names() {
             markdown_table.push_str(&format!("{} | ", col_name));
         }
-        markdown_table.push_str("\n");
+        markdown_table.push('\n');
 
         // Generate the separator row
         markdown_table.push_str("| ");
         for _ in df.get_column_names() {
             markdown_table.push_str("--- | ");
         }
-        markdown_table.push_str("\n");
+        markdown_table.push('\n');
 
         // Generate the data rows
         for i in 0..5 {
@@ -52,7 +52,7 @@ impl DataExtract for CsvExtractor {
                 let value = col.get(i).unwrap_or_default().to_string();
                 markdown_table.push_str(&format!("{} | ", value));
             }
-            markdown_table.push_str("\n");
+            markdown_table.push('\n');
         }
 
         //Use ClassifySourceInput and put the table in it
