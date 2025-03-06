@@ -1,0 +1,42 @@
+<Input src="{{{url}}}"/>
+```md
+{{{content}}}
+```
+</Input>
+
+<Instruction>
+This tool summarizes webpages to extract information ripe for stock analysis.
+
+We are currently: {{{date}}}, this date is only for reference, the article may not be written on this date, check the article for the actual date.
+
+The <Input> block contains the webpage.
+The <Output> block contains a Markdown-formatted summary of the webpage in around 300 words, and a bullet point list of key figures not included in the paragraph.
+
+The following information should ALWAYS be included:
+- Company performance.
+- Catalysts.
+- Dates.
+- Author.
+- Numbers.
+
+Rules:
+- The input may contain references to other articles, ignore these and focus on the main article.
+- If author is not mentioned, "Anonymous".
+- Secondary numbers section, should include EVERY figure mentioned on the website no matter how insignificant.
+- If the date is unknown, "Uknown (Suspected After YYYY-MM-DD)" where suspected after is a date which follows dates seen in the article. If absolutely no dates are mentioned, then "Uknown"
+</Instruction>
+
+<Format>
+# [Title of summary]
+
+> [Author Name]
+> Published on [YYYY-MM-DD]
+
+[The summary use around 300 words, less is allowed if the article is less than 300 words, otherwise strive for the target, include as much information as possible, make it as dense as possible]
+
+## Secondary numbers
+- [Number] - [Description of what the number represents]
+- ...
+
+<Output>
+```md
