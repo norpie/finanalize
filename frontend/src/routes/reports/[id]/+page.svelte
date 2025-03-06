@@ -36,6 +36,7 @@
         socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             console.log(data);
+            report = data;
         }
         socket.onerror = (event) => {
             console.error(event);
@@ -67,20 +68,15 @@
         }
     }
 
-    interface FullReport {
-        report: {
-            id: string;
-            user_input: string;
-            status: string;
-            created_at: string;
-            updated_at: string;
-        };
-        verdict: { valid: boolean; justification: string } | undefined;
-        title: string | undefined;
-        headings: { heading: string; paragraphs: string[] }[] | undefined;
-        searches: { query: string }[] | undefined;
-        sources: { url: string }[] | undefined;
+    interface FrontendReport {
+        title?: string;
+        user_input: string;
+        status: string;
+        error?: string;
+        valid?: boolean;
+        src?: string;
     }
+
 
     const startStatuses = ['Pending'];
     const endStatuses = ['Invalid', 'Done'];
@@ -88,11 +84,18 @@
     const knownStatuses = [
         'Validation',
         'GenerateTitle',
-        'GenerateSectionHeadings',
-        'GenerateParagraphBullets',
+        'GenerateSectionNames',
+        'GenerateSubSectionNames',
+        'GenerateSubSectionQuestions',
         'GenerateSearchQueries',
         'SearchQueries',
-        'ScrapeTopResults'
+        'ScrapeTopResults',
+        'ExtractContent',
+        'ClassifyContent',
+        'ChunkContent',
+        'IndexChunks',
+        'AnswerQuestions',
+        'RenderLaTeXPdf',
     ]
 
     function statusColor(status: string) {
@@ -107,7 +110,7 @@
         } else {
             return 'bg-blue-500';
         }
-    };
+    }
 
     function progress(status: string) {
         return (knownStatuses.indexOf(status) / knownStatuses.length) * 100;
@@ -123,25 +126,21 @@
         }
     }
 
-    let created_at = $state(new Date());
     let verdict = $state('N/A');
 
     $effect(() => {
         if (report) {
-            if (report.report) {
-                created_at = new Date(report.report.created_at);
-            }
-            if (report.verdict) {
-                verdict = report.verdict.valid ? 'Valid' : 'Invalid';
+            if (report.valid) {
+                verdict = report.valid ? 'Valid' : 'Invalid';
             }
         }
     });
 
-    let report: FullReport | undefined = $state();
+    let report: FrontendReport | undefined = $state();
     let interval: number | null = $state(null);
 
     async function refreshReport() {
-        const result = await get<FullReport>(`v1/protected/reports/${data.id}`);
+        const result = await get<FrontendReport>(`v1/protected/reports/${data.id}`);
         if (result.result) {
             report = result.result;
             // toast.success('Report has been refreshed');
@@ -151,7 +150,7 @@
     }
 
     onMount(async () => {
-        //await refreshReport();
+        await refreshReport();
         // Start timer to refresh the report every 5 seconds
         // interval = setInterval(async () => {
         //     await refreshReport();
@@ -172,92 +171,48 @@
     <Button onclick={retry}>Retry</Button>
 </div>
 {#if report}
-    <div class="flex flex-row">
-        <div class="m-4 mb-4 max-w-[50%] p-4">
-            <h1 class="text-center text-2xl font-bold">{report.title ?? 'Untitled Report'}</h1>
-            <div id="badges" class="flex flex-wrap gap-2">
-                <Badge class={statusColor(report.report.status)}>{report.report.status}</Badge>
-                <Badge>N/A Credits</Badge>
-                <Badge>{created_at}</Badge>
-                <Badge class={verdictColor(verdict)}>Verdict: {verdict}</Badge>
+    <div class="flex justify-center p-4">
+    <Card.Root class="w-full max-w-3xl bg-gray-900 text-white shadow-lg rounded-lg p-6">
+        <!-- Report Title -->
+        <Card.Title class="text-xl font-bold text-white mb-4">
+           Title: {report.title ?? 'Untitled Report'}
+        </Card.Title>
+
+        <Card.Content>
+            <div class="flex flex-wrap gap-3 items-center mb-4">
+                <Badge class={"px-3 py-1 rounded-full text-sm font-medium " + statusColor(report.status)}>
+                    {report.status}
+                </Badge>
+                <Badge class={"px-3 py-1 rounded-full text-sm font-medium " + verdictColor(verdict)}>
+                    Verdict: {verdict}
+                </Badge>
             </div>
-            <p>Requested subject: {report.report.user_input}</p>
-            {#if verdict == 'Invalid'}
-                <p>Verdict: {verdict}</p>
-                <p>Justification: {report.verdict?.justification}</p>
+
+            <p class="text-gray-300 text-sm mb-2">
+                <span class="font-semibold">Requested subject:</span> {report.user_input}
+            </p>
+
+            {#if verdict === 'Invalid'}
+                <p class="text-red-400 text-sm">
+                    <span class="font-semibold">Justification:</span> {report.error}
+                </p>
             {/if}
-            {#if report.report.status !== 'Done' && report.report.status !== 'Invalid'}
-                <Progress value={progress(report.report.status)} max={100} class="mb-4 w-[100%]"/>
+
+            {#if report.status !== 'Done' && report.status !== 'Invalid'}
+                <div class="w-full bg-gray-700 rounded-full h-2.5 mt-4 relative">
+                    <div class="bg-blue-500 h-2.5 rounded-full transition-all" style="width: {progress(report.status)}%"></div>
+
+                    <div class="absolute inset-0 flex items-center justify-center text-xs font-semibold text-white">
+                        {Math.round(progress(report.status))}%
+                    </div>
+                </div>
+            {:else}
+                <iframe  width="800" height="600" title={report.title} src={`${import.meta.env.VITE_BACKEND_URL}/v1/unprotected/reports/${data.id}/document.pdf`}/>
             {/if}
-            <Card.Root>
-                <Card.Content class="p-4">
-                    {#if report.headings && report.headings.length !== 0}
-                        {#each report.headings as heading, i (i)}
-                            <h3 class="mb-4 text-lg font-bold">{heading.heading}</h3>
-                            {#each heading.paragraphs as paragraph, j (j)}
-                                <p class="mb-4">{paragraph}</p>
-                            {/each}
-                        {/each}
-                    {:else}
-                        {#each Array(3) as _, i}
-                            <Skeleton class="mb-2 h-6 w-[500px] p-6"/>
-                            {#each Array(3) as _, j}
-                                <Skeleton class="mb-1 h-4 w-[300px] p-4"/>
-                                <Skeleton class="mb-1 h-4 w-[250px] p-4"/>
-                                <Skeleton class="mb-1 h-4 w-[200px] p-4"/>
-                            {/each}
-                        {/each}
-                    {/if}
-                </Card.Content>
-            </Card.Root>
-        </div>
-        <div class="max-w-[50%] p-4">
-            <Card.Root>
-                <Card.Header>
-                    <Card.Title>Search Queries</Card.Title>
-                </Card.Header>
-                <Card.Content>
-                    {#if report.searches && report.searches.length !== 0}
-                        <ScrollArea>
-                            <ul class="list-inside list-disc">
-                                {#each report.searches as search, i (i)}
-                                    <li>{search.query}</li>
-                                {/each}
-                            </ul>
-                        </ScrollArea>
-                    {:else}
-                        {#each Array(3) as _, i}
-                            <Skeleton class="mb-1 h-4 w-[300px] p-4"/>
-                            <Skeleton class="mb-1 h-4 w-[250px] p-4"/>
-                            <Skeleton class="mb-1 h-4 w-[200px] p-4"/>
-                        {/each}
-                    {/if}
-                </Card.Content>
-            </Card.Root>
-            <Card.Root>
-                <Card.Header>
-                    <Card.Title>Sources</Card.Title>
-                </Card.Header>
-                <Card.Content>
-                    {#if report.sources && report.sources.length !== 0}
-                        <ScrollArea>
-                            <ul class="list-inside list-disc">
-                                {#each report.sources as source, i (i)}
-                                    <li>{source.url}</li>
-                                {/each}
-                            </ul>
-                        </ScrollArea>
-                    {:else}
-                        {#each Array(3) as _, i}
-                            <Skeleton class="mb-1 h-4 w-[300px] p-4"/>
-                            <Skeleton class="mb-1 h-4 w-[250px] p-4"/>
-                            <Skeleton class="mb-1 h-4 w-[200px] p-4"/>
-                        {/each}
-                    {/if}
-                </Card.Content>
-            </Card.Root>
-        </div>
-    </div>
+
+        </Card.Content>
+    </Card.Root>
+</div>
 {:else}
     <div class="flex h-screen w-full items-center justify-center">
         <Spinner/>
