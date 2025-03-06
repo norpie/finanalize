@@ -2,7 +2,7 @@ use crate::prelude::*;
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-// pub mod csv;
+pub mod csv;
 pub mod figure;
 pub mod html;
 pub mod md;
@@ -19,7 +19,7 @@ pub enum Content {
     Html(String),
     Text(String),
     Figures(Vec<Figure>),
-    // Csv(String),
+    Csv(String),
     MarkDown(String),
     Pdf(Vec<u8>),
 }
@@ -28,7 +28,7 @@ pub enum FileType {
     Html(String),
     Text(String),
     Figures(Vec<Figure>),
-    // Csv(String),
+    Csv(String),
     MarkDown(String),
     Pdf(Vec<u8>),
 }
