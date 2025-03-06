@@ -1,4 +1,4 @@
-use crate::{db::DB, models::FullReport, prelude::*, rabbitmq::PUBLISHER};
+use crate::{db::DB_HTTP, models::FullReport, prelude::*, rabbitmq::PUBLISHER};
 
 use lapin::{message::Delivery, options::BasicPublishOptions, BasicProperties, Channel};
 use log::debug;
@@ -33,19 +33,25 @@ pub mod job;
 
 pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Result<()> {
     let workflow_state: WorkflowState = serde_json::from_slice(&delivery.data)?;
-    let output = process_state(workflow_state).await?;
+    let output = process_state(workflow_state.clone()).await?;
+    // If it's not done, publish the next job
+    let mut tbs_clone = output.clone();
+    tbs_clone.state.sources = None;
+    tbs_clone.state.md_sources = None;
+    tbs_clone.state.html_sources = None;
+    tbs_clone.state.chunks = None;
+    tbs_clone.state.chunk_embeddings = None;
+    let saved: SDBWorkflowState = DB_HTTP
+        .get()
+        .unwrap()
+        .upsert(("workflow_state", &output.id))
+        .content(tbs_clone)
+        .await?
+        .ok_or(FinanalizeError::NotFound)?;
     if output.state.status.next().is_none() {
         debug!("Workflow for report {} is done", output.id);
         return Ok(());
     }
-    // If it's not done, publish the next job
-    let saved: SDBWorkflowState = DB
-        .get()
-        .unwrap()
-        .upsert(("workflow_state", &output.id))
-        .content(output)
-        .await?
-        .ok_or(FinanalizeError::NotFound)?;
     debug!("Saved workflow state for report {}", saved.id);
     let publisher = PUBLISHER.get().unwrap();
     publisher
@@ -54,7 +60,7 @@ pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Re
             "",
             publisher.queue.name().as_str(),
             BasicPublishOptions::default(),
-            serde_json::to_string(&WorkflowState::from(saved))?.as_bytes(),
+            serde_json::to_string(&output)?.as_bytes(),
             BasicProperties::default(),
         )
         .await?;
@@ -66,11 +72,20 @@ pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Re
 }
 
 async fn process_state(mut state: WorkflowState) -> Result<WorkflowState> {
+    if state.state.status == JobType::Done {
+        debug!("report is already done {}", &state.id);
+        return Ok(state);
+    }
     let Some(next_type) = state.last_job_type.next() else {
         state.state.status = JobType::Done;
         debug!("No more jobs to run for report {}", &state.id);
         return Ok(state);
     };
+    if next_type == JobType::Done {
+        state.state.status = JobType::Done;
+        debug!("No more jobs to run for report {}", &state.id);
+        return Ok(state);
+    }
     let Some(next_job) = next_type.job() else {
         state.state.status = JobType::Invalid;
         debug!("No job for type {:?}", next_type);
