@@ -14,7 +14,7 @@ use api::{
     ApiResponse,
 };
 use auth_middleware::Auth;
-use db::DB;
+use db::{DB, DB_HTTP};
 use jwt::TokenFactory;
 use rabbitmq::RabbitMQPublisher;
 
@@ -54,7 +54,9 @@ async fn main() -> Result<()> {
     let token_factory: TokenFactory = "secret".into();
 
     let db = db::connect().await?;
+    let db_http = db::connect_http().await?;
     DB.set(db.clone()).unwrap();
+    DB_HTTP.set(db_http).unwrap();
 
     RabbitMQPublisher::setup().await?;
 
