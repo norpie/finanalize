@@ -27,7 +27,11 @@ pub mod models {
     }
 
     impl ClassifiedSource {
-        pub fn from_id(id: String, value: ClassifySourcesOutput, pre: PreClassificationSource) -> Self {
+        pub fn from_id(
+            id: String,
+            value: ClassifySourcesOutput,
+            pre: PreClassificationSource,
+        ) -> Self {
             Self {
                 id,
                 title: value.title,
@@ -79,7 +83,11 @@ impl Job for ClassifySourcesJob {
                     serde_json::to_string_pretty(&schema_for!(ClassifySourcesOutput))?,
                 )
                 .await?;
-            sources.push(ClassifiedSource::from_id(format!("website{}", i), output, source));
+            sources.push(ClassifiedSource::from_id(
+                format!("website{}", i),
+                output,
+                source,
+            ));
         }
         state.state.sources = Some(sources);
         Ok(state)

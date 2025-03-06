@@ -61,7 +61,7 @@ mod tests {
 
     use crate::{
         db,
-        models::{FullReport, PreClassificationSource},
+        models::FullReport,
         workflow::{
             job::{chunk_content::models::Chunk, classify_sources::models::ClassifiedSource},
             JobType, WorkflowState,
