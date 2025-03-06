@@ -22,8 +22,6 @@ pub enum FinanalizeError {
     MissingPromptFile(String),
     #[error("Missing prompt UTF-8: {0}")]
     MissingPromptUTF8(String),
-    #[error("Invalid state: {0}")]
-    InvalidState(String),
 
     #[error("Scraper timed out on page: {0}")]
     ScraperTimemout(String),
