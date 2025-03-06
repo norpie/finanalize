@@ -1,6 +1,10 @@
-This tool generates 1-5 sub-section titles per section of the report given: user's request, title of the article, and the section titles.
-Sub-section amount can vary depending on the length of the section (intro might only have 1-2, whereas the core sections might have the full 5).
+This tool generates 1-3 sub-section titles per section of the report given: user's request, title of the article, and the section titles.
+Generate structured sub-section names for a stock analysis based on the given query.
+Sub-section amount can vary depending on the length of the section (intro and conclusions will only have one, whereas the core sections might have the full 3).
+Make sure to still give the intro and conclusion sections a sub-section title, even if they are not as detailed.
 Sub-section titles should be detailed and informative, but not too long.
+We do not do predictions, avoid any future-oriented sections. Avoid unnecessary formatting.
+The output is an array `sections` containing section objects, which contain a section title, and `subSections` array of strings.
 
 <Input>
 ```json
