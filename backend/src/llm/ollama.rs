@@ -26,7 +26,9 @@ impl Default for Ollama {
         }
         Self {
             client: reqwest::Client::new(),
-            completion_model: "qwen2.5-coder:32b".to_string(),
+            // completion_model: "qwen2.5-coder:32b".to_string(),
+            // completion_model: "llama3.2:latest".to_string(),
+            completion_model: "llama3.1:latest".to_string(),
             embed_model: "nomic-embed-text".to_string(),
             base_url,
         }
@@ -59,12 +61,18 @@ pub struct OllamaCompletionResponse {
     response: String,
 }
 
+fn default_options() -> HashMap<&'static str, Value> {
+    let mut options = HashMap::new();
+    options.insert("stop", Value::Array(vec!["```".into(), "</Output>".into()]));
+    options.insert("num_ctx", Value::Number(Number::from_u128(12228).unwrap()));
+    options.insert("temperature", Value::Number(Number::from_f64(0.5).unwrap()));
+    options
+}
+
 #[async_trait]
 impl LLMApi for Ollama {
     async fn generate(&self, prompt: String) -> Result<String> {
-        let mut options = HashMap::new();
-        options.insert("stop", Value::Array(vec!["```".into()]));
-        options.insert("num_ctx", Value::Number(Number::from_u128(12228).unwrap()));
+        let options = default_options();
         let request = OllamaCompletionRequest {
             model: self.completion_model.clone(),
             prompt,
@@ -87,8 +95,7 @@ impl LLMApi for Ollama {
     }
 
     async fn generate_json(&self, prompt: String, json_schema: String) -> Result<String> {
-        let mut options = HashMap::new();
-        options.insert("num_ctx", Value::Number(Number::from_u128(12228).unwrap()));
+        let options = default_options();
         let request = OllamaCompletionRequest {
             model: self.completion_model.clone(),
             prompt,
