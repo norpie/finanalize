@@ -1,4 +1,4 @@
-use std::{env, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use crate::{models::PreClassificationSource, prelude::*, workflow::WorkflowState};
 
@@ -19,12 +19,15 @@ const BROWSER_COUNT: u16 = 4;
 const FIRST_PORT: u16 = 4444;
 
 async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
+    debug!("Initializing {} browsers...", amount);
     let mut browsers = vec![];
     for i in 0..amount {
-        let mut default = format!("http://localhost:{}", FIRST_PORT + i);
-        if let Ok(address) = env::var(format!("GECKODRIVER{}_URL", i)) {
-            default = address;
-        }
+        debug!("Initializing browser {}...", i + 1);
+        let default = format!("http://localhost:{}", FIRST_PORT + i);
+        // if let Ok(address) = env::var(format!("GECKODRIVER{}_URL", i)) {
+        // debug!("Using custom address for browser {}: {}", i + 1, address);
+        // default = address;
+        // }
         browsers.push(
             ClientBuilder::native()
                 .capabilities(
@@ -40,6 +43,7 @@ async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
                 .connect(&default)
                 .await?,
         );
+        debug!("Initialized browser {}", i + 1);
     }
     Ok(Pool::from(browsers))
 }
