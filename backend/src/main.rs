@@ -1,3 +1,4 @@
+use crate::api::v1::report::get_document;
 use crate::prelude::*;
 use actix_cors::Cors;
 use actix_web::{
@@ -95,7 +96,11 @@ async fn main() -> Result<()> {
                     .service(get_report)
                     .service(get_reports),
             )
-            .service(web::scope("/api/v1/unprotected").service(get_live_report))
+            .service(
+                web::scope("/api/v1/unprotected")
+                    .service(get_live_report)
+                    .service(get_document),
+            )
     })
     .bind(("0.0.0.0", 8080))?
     .run()
