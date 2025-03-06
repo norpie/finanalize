@@ -1,0 +1,59 @@
+This tool extracts structured metadata from an input CSV file.
+
+If a title is missing, it should be generated based on the content.
+The description should always be derived from the data.
+Each column must have a title and a description explaining its content.
+Column descriptions should be inferred based on the data
+If any column descriptions are missing, they should be generated using contextual information from the dataset.
+
+
+<Schema>
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "columns": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "title",
+            "description"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "title",
+    "description",
+    "columns"
+  ]
+}
+</Schema>
+
+<Input>
+```md
+{{{input}}}
+```
+</Input>
+
+<Output>
+```json
+{
+    "title":
