@@ -107,6 +107,8 @@ pub enum JobType {
     ScrapeTopResults,
     // Extract the content of the scraped pages
     ExtractContent,
+    // Format and summarize the content
+    FormatContent,
     // Classify the content
     ClassifyContent,
     // Chunk content
