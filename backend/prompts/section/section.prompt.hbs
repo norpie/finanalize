@@ -1,91 +1,18 @@
-Generate 5-7 structured section names for a stock analysis based on the given query.
+Generate structured section names for a stock analysis based on the given query.
 The section names should be clear, relevant, and cover key aspects such as market performance,
 risks, and trends. We do not do predictions, avoid any future-oriented sections. Avoid unnecessary formatting.
+The output is an array `sections` containing strings.
 
-The following are complete examples of the input and output:
-
-<Example>
-    <Input>
-    ```json
-    {
-
-        "message": "Analyse Tesla stock performance",
-        "title": "Tesla stock Analysis"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-{
-    "sections": [
-        "Company Overview and Market Position",
-        "Stock Price Trends and Key Drivers",
-        "Financial Performance: Revenue & Profitability",
-        "Macroeconomic and Industry Impact",
-        "Investment Risks and Challenges",
-        "Growth Potential and Innovation Strategy",
-    ]
-}
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Tell me about bitcoin",
-        "title": "Bitcoin insights"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-{
-    "sections": [
-        "Bitcoin: Technology and Use Cases",
-        "Price History and Market Cycles",
-        "Institutional Adoption and Regulation",
-        "Comparing Bitcoin to Traditional Assets",
-        "Security, Scalability, and Network Health",
-        "Future Challenges and Innovations",
-    ]
-}
-
-    ```
-</Example>
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Compare Apple and Microsoft stocks",
-        "title": "Apple vs Microsoft Stock Comparison"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-{
-    "sections": [
-        "Introduction to Apple and Microsoft",
-        "Recent Stock Performance Comparison",
-        "Key Financial Metrics: Revenue, P/E Ratio, EPS",
-        "Risk and Volatility Analysis",
-        "Industry Trends and Market Position",
-        "Future Growth Potential",
-        "Stock Performance Comparison Charts"
-    ]
-}
-    ```
-</Example>
+Requirements:
+- Introductionary section: "Company Overview", "Introduction", etc. make your own choice.
+- Three concrete body sections.
+- Conclusionary section: "Closing statements", "Conclusion", etc. make your own choice.
 
 <Input>
 ```json
 {
-    "message": "{{message}}",
-    "title": "{{title}}"
+    "message": "{{{message}}}",
+    "title": "{{{title}}}"
 }
 ```
 </Input>
