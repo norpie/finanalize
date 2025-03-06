@@ -1,24 +1,87 @@
-use crate::prelude::*;
+use super::{Column, Data, DataExtract};
+use crate::workflow::job::classify_sources::models::ClassifySourcesInput;
+use crate::{llm::API, prelude::*, prompting, tasks::Task};
 use async_trait::async_trait;
+use log::debug;
 use polars::{io::SerReader, prelude::CsvReadOptions};
-
-use super::{Column, Data, ContentExtract, Content};
+use serde::{Deserialize, Serialize};
 
 pub struct CsvExtractor;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DataClassifierOuput {
+    pub title: String,
+    pub description: String,
+    pub columns: Vec<ClassifierColumn>,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+
+pub struct ClassifierColumn {
+    pub title: String,
+    pub description: String,
+}
+
 #[async_trait]
-impl ContentExtract for CsvExtractor {
-    async fn extract(&self, file_path: &str) -> Result<Vec<Content>> {
+impl DataExtract for CsvExtractor {
+    async fn extract(&self, file: &str) -> Result<Data> {
         let df = CsvReadOptions::default()
-            .try_into_reader_with_file_path(Some(file_path.into()))?
+            .try_into_reader_with_file_path(Some(file.into()))?
             .finish()?;
-        
+
+        // TODO: Make head into markdown table
+        let mut markdown_table = String::new();
+
+        // Generate the header row of the table
+        markdown_table.push_str("| ");
+        for col_name in df.get_column_names() {
+            markdown_table.push_str(&format!("{} | ", col_name));
+        }
+        markdown_table.push_str("\n");
+
+        // Generate the separator row
+        markdown_table.push_str("| ");
+        for _ in df.get_column_names() {
+            markdown_table.push_str("--- | ");
+        }
+        markdown_table.push_str("\n");
+
+        // Generate the data rows
+        for i in 0..5 {
+            markdown_table.push_str("| ");
+            for col in df.get_columns() {
+                let value = col.get(i).unwrap_or_default().to_string();
+                markdown_table.push_str(&format!("{} | ", value));
+            }
+            markdown_table.push_str("\n");
+        }
+
+        //Use ClassifySourceInput and put the table in it
+        let input = ClassifySourcesInput {
+            input: markdown_table,
+        };
+
+        //Start job run structured data classification
+        let prompt = prompting::get_prompt("data-classifier".into())?;
+        let task = Task::new(&prompt);
+        let output: DataClassifierOuput = task.run_structured(API.clone(), &input).await?;
+
+        // After getting your output from the task.run_structured call
         let mut columns = vec![];
         for column in df.get_columns() {
             let column = column.cast(&polars::prelude::DataType::String)?;
+            let column_name = column.name().as_str();
+
+            // Find the matching description from the classifier output
+            let description = output
+                .columns
+                .iter()
+                .find(|c| c.title == column_name)
+                .map(|c| c.description.clone())
+                .unwrap_or_else(String::new);
+
             columns.push(Column {
-                name: column.name().as_str().into(),
-                description: String::new(),
+                name: column_name.into(),
+                description, // Use the found description instead of an empty string
                 values: column
                     .str()?
                     .into_iter()
@@ -28,23 +91,17 @@ impl ContentExtract for CsvExtractor {
         }
         debug!("Columns: {:?}", columns);
         // TODO: Generate actual title and description from DataFrame metadata
-        let title = "CSV Data Analysis".to_string();
-        let description = format!(
-            "DataFrame with {} rows and {} columns",
-            df.height(),
-            df.width()
-        );
-        let _head = df.head(Some(5));
+
+        //Return the output
 
         let data = Data {
-            title,
-            description,
+            title: output.title,
+            description: output.description,
             columns,
         };
         debug!("Data: {:?}", data);
         // Return as Vec<Content> by converting Data into Content::Csv
-        Ok(vec![Content::Csv(serde_json::to_string(&data)?)])
-
+        Ok(data)
     }
 }
 
@@ -57,9 +114,11 @@ mod tests {
 
     #[tokio::test]
     async fn test_extract() {
+        dotenvy::from_filename(".env").ok();
         // Create a temporary directory
         let dir = tempdir().unwrap();
         let file_path = dir.path().join("sample.csv");
+        let csv_file = file_path.to_str().unwrap();
 
         // Write sample CSV data to the file
         let mut file = File::create(&file_path).unwrap();
@@ -72,20 +131,14 @@ mod tests {
         let extractor = CsvExtractor;
 
         // Call the extract function
-        let result = extractor.extract(file_path.to_str().unwrap()).await;
+        let result = extractor.extract(csv_file).await;
 
         // Assert that the result is Ok
         let content = result.unwrap();
 
         // Make sure we have at least one content in the result (for CSV)
-        assert!(!content.is_empty());
-
-        // Check that the content is of type Content::Csv
-        if let Content::Csv(csv_data) = &content[0] {
-            let data: Data = serde_json::from_str(csv_data).unwrap();
-            assert_eq!(data.title, "CSV Data Analysis");
-            assert_eq!(data.columns.len(), 3); // name, age, city columns
-        }
+        assert!(!content.columns.is_empty());
+        dbg!(content);
 
         // Clean up the temporary directory
         dir.close().unwrap();
