@@ -12,7 +12,7 @@ pub struct SearchJob;
 impl Job for SearchJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         debug!("Running SearchJob...");
-        let searches = state.state.searches.clone().unwrap();
+        let searches = state.state.search_queries.clone().unwrap();
         let total = searches.len();
         debug!("Total searches: {}", total);
         // Create a vector to hold the futures
@@ -37,7 +37,7 @@ impl Job for SearchJob {
         all_urls.sort();
         all_urls.dedup();
         debug!("Search results: {:?}", all_urls.len());
-        state.state.search_results = Some(all_urls);
+        state.state.search_urls = Some(all_urls);
         debug!("SearchJob completed");
         Ok(state)
     }
@@ -96,6 +96,6 @@ mod tests {
                 ]),
         };
         let state = job.run(state).await.unwrap();
-        dbg!(state.state.search_results.unwrap());
+        dbg!(state.state.search_urls.unwrap());
     }
 }

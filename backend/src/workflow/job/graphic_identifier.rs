@@ -101,6 +101,7 @@ impl Job for GraphIdentifierJob {
 mod tests {
     use super::*;
 
+    use crate::models::PreClassificationSource;
     use crate::workflow::job::graphic_identifier::models::Text;
     use crate::{
         models::FullReport,
@@ -166,6 +167,9 @@ mod tests {
                     "https://www.technavio.com/report/fresh-apples-market-industry-analysis".into(),
                 ])
                 .with_raw_sources(vec![
+                    PreClassificationSource {
+                        url: "some url".into(),
+content:
                     r#"Apple shares rise 3% as boost in services revenue overshadows iPhone miss
 =========================================================================
 
@@ -230,6 +234,7 @@ The company’s “other products” category, also called Wearables, which incl
 Apple said it would pay a dividend of 25 cents per share and spent $30 billion on dividends and share repurchases during the first quarter.   
 
 **WATCH:** [Apple’s superficial problem is there’s not enough demand, says Jim Cramer](https://www.cnbc.com/video/2025/01/21/apples-superficial-problem-is-theres-not-enough-demand-says-jim-cramer.html)"#.into()
+                    }
                 ])
                 .with_texts(vec![
                     Text {

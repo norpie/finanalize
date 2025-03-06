@@ -13,6 +13,8 @@ pub mod models {
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
     pub struct SubSectionsInput {
+        pub title: String,
+        pub message: String,
         pub sections: Vec<String>,
     }
 
@@ -37,6 +39,8 @@ impl Job for SubSectionsJob {
         let task = Task::new(&prompt);
         let task = task.clone();
         let input = SubSectionsInput {
+            message: state.state.user_input.clone(),
+            title: state.state.title.clone().unwrap(),
             sections: state.state.sections.clone().unwrap(),
         };
         debug!("Prepared input: {:#?}", input);

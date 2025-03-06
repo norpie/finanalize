@@ -15,9 +15,11 @@ use super::Job;
 pub mod models {
     use serde::{Deserialize, Serialize};
 
+    use crate::rag::DistancedChunk;
+
     #[derive(Debug, Clone, Deserialize, Serialize)]
     pub struct AnswerQuestionsInput {
-        pub context: String,
+        pub sources: Vec<DistancedChunk>,
         pub title: String,
         pub section: String,
         #[serde(rename = "subSection")]
@@ -42,19 +44,18 @@ pub struct AnswerQuestionsJob;
 pub struct W(Vec<DistancedChunk>);
 
 impl W {
-    fn into_context(self, len: usize) -> String {
-        let mut context = String::new();
-        for chunk in self.0 {
-            context.push_str("***");
-            context.push_str(&format!("# START - Source ID: {}", chunk.source_id));
-            context.push_str("***");
-            context.push_str(&chunk.chunk);
-            context.push_str(&format!("# STOP - Source ID: {}", chunk.source_id));
-            if context.len() >= len {
+    // Only keep top results which make string length less than len
+    fn into_context(self, len: usize) -> Vec<DistancedChunk> {
+        let mut total_len = 0;
+        let mut res = Vec::new();
+        for chunk in self.0.into_iter() {
+            if total_len + chunk.chunk.len() > len {
                 break;
             }
+            total_len += chunk.chunk.len();
+            res.push(chunk);
         }
-        context
+        res
     }
 }
 
@@ -94,7 +95,7 @@ impl Job for AnswerQuestionsJob {
                         );
                     }
                     let input = AnswerQuestionsInput {
-                        context: W(context).into_context(4096),
+                        sources: W(context).into_context(8192),
                         title: state.state.title.clone().unwrap(),
                         section: section_name.clone(),
                         sub_section: sub_section_name.clone(),
@@ -121,7 +122,7 @@ mod tests {
     use crate::{
         db::{self, DB},
         models::FullReport,
-        workflow::{job::classify_sources::models::{ClassifiedSource, ClassifySourcesOutput}, JobType, WorkflowState},
+        workflow::{job::classify_sources::models::ClassifiedSource, JobType, WorkflowState},
     };
 
     #[tokio::test]
@@ -150,46 +151,41 @@ mod tests {
                 .with_sources(vec![
                     ClassifiedSource {
                         id: "0".into(),
+                        content: r#"# Apple shares rise 3% as boost in services revenue overshadows iPhone miss
+
+> Kif Leswing, CNBC
+> Published on January 30, 2025
+
+Apple's overall revenue rose 4% during its first fiscal quarter, but it missed on Wall Street's iPhone sales expectations and saw sales in China decline 11.1%, the company reported Thursday.
+
+Although Apple's overall sales rose during the quarter, the company's closely watched iPhone sales declined slightly on a year-over-year basis. The December quarter is the first full quarter with iPhone 16 sales, and Apple released its Apple Intelligence AI suite for the devices during the quarter.
+
+Apple's profit engine, its Services division, which includes subscriptions, warranties and licensing deals, reported $23.12 billion in revenue, which is 14% higher than the same period last year. Apple CEO Tim Cook told analysts on a call Thursday that the company had more than one billion subscriptions, which includes both direct subscriptions for services such as Apple TV+ and iCloud, as well as subscriptions to third-party apps through the company's App Store system.
+
+The December quarter is the first full quarter with iPhone 16 sales, and Apple released its Apple Intelligence AI suite for the devices during the quarter.
+
+Apple said it expected growth in the March quarter of "low to mid single digits" on an annual basis. The company also said it expected "low double digits" growth for its Services division.
+
+## Secondary numbers
+- $2.40 - Earnings per share
+- $124.30 billion - Revenue
+- $69.14 billion - iPhone revenue
+- $8.99 billion - Mac revenue
+- $8.09 billion - iPad revenue
+- $11.75 billion - Other products revenue
+- $26.34 billion - Services revenue
+- 46.9% - Gross margin"#.into(),
+                        url: "https://www.nbcboston.com/news/business/money-report/apple-reports-first-quarter-earnings-after-the-bell-2/3617779/?os=android&ref=app&noamp=mobile".into(),
                         title: "Apple shares rise 3% as boost in services revenue overshadows iPhone miss".into(),
-                        summary: "Apple’s overall revenue rose 4% in its first fiscal quarter, but it missed on Wall Street’s iPhone sales expectations and saw sales in China decline 11.1%, the company reported Thursday.".into(),
-                        author: "Anonymous".into(),
-                        published_after: Some(Utc::now().to_rfc3339()),
-                        date: Some(Utc::now().to_rfc3339())
+                        author: "Kif Leswing, CNBC".into(),
+                        published_after: Some(Utc::now().format("%Y-%m-%d").to_string()),
+                        date: Some(Utc::now().format("%Y-%m-%d").to_string()),
                     }
                 ])
                 .with_sub_section_questions(vec![
                     vec![
                         vec![
-                            "What significant events shaped Apple's position in the market up to 2025?".into(),
-                        ],
-                        vec![
-                            "What are the main challenges Apple faces in maintaining its competitive edge by 2025?".into(),
-                        ],
-                    ],
-                    vec![
-                        vec![
-                            "How has the overall market size for technology products evolved, impacting Apple's growth in 2025?".into(),
-                            "What factors contribute to the projected changes in market size relevant to Apple?".into(),
-                        ],
-                        vec![
-                            "In comparison to its competitors, what percentage of the market does Apple control in 2025?".into(),
-                            "How has this market share changed from previous years, and what strategies have influenced these changes?".into(),
-                        ],
-                    ],
-                    vec![
-                        vec![
-                            "What is Apple's total revenue in 2025, and how has it grown compared to previous years?".into(),
-                            "Which product lines contribute the most to this revenue growth?".into(),
-                        ],
-                        vec![
-                            "How does Apple's profit margin compare with its market share in 2025?".into(),
-                            "What cost factors have influenced Apple's profitability in 2025?".into(),
-                        ],
-                    ],
-                    vec![
-                        vec![
-                            "Based on the market and financial analysis, what strategic recommendations are made for Apple to sustain its growth in 2025?".into(),
-                            "How do these recommendations address the challenges outlined in the problem statement?".into(),
+                            "What did Apple's Q1 2025 look like?".into(),
                         ],
                     ],
                 ])

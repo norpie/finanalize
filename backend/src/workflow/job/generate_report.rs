@@ -51,22 +51,15 @@ impl Job for GenerateReportJob {
         }
 
         let mut sources = vec![];
-        for (i, source) in state
-            .state
-            .search_results
-            .clone()
-            .unwrap()
-            .into_iter()
-            .enumerate()
-        {
+        for source in state.state.sources.clone().unwrap().into_iter() {
             sources.push(Source::new(
                 "Website".into(),
-                i.to_string(),
-                "Author".into(),
-                "Title".into(),
+                source.id,
+                source.author,
+                source.title,
                 2025,
                 "Journal".into(),
-                source,
+                source.url,
             ));
         }
 

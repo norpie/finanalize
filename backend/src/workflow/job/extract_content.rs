@@ -1,6 +1,10 @@
 use async_trait::async_trait;
 use log::debug;
+use markup5ever::interface::tree_builder::TreeSink;
+use regex::Regex;
+use scraper::{Html, HtmlTreeSink, Selector};
 
+use crate::models::PreClassificationSource;
 use crate::prelude::*;
 
 use crate::workflow::WorkflowState;
@@ -16,7 +20,8 @@ impl Job for ExtractContentJob {
         let mut mds = vec![];
         let html_sources = state.state.html_sources.clone().unwrap();
         let total = html_sources.len();
-        for (i, html) in html_sources.into_iter().enumerate() {
+        let pattern = Regex::new("(?i)<span[^>]*>")?;
+        for (i, source) in html_sources.into_iter().enumerate() {
             debug!("Extracting content from HTML source ({}/{})", i + 1, total);
             // let content = extractor
             //     .extract(FileType::Html(html))
@@ -28,9 +33,48 @@ impl Job for ExtractContentJob {
             //     Content::MarkDown(md) => mds.push(md),
             //     _ => continue,
             // }
-            mds.push(mdka::from_html(&html))
+            let document = Html::parse_document(&source.content);
+            // Selectors for header and footer
+            let header_selector = Selector::parse("header")?;
+            let footer_selector = Selector::parse("footer")?;
+
+            let mut removables = vec![];
+
+            // Remove the selected elements
+            for node in document.select(&header_selector).collect::<Vec<_>>() {
+                removables.push(node.id());
+            }
+
+            for node in document.select(&footer_selector).collect::<Vec<_>>() {
+                removables.push(node.id());
+            }
+
+            let tree = HtmlTreeSink::new(document);
+
+            for removable in removables {
+                tree.remove_from_parent(&removable);
+            }
+
+            let filtered: String = tree.finish().html();
+
+            let mut md = mdka::from_html(&filtered);
+
+            // Replace
+            md = pattern.replace_all(&md, "").to_string();
+            md = md.replace("</span>", "");
+            md = md
+                .trim()
+                .lines()
+                .filter(|l| !l.is_empty())
+                .collect::<Vec<_>>()
+                .join("\n");
+
+            mds.push(PreClassificationSource {
+                url: source.url,
+                content: md,
+            })
         }
-        state.state.raw_sources = Some(mds);
+        state.state.md_sources = Some(mds);
         Ok(state)
     }
 }
@@ -101,13 +145,15 @@ mod tests {
                     "https://www.officetimeline.com/blog/apple-inc-timeline".into(),
                     "https://www.technavio.com/report/fresh-apples-market-industry-analysis".into(),
                 ])
-                .with_html_sources(vec![
-                    include_str!("../../../tests/scraped/capital.html").into(),
-                    include_str!("../../../tests/scraped/captide.html").into(),
-                    include_str!("../../../tests/scraped/tbrc.html").into(),
-                ]),
+                .with_html_sources(vec![PreClassificationSource {
+                    url: "http://tbrc.info".into(),
+                    content: include_str!("../../../tests/scraped/nbcboston.html").into(),
+                }]),
         };
         let state = job.run(state).await.unwrap();
-        dbg!(state.state.raw_sources.unwrap());
+        println!(
+            "{}",
+            state.state.md_sources.unwrap().first().unwrap().content
+        )
     }
 }
