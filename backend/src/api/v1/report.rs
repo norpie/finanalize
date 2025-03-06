@@ -186,10 +186,7 @@ struct AuthQuery {
 }
 
 #[get("/reports/{report_id}/document.pdf")]
-pub async fn get_document(
-    db: Data<SurrealDb>,
-    report_id: Path<String>,
-) -> Result<impl Responder> {
+pub async fn get_document(db: Data<SurrealDb>, report_id: Path<String>) -> Result<impl Responder> {
     let workflow_state_id_thing: Thing = ("workflow_state", report_id.as_str()).into();
     dbg!("here");
     let workflow_state = db
