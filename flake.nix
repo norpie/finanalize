@@ -30,6 +30,7 @@
               openssl
               fontconfig
               pkg-config
+              geckodriver
               # ra-multiplex
             ];
 
