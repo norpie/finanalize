@@ -190,6 +190,15 @@ pub struct FullReport {
     pub graphics: Option<Vec<Graphic>>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FrontendReport {
+    pub user_input: String,
+    pub status: JobType,
+    pub error: Option<String>,
+    pub valid: Option<bool>,
+    pub title: Option<String>,
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
