@@ -1,6 +1,6 @@
 use std::{env, sync::Arc, time::Duration};
 
-use crate::{prelude::*, workflow::WorkflowState};
+use crate::{models::PreClassificationSource, prelude::*, workflow::WorkflowState};
 
 use super::Job;
 
@@ -53,7 +53,7 @@ async fn scrape_page(browser: &Object<Client>, url: &str) -> Result<String> {
             Ok(source)
         }
         Ok(Err(e)) => Err(e.into()), // Handle `goto` errors
-        Err(_) => Err(FinanalizeError::ScraperTimemout(url.into()))
+        Err(_) => Err(FinanalizeError::ScraperTimemout(url.into())),
     }
     // let source = browser.source().await?;
     // Ok(source)
@@ -73,8 +73,8 @@ impl Job for ScrapePagesJob {
         debug!("Running ScrapePagesJob...");
         let browsers = Arc::new(make_browsers(BROWSER_COUNT).await?);
         debug!("Initialized {} browsers", BROWSER_COUNT);
-        let sources: Arc<Mutex<Vec<String>>> = Arc::new(Mutex::new(vec![]));
-        let search_results = state.state.search_results.clone().unwrap();
+        let sources: Arc<Mutex<Vec<PreClassificationSource>>> = Arc::new(Mutex::new(vec![]));
+        let search_results = state.state.search_urls.clone().unwrap();
         debug!("Pages to scrape: {}", search_results.len());
         let mut join_set = JoinSet::new();
         let total = search_results.len();
@@ -92,8 +92,11 @@ impl Job for ScrapePagesJob {
                     // return Err(FinanalizeError::InternalServerError);
                     return Ok(());
                 };
-                debug!("Scraped ({}/{}): {}", i + 1, total, source);
-                sources.clone().lock().await.push(html);
+                debug!("Scraped ({}/{}): {}", i + 1, total, &source);
+                sources.clone().lock().await.push(PreClassificationSource {
+                    url: source,
+                    content: html,
+                });
                 Ok(())
             });
         }

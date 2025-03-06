@@ -103,7 +103,7 @@ impl Job for GenerateSearchQueriesJob {
             "Generated search queries successfully. Total queries: {}",
             output.queries.len()
         );
-        state.state.searches = Some(output.queries);
+        state.state.search_queries = Some(output.queries);
         debug!("GenerateSearchQueriesJob completed");
         Ok(state)
     }
@@ -180,6 +180,6 @@ mod tests {
 
         };
         let state = job.run(state).await.unwrap();
-        dbg!(state.state.searches.unwrap());
+        dbg!(state.state.search_queries.unwrap());
     }
 }

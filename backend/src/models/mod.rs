@@ -7,8 +7,8 @@ use crate::workflow::job::classify_sources::models::ClassifiedSource;
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 use crate::workflow::{
     job::{
-        chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
-        index_chunks::models::EmbeddedChunk, validation::models::ValidationOutput,
+        chunk_content::models::Chunk, index_chunks::models::EmbeddedChunk,
+        validation::models::ValidationOutput,
     },
     JobType,
 };
@@ -129,10 +129,11 @@ pub struct FullSDBReport {
     pub sections: Option<Vec<String>>,
     pub sub_sections: Option<Vec<Vec<String>>>,
     pub sub_section_questions: Option<Vec<Vec<Vec<String>>>>,
-    pub searches: Option<Vec<String>>,
-    pub search_results: Option<Vec<String>>,
-    pub html_sources: Option<Vec<String>>,
-    pub raw_sources: Option<Vec<String>>,
+    pub search_queries: Option<Vec<String>>,
+    pub search_urls: Option<Vec<String>>,
+    pub html_sources: Option<Vec<PreClassificationSource>>,
+    pub raw_sources: Option<Vec<PreClassificationSource>>,
+    pub formatted_sources: Option<Vec<PreClassificationSource>>,
     pub sources: Option<Vec<ClassifiedSource>>,
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
@@ -155,10 +156,11 @@ impl From<FullSDBReport> for FullReport {
             sections: report.sections,
             sub_sections: report.sub_sections,
             sub_section_questions: report.sub_section_questions,
-            searches: report.searches,
-            search_results: report.search_results,
+            search_queries: report.search_queries,
+            search_urls: report.search_urls,
             html_sources: report.html_sources,
-            raw_sources: report.raw_sources,
+            md_sources: report.raw_sources,
+            formatted_sources: report.formatted_sources,
             sources: report.sources,
             chunks: report.chunks,
             chunk_embeddings: report.chunk_embeddings,
@@ -168,6 +170,12 @@ impl From<FullSDBReport> for FullReport {
             graphics: report.graphics,
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PreClassificationSource {
+    pub url: String,
+    pub content: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -182,10 +190,11 @@ pub struct FullReport {
     pub sections: Option<Vec<String>>,
     pub sub_sections: Option<Vec<Vec<String>>>,
     pub sub_section_questions: Option<Vec<Vec<Vec<String>>>>,
-    pub searches: Option<Vec<String>>,
-    pub search_results: Option<Vec<String>>,
-    pub html_sources: Option<Vec<String>>,
-    pub raw_sources: Option<Vec<String>>,
+    pub search_queries: Option<Vec<String>>,
+    pub search_urls: Option<Vec<String>>,
+    pub html_sources: Option<Vec<PreClassificationSource>>,
+    pub md_sources: Option<Vec<PreClassificationSource>>,
+    pub formatted_sources: Option<Vec<PreClassificationSource>>,
     pub sources: Option<Vec<ClassifiedSource>>,
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
@@ -208,7 +217,7 @@ pub struct FrontendReport {
 mod tests {
     use chrono::Utc;
 
-    use super::FullReport;
+    use super::{FullReport, PreClassificationSource};
     use crate::workflow::job::classify_sources::models::ClassifiedSource;
     use crate::workflow::job::graphic_identifier::models::Text;
     use crate::workflow::{
@@ -230,10 +239,12 @@ mod tests {
                 sections: None,
                 sub_sections: None,
                 sub_section_questions: None,
-                searches: None,
-                search_results: None,
+                search_queries: None,
+                search_urls: None,
+
                 html_sources: None,
-                raw_sources: None,
+                md_sources: None,
+                formatted_sources: None,
                 sources: None,
                 chunks: None,
                 chunk_embeddings: None,
@@ -275,22 +286,22 @@ mod tests {
         }
 
         pub fn with_searches(mut self, searches: Vec<String>) -> Self {
-            self.searches = Some(searches);
+            self.search_queries = Some(searches);
             self
         }
 
         pub fn with_search_results(mut self, search_results: Vec<String>) -> Self {
-            self.search_results = Some(search_results);
+            self.search_urls = Some(search_results);
             self
         }
 
-        pub fn with_html_sources(mut self, html_sources: Vec<String>) -> Self {
+        pub fn with_html_sources(mut self, html_sources: Vec<PreClassificationSource>) -> Self {
             self.html_sources = Some(html_sources);
             self
         }
 
-        pub fn with_raw_sources(mut self, sources: Vec<String>) -> Self {
-            self.raw_sources = Some(sources);
+        pub fn with_raw_sources(mut self, sources: Vec<PreClassificationSource>) -> Self {
+            self.md_sources = Some(sources);
             self
         }
 

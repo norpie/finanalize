@@ -6,6 +6,7 @@ use super::{JobType, WorkflowState};
 pub mod answer_questions;
 pub mod chunk_content;
 pub mod classify_sources;
+pub mod content_formatter;
 pub mod extract_content;
 pub mod generate_report;
 pub mod graphic_identifier;
@@ -38,8 +39,9 @@ impl JobType {
             JobType::GenerateSearchQueries => Some(JobType::SearchQueries),
             JobType::SearchQueries => Some(JobType::ScrapeTopResults),
             JobType::ScrapeTopResults => Some(JobType::ExtractContent),
-            JobType::ExtractContent => Some(JobType::ClassifyContent),
-            JobType::ClassifyContent => Some(JobType::ChunkContent), // TODO: Add more steps
+            JobType::ExtractContent => Some(JobType::FormatContent),
+            JobType::FormatContent => Some(JobType::ClassifyContent),
+            JobType::ClassifyContent => Some(JobType::ChunkContent),
             JobType::ChunkContent => Some(JobType::IndexChunks),
             JobType::IndexChunks => Some(JobType::AnswerQuestions),
             JobType::AnswerQuestions => Some(JobType::RenderLaTeXPdf),
@@ -66,6 +68,7 @@ impl JobType {
             JobType::SearchQueries => Some(Box::new(search_terms::SearchJob)),
             JobType::ScrapeTopResults => Some(Box::new(scrape_pages::ScrapePagesJob)),
             JobType::ExtractContent => Some(Box::new(extract_content::ExtractContentJob)),
+            JobType::FormatContent => Some(Box::new(content_formatter::FormatContentJob)),
             JobType::ClassifyContent => Some(Box::new(classify_sources::ClassifySourcesJob)),
             JobType::ChunkContent => Some(Box::new(chunk_content::ChunkContentJob)),
             JobType::IndexChunks => Some(Box::new(index_chunks::IndexChunksJob)),

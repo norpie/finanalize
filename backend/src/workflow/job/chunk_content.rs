@@ -4,6 +4,7 @@ use crate::{
 };
 
 use async_trait::async_trait;
+use models::Chunk;
 
 use crate::workflow::WorkflowState;
 
@@ -25,28 +26,11 @@ pub struct ChunkContentJob;
 impl Job for ChunkContentJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         let mut chunks = Vec::new();
-        let extractor = TextExtractor;
-        for (info, source) in state
-            .state
-            .sources
-            .clone()
-            .unwrap()
-            .into_iter()
-            .zip(state.state.raw_sources.clone().unwrap().into_iter())
-        {
-            let mut source_chunks = Vec::new();
-            for chunk in extractor.extract(FileType::Text(source)).await?.into_iter() {
-                source_chunks.push(models::Chunk {
-                    source_id: info.id.clone(),
-                    content: match chunk {
-                        Content::Text(content) => content,
-                        _ => Err(FinanalizeError::InvalidState(
-                            "Invalid chunk type".to_string(),
-                        ))?,
-                    },
-                });
-            }
-            chunks.extend(source_chunks);
+        for source in state.state.sources.clone().unwrap().into_iter() {
+            chunks.push(Chunk {
+                source_id: source.id,
+                content: source.content,
+            });
         }
         state.state.chunks = Some(chunks);
         Ok(state)
@@ -60,8 +44,8 @@ mod tests {
     use super::*;
 
     use crate::{
-        models::FullReport,
-        workflow::{job::classify_sources::models::{ClassifiedSource, ClassifySourcesOutput}, JobType, WorkflowState},
+        models::{FullReport, PreClassificationSource},
+        workflow::{job::classify_sources::models::ClassifiedSource, JobType, WorkflowState},
     };
 
     #[tokio::test]
@@ -122,6 +106,9 @@ mod tests {
                     "https://www.technavio.com/report/fresh-apples-market-industry-analysis".into(),
                 ])
                 .with_raw_sources(vec![
+                    PreClassificationSource {
+                        url: "some url".into(),
+                        content:
                     r#"Apple shares rise 3% as boost in services revenue overshadows iPhone miss
 =========================================================================
 
@@ -186,15 +173,40 @@ The company’s “other products” category, also called Wearables, which incl
 Apple said it would pay a dividend of 25 cents per share and spent $30 billion on dividends and share repurchases during the first quarter.   
 
 **WATCH:** [Apple’s superficial problem is there’s not enough demand, says Jim Cramer](https://www.cnbc.com/video/2025/01/21/apples-superficial-problem-is-theres-not-enough-demand-says-jim-cramer.html)"#.into()
+                                                }
                 ])
                 .with_sources(vec![
                     ClassifiedSource {
                         id: "0".into(),
+                        content: r#"# Apple shares rise 3% as boost in services revenue overshadows iPhone miss
+
+> Kif Leswing, CNBC
+> Published on January 30, 2025
+
+Apple's overall revenue rose 4% during its first fiscal quarter, but it missed on Wall Street's iPhone sales expectations and saw sales in China decline 11.1%, the company reported Thursday.
+
+Although Apple's overall sales rose during the quarter, the company's closely watched iPhone sales declined slightly on a year-over-year basis. The December quarter is the first full quarter with iPhone 16 sales, and Apple released its Apple Intelligence AI suite for the devices during the quarter.
+
+Apple's profit engine, its Services division, which includes subscriptions, warranties and licensing deals, reported $23.12 billion in revenue, which is 14% higher than the same period last year. Apple CEO Tim Cook told analysts on a call Thursday that the company had more than one billion subscriptions, which includes both direct subscriptions for services such as Apple TV+ and iCloud, as well as subscriptions to third-party apps through the company's App Store system.
+
+The December quarter is the first full quarter with iPhone 16 sales, and Apple released its Apple Intelligence AI suite for the devices during the quarter.
+
+Apple said it expected growth in the March quarter of "low to mid single digits" on an annual basis. The company also said it expected "low double digits" growth for its Services division.
+
+## Secondary numbers
+- $2.40 - Earnings per share
+- $124.30 billion - Revenue
+- $69.14 billion - iPhone revenue
+- $8.99 billion - Mac revenue
+- $8.09 billion - iPad revenue
+- $11.75 billion - Other products revenue
+- $26.34 billion - Services revenue
+- 46.9% - Gross margin"#.into(),
+                        url: "https://www.nbcboston.com/news/business/money-report/apple-reports-first-quarter-earnings-after-the-bell-2/3617779/?os=android&ref=app&noamp=mobile".into(),
                         title: "Apple shares rise 3% as boost in services revenue overshadows iPhone miss".into(),
-                        summary: "Apple’s overall revenue rose 4% in its first fiscal quarter, but it missed on Wall Street’s iPhone sales expectations and saw sales in China decline 11.1%, the company reported Thursday.".into(),
-                        author: "Anonymous".into(),
-                        published_after: Some(Utc::now().to_rfc3339()),
-                        date: Some(Utc::now().to_rfc3339())
+                        author: "Kif Leswing, CNBC".into(),
+                        published_after: Some(Utc::now().format("%Y-%m-%d").to_string()),
+                        date: Some(Utc::now().format("%Y-%m-%d").to_string()),
                     }
                 ])
         };
