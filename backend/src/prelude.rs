@@ -31,9 +31,6 @@ pub enum FinanalizeError {
     #[error("Some retry logic generated the following errors: {0:#?}")]
     MultipleErrors(Vec<FinanalizeError>),
 
-    #[error("LLM API error: {0}")]
-    LlmApi(String),
-
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
     #[error("Env error: {0}")]
@@ -79,6 +76,8 @@ pub enum FinanalizeError {
     Websocket(String),
     #[error("Drawing area error: {0}")]
     DrawingArea(String),
+    #[error("Regex error: {0}")]
+    Regex(#[from] regex::Error),
 }
 
 impl<E> From<DrawingAreaErrorKind<E>> for FinanalizeError
