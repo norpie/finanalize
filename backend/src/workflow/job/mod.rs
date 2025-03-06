@@ -45,10 +45,10 @@ impl JobType {
             JobType::ChunkContent => Some(JobType::IndexChunks),
             JobType::IndexChunks => Some(JobType::AnswerQuestions),
             JobType::AnswerQuestions => Some(JobType::RenderLaTeXPdf),
+            JobType::RenderLaTeXPdf => Some(JobType::Done),
             // Done
             JobType::Invalid => None,
             JobType::Done => None,
-            _ => None,
         }
     }
 
