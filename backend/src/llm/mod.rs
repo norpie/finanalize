@@ -13,8 +13,8 @@ pub static API: Lazy<Arc<dyn LLMApi>> = Lazy::new(|| Arc::new(Ollama::default())
 
 #[derive(Debug, Clone)]
 pub struct GenerationParams {
-    model: String,
-    ctx: u128,
+    pub model: String,
+    pub ctx: u128,
 }
 
 impl Default for GenerationParams {
