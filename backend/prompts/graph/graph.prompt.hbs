@@ -2,6 +2,7 @@ This tool analyzes a given text and recommends charts or tables to effectively v
 A table or chart is not needed if the graphic does not add value to the text (empty `graphics` output).
 It selects from a predefined list of chart types and suggests a table if it's more suitable.
 For each recommendation, the tool specifies the type, purpose, data used, and axis assignment.
+The `data_used` field contains all the necessary data to construct the graphic.
 
 Output schema:
 ```json

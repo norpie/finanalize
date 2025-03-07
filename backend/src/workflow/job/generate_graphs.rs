@@ -1,97 +1,172 @@
-use crate::workflow::job::graphic_identifier::models::Graphic;
+use crate::llm::API;
+use crate::prelude::*;
+use crate::tasks::Task;
 use crate::workflow::job::Job;
 use crate::workflow::WorkflowState;
-use crate::{llm::API, prelude::*, prompting, tasks::Task};
+use crate::{graphing, prompting};
 use async_trait::async_trait;
 use log::debug;
-use models::GraphDataOutput;
 use schemars::schema_for;
+use crate::workflow::job::generate_graphs::models::{BarDataOutput, LineDataOutput, PieDataOutput, StockDataOutput, TableDataOutput};
+
+pub struct GenerateGraphsJob;
 
 pub mod models {
     use schemars::JsonSchema;
+    use crate::graphing::{GraphData, HistogramData, PieChartData, StockChartData};
     use serde::{Deserialize, Serialize};
-
-    #[derive(Debug, Clone, Deserialize, Serialize)]
+    #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct GraphInput {
-        pub chart_options: Vec<String>,
-        pub text: String,
-    }
-
-    #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
-    pub struct GraphDataOutput {
-        pub graphics: Vec<GraphicOutput>,
-    }
-
-    #[derive(Debug, Clone, Deserialize, Serialize)]
-    pub struct Text {
-        pub id: String,
-        pub text: String,
-    }
-
-    #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
-    pub struct GraphicOutput {
         pub graph_type: String,
-        pub purpose: String,
-        pub data_used: String,
-        pub x_label: String,
-        pub y_label: String,
-    }
-
-    #[derive(Debug, Clone, Deserialize, Serialize)]
-    pub struct Graphic {
         pub text_id: String,
-        pub graph_type: String,
+        pub data: String,
         pub purpose: String,
-        pub data_used: String,
         pub x_label: String,
         pub y_label: String,
+    }
+
+    #[derive(Debug, Serialize, Deserialize, Clone)]
+    pub struct GraphFileOutput {
+        pub graph_type: String,
+        pub file_path: String,
+    }
+
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
+    pub struct LineDataOutput {
+        pub graph_data: GraphData,
+    }
+
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
+    pub struct BarDataOutput {
+        pub graph_data: HistogramData,
+    }
+
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
+    pub struct PieDataOutput {
+        pub graph_data: PieChartData,
+    }
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
+    pub struct StockDataOutput {
+        pub graph_data: StockChartData,
+    }
+
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
+    pub struct TableDataOutput {
+        pub graph_data: TableOutput,
+    }
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
+    pub struct TableOutput {
+        pub caption: String,
+        pub rows: Vec<Vec<String>>,
+        pub columns: Vec<String>,
     }
 }
-pub struct GraphIdentifierJob;
 
 #[async_trait]
-impl Job for GraphIdentifierJob {
+impl Job for GenerateGraphsJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
-        debug!("Running GraphIdentifierJob...");
-        let mut graphics = Vec::new();
-        if let Some(texts) = state.state.texts.clone() {
-            for text in texts {
-                let prompt = prompting::get_prompt("graph".into())?;
+        debug!("Running GenerateGraphsJob...");
+        let mut charts = Vec::new();
+        let mut tables = Vec::new();
+        if let Some(graphics) = state.state.graphics.clone() {
+            for graphic in graphics {
+                let prompt = prompting::get_prompt("graph-data-prep".to_string())?;
                 let task = Task::new(&prompt);
                 let input = models::GraphInput {
-                    chart_options: vec![
-                        "table".to_string(),
-                        "line".to_string(),
-                        "bar".to_string(),
-                        "pie".to_string(),
-                        "stock".to_string(),
-                    ],
-                    text: text.text.clone(),
+                    graph_type: graphic.graph_type.clone(),
+                    text_id: graphic.text_id.clone(),
+                    data: graphic.data_used.clone(),
+                    purpose: graphic.purpose.clone(),
+                    x_label: graphic.x_label.clone(),
+                    y_label: graphic.y_label.clone(),
                 };
                 debug!("Prepared input: {:#?}", input);
                 debug!("Running task...");
-                let output: GraphDataOutput = task
-                    .run_structured(
-                        API.clone(),
-                        &input,
-                        serde_json::to_string_pretty(&schema_for!(GraphDataOutput))?,
-                    )
-                    .await?;
-                graphics.extend(output.graphics.into_iter().map(|g| Graphic {
-                    text_id: text.id.clone(),
-                    graph_type: g.graph_type,
-                    purpose: g.purpose,
-                    data_used: g.data_used,
-                    x_label: g.x_label,
-                    y_label: g.y_label,
-                }));
+                match graphic.graph_type.as_str() {
+                    "line" => {
+                        let output: LineDataOutput =
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(LineDataOutput))?).await?;
+                        let chart = graphing::create_graph(
+                            "line".to_string(),
+                            Some(output.graph_data),
+                            None,
+                            None,
+                            None,
+                        )
+                        .expect("Could not create line/scatter graph");
+                        let graph_file_output = models::GraphFileOutput {
+                            graph_type: chart.chart_type.clone(),
+                            file_path: chart.chart_file.clone(),
+                        };
+                        charts.push(graph_file_output);
+                    }
+                    "bar" => {
+                        let output: models::BarDataOutput =
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(BarDataOutput))?).await?;
+                        let chart = graphing::create_graph(
+                            "bar".to_string(),
+                            None,
+                            Some(output.graph_data),
+                            None,
+                            None,
+                        )
+                        .expect("Could not create histogram");
+                        let graph_file_output = models::GraphFileOutput {
+                            graph_type: chart.chart_type.clone(),
+                            file_path: chart.chart_file.clone(),
+                        };
+                        charts.push(graph_file_output);
+                    }
+                    "pie" => {
+                        let output: models::PieDataOutput =
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(PieDataOutput))?).await?;
+                        let chart = graphing::create_graph(
+                            "pie".to_string(),
+                            None,
+                            None,
+                            Some(output.graph_data),
+                            None,
+                        )
+                        .expect("Could not create pie chart");
+                        let graph_file_output = models::GraphFileOutput {
+                            graph_type: chart.chart_type.clone(),
+                            file_path: chart.chart_file.clone(),
+                        };
+                        charts.push(graph_file_output);
+                    }
+                    "stock" => {
+                        let output: models::StockDataOutput =
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(StockDataOutput))?).await?;
+                        let chart = graphing::create_graph(
+                            "stock".to_string(),
+                            None,
+                            None,
+                            None,
+                            Some(output.graph_data),
+                        )
+                        .expect("Could not create stock graph");
+                        let graph_file_output = models::GraphFileOutput {
+                            graph_type: chart.chart_type.clone(),
+                            file_path: chart.chart_file.clone(),
+                        };
+                        charts.push(graph_file_output);
+                    }
+                    "table" => {
+                        let output: models::TableDataOutput =
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(TableDataOutput))?).await?;
+                        tables.push(output.graph_data);
+                    }
+                    _ => {}
+                }
                 debug!("Task completed");
             }
-            state.state.graphics = Some(graphics);
-            debug!("Graph: {:#?}", state.state.report);
+            state.state.charts = Some(charts);
+            debug!("Charts: {:#?}", state.state.charts);
+            state.state.tables = Some(tables);
+            debug!("Tables: {:#?}", state.state.tables);
             dbg!(&state.state.report);
         }
-        debug!("GraphIdentifierJob completed");
+        debug!("GenerateGraphsJob completed");
         Ok(state)
     }
 }
@@ -100,19 +175,18 @@ impl Job for GraphIdentifierJob {
 mod tests {
     use super::*;
 
-    use crate::models::PreClassificationSource;
-    use crate::workflow::job::graphic_identifier::models::Text;
+    use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
     use crate::{
         models::FullReport,
         workflow::{JobType, WorkflowState},
     };
 
     #[tokio::test]
-    #[ignore = "Uses LLM API (External Service)"]
-    async fn test_graphic_identifier_job() {
+    // #[ignore = "Uses LLM API (External Service)"]
+    async fn test_generate_graphs_job() {
         env_logger::init();
         dotenvy::from_filename(".env").ok();
-        let job = GraphIdentifierJob;
+        let job = GenerateGraphsJob;
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
@@ -166,9 +240,6 @@ mod tests {
                     "https://www.technavio.com/report/fresh-apples-market-industry-analysis".into(),
                 ])
                 .with_raw_sources(vec![
-                    PreClassificationSource {
-                        url: "some url".into(),
-content:
                     r#"Apple shares rise 3% as boost in services revenue overshadows iPhone miss
 =========================================================================
 
@@ -233,7 +304,6 @@ The company’s “other products” category, also called Wearables, which incl
 Apple said it would pay a dividend of 25 cents per share and spent $30 billion on dividends and share repurchases during the first quarter.   
 
 **WATCH:** [Apple’s superficial problem is there’s not enough demand, says Jim Cramer](https://www.cnbc.com/video/2025/01/21/apples-superficial-problem-is-theres-not-enough-demand-says-jim-cramer.html)"#.into()
-                    }
                 ])
                 .with_texts(vec![
                     Text {
@@ -279,10 +349,51 @@ Apple said it would pay a dividend of 25 cents per share and spent $30 billion o
                     Text {
                         id: "k".to_string(),
                         text: "Apple's stock price remained relatively stable following the earnings announcement, with a slight uptick of 3% in after-hours trading. Investors reacted positively to the company’s long-term strategy and growth forecasts, despite short-term concerns over product-specific revenue trends.".to_string(),
-                    },
-                ]),
+                    },]).with_graphics(vec![
+                Graphic {
+                    graph_type: "line".to_string(),
+                    text_id: "a".to_string(),
+                    data_used: "[{\"x\": 1, \"y\": 50.2}, {\"x\": 2, \"y\": 55.8}, {\"x\": 3, \"y\": 60.4}, {\"x\": 4, \"y\": 62.1}]".to_string(),
+                    purpose: "Revenue trends for Apple in 2025".to_string(),
+                    x_label: "Quarter".to_string(),
+                    y_label: "Revenue (in billions)".to_string(),
+                },
+                Graphic {
+                    graph_type: "bar".to_string(),
+                    text_id: "b".to_string(),
+                    data_used: "[{\"x\": 1, \"y\": 12.3}, {\"x\": 2, \"y\": 14.1}, {\"x\": 3, \"y\": 15.8}, {\"x\": 4, \"y\": 17.5}]".to_string(),
+                    purpose: "Profit analysis of Apple in 2025".to_string(),
+                    x_label: "Quarter".to_string(),
+                    y_label: "Profit (in billions)".to_string(),
+                },
+                Graphic {
+                    graph_type: "table".to_string(),
+                    text_id: "c".to_string(),
+                    data_used: "{\"rows\": [[\"Q1\", \"$50B\", \"$12B\"], [\"Q2\", \"$55B\", \"$14B\"], [\"Q3\", \"$60B\", \"$15.8B\"], [\"Q4\", \"$62B\", \"$17.5B\"]], \"columns\": [\"Quarter\", \"Revenue\", \"Profit\"]}".to_string(),
+                    purpose: "Quarterly financial data for Apple in 2025".to_string(),
+                    x_label: "Quarter".to_string(),  // Represents table columns
+                    y_label: "".to_string(),  // Not used for tables
+                },
+                Graphic {
+                    graph_type: "pie".to_string(),
+                    text_id: "d".to_string(),
+                    data_used: "{\"values\": [40, 30, 20, 10], \"labels\": [\"iPhone\", \"Mac\", \"iPad\", \"Services\"]}".to_string(),
+                    purpose: "Revenue distribution by product category".to_string(),
+                    x_label: "".to_string(),  // Not used for pie charts
+                    y_label: "".to_string(),  // Not used for pie charts
+                },
+                Graphic {
+                    graph_type: "stock".to_string(),
+                    text_id: "e".to_string(),
+                    data_used: "{\"dates\": [\"2025-01-01\", \"2025-01-02\", \"2025-01-03\", \"2025-01-04\"], \"open\": [150.5, 152.3, 153.7, 155.0], \"high\": [155.2, 157.8, 159.3, 160.0], \"low\": [149.8, 151.0, 152.5, 154.2], \"close\": [154.0, 156.5, 158.2, 159.8]}".to_string(),
+                    purpose: "Apple stock performance over time".to_string(),
+                    x_label: "Date".to_string(),
+                    y_label: "Stock Price (USD)".to_string(),
+                },
+            ])
         };
         let state = job.run(state).await.unwrap();
-        dbg!(state.state.graphics.unwrap());
+        dbg!(state.state.charts.unwrap());
+        dbg!(state.state.tables.unwrap());
     }
 }

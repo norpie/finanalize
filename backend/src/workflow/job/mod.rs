@@ -8,6 +8,7 @@ pub mod chunk_content;
 pub mod classify_sources;
 pub mod content_formatter;
 pub mod extract_content;
+pub mod generate_graphs;
 pub mod generate_report;
 pub mod graphic_identifier;
 pub mod index_chunks;
