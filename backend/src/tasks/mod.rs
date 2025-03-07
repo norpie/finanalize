@@ -45,6 +45,16 @@ impl Task {
         }
     }
 
+    pub fn with_model(mut self, model: String) -> Self {
+        self.params.model = model;
+        self
+    }
+
+    pub fn with_context_len(mut self, ctx: u128) -> Self {
+        self.params.ctx = ctx;
+        self
+    }
+
     pub fn with_retry_strategy(mut self, strategy: RetryStrategy) -> Self {
         self.retry_strategy = strategy;
         self
