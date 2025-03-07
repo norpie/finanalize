@@ -113,6 +113,7 @@ mod tests {
     use tempfile::tempdir;
 
     #[tokio::test]
+    #[ignore = "Uses Ollama for generation"]
     async fn test_extract() {
         dotenvy::from_filename(".env").ok();
         // Create a temporary directory
