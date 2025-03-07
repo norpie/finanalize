@@ -4,18 +4,19 @@ use crate::{llm::API, prelude::*, prompting, tasks::Task};
 use async_trait::async_trait;
 use log::debug;
 use polars::{io::SerReader, prelude::CsvReadOptions};
+use schemars::{schema_for, JsonSchema};
 use serde::{Deserialize, Serialize};
 
 pub struct CsvExtractor;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct DataClassifierOuput {
     pub title: String,
     pub description: String,
     pub columns: Vec<ClassifierColumn>,
 }
-#[derive(Debug, Clone, Serialize, Deserialize)]
 
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct ClassifierColumn {
     pub title: String,
     pub description: String,
@@ -63,7 +64,13 @@ impl DataExtract for CsvExtractor {
         //Start job run structured data classification
         let prompt = prompting::get_prompt("data-classifier".into())?;
         let task = Task::new(&prompt);
-        let output: DataClassifierOuput = task.run_structured(API.clone(), &input).await?;
+        let output: DataClassifierOuput = task
+            .run_structured(
+                API.clone(),
+                &input,
+                serde_json::to_string_pretty(&schema_for!(DataClassifierOuput))?,
+            )
+            .await?;
 
         // After getting your output from the task.run_structured call
         let mut columns = vec![];
