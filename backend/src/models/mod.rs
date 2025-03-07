@@ -232,7 +232,6 @@ use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
         job::{chunk_content::models::Chunk, validation::models::ValidationOutput},
         JobType,
     };
-    use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 
 
     impl FullReport {
