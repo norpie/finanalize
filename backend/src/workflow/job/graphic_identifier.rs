@@ -70,7 +70,7 @@ impl Job for GraphIdentifierJob {
                 };
                 debug!("Prepared input: {:#?}", input);
                 debug!("Running task...");
-                let output: models::GraphDataOutput = task
+                let output: GraphDataOutput = task
                     .run_structured(
                         API.clone(),
                         &input,

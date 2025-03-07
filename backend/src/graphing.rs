@@ -6,6 +6,7 @@ use plotters::style::full_palette::{
 };
 use serde::{Deserialize, Serialize};
 use std::env;
+use schemars::JsonSchema;
 
 #[derive(Debug)]
 enum GraphType {
@@ -27,7 +28,7 @@ impl GraphType {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
 pub struct GraphData {
     x_values: Vec<f32>,
     y_values: Vec<f32>,
@@ -36,7 +37,7 @@ pub struct GraphData {
     y_label: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
 pub struct HistogramData {
     x_values: Vec<u32>,
     y_values: Vec<f32>,
@@ -44,14 +45,14 @@ pub struct HistogramData {
     x_label: String,
     y_label: String,
 }
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
 pub struct PieChartData {
     values: Vec<f64>,
     labels: Vec<String>,
     caption: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
 pub struct StockChartData {
     dates: Vec<String>,
     open: Vec<f32>,
