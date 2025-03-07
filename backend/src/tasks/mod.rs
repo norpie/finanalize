@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{llm::LLMApi, prelude::*};
+use crate::{llm::{GenerationParams, LLMApi}, prelude::*};
 use handlebars::Handlebars;
 use log::{debug, error, info, warn};
 use serde::{de::DeserializeOwned, Serialize};
@@ -30,6 +30,7 @@ pub enum FixStrategy {
 #[derive(Debug, Clone)]
 pub struct Task {
     prompt: String,
+    params: GenerationParams,
     retry_strategy: RetryStrategy,
     fix_strategies: Vec<FixStrategy>,
 }
@@ -38,6 +39,7 @@ impl Task {
     pub fn new(template: &str) -> Self {
         Self {
             prompt: template.into(),
+            params: GenerationParams::default(),
             retry_strategy: RetryStrategy::Count(3),
             fix_strategies: Vec::new(),
         }
@@ -57,7 +59,7 @@ impl Task {
     where
         T: Serialize,
     {
-        api.generate(Handlebars::default().render_template(&self.prompt, input)?)
+        api.generate(&self.params, Handlebars::default().render_template(&self.prompt, input)?)
             .await
     }
 
@@ -113,7 +115,7 @@ impl Task {
         U: DeserializeOwned + std::fmt::Debug,
     {
         debug!("Starting generation.");
-        let generated = api.generate_json(prompt.clone(), schema).await?;
+        let generated = api.generate_json(&self.params, prompt.clone(), schema).await?;
         info!("Generated");
         let full = format!("{}{}", prompt, generated);
         debug!("Parsing output.");
