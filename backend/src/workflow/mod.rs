@@ -143,7 +143,7 @@ pub enum JobType {
 mod tests {
     use std::time::Duration;
 
-    use crate::db;
+    use crate::db::{self, DB};
 
     use super::*;
 
