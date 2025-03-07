@@ -6,10 +6,13 @@ use crate::workflow::WorkflowState;
 use crate::{graphing, prompting};
 use async_trait::async_trait;
 use log::debug;
+use schemars::schema_for;
+use crate::workflow::job::generate_graphs::models::{BarDataOutput, LineDataOutput, PieDataOutput, StockDataOutput, TableDataOutput};
 
 pub struct GenerateGraphsJob;
 
 pub mod models {
+    use schemars::JsonSchema;
     use crate::graphing::{GraphData, HistogramData, PieChartData, StockChartData};
     use serde::{Deserialize, Serialize};
     #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -28,30 +31,30 @@ pub mod models {
         pub file_path: String,
     }
 
-    #[derive(Debug, Serialize, Deserialize, Clone)]
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
     pub struct LineDataOutput {
         pub graph_data: GraphData,
     }
 
-    #[derive(Debug, Serialize, Deserialize, Clone)]
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
     pub struct BarDataOutput {
         pub graph_data: HistogramData,
     }
 
-    #[derive(Debug, Serialize, Deserialize, Clone)]
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
     pub struct PieDataOutput {
         pub graph_data: PieChartData,
     }
-    #[derive(Debug, Serialize, Deserialize, Clone)]
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
     pub struct StockDataOutput {
         pub graph_data: StockChartData,
     }
 
-    #[derive(Debug, Serialize, Deserialize, Clone)]
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
     pub struct TableDataOutput {
         pub graph_data: TableOutput,
     }
-    #[derive(Debug, Serialize, Deserialize, Clone)]
+    #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
     pub struct TableOutput {
         pub caption: String,
         pub rows: Vec<Vec<String>>,
@@ -81,8 +84,8 @@ impl Job for GenerateGraphsJob {
                 debug!("Running task...");
                 match graphic.graph_type.as_str() {
                     "line" => {
-                        let output: models::LineDataOutput =
-                            task.run_structured(API.clone(), &input).await?;
+                        let output: LineDataOutput =
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(LineDataOutput))?).await?;
                         let chart = graphing::create_graph(
                             "line".to_string(),
                             Some(output.graph_data),
@@ -99,7 +102,7 @@ impl Job for GenerateGraphsJob {
                     }
                     "bar" => {
                         let output: models::BarDataOutput =
-                            task.run_structured(API.clone(), &input).await?;
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(BarDataOutput))?).await?;
                         let chart = graphing::create_graph(
                             "bar".to_string(),
                             None,
@@ -116,7 +119,7 @@ impl Job for GenerateGraphsJob {
                     }
                     "pie" => {
                         let output: models::PieDataOutput =
-                            task.run_structured(API.clone(), &input).await?;
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(PieDataOutput))?).await?;
                         let chart = graphing::create_graph(
                             "pie".to_string(),
                             None,
@@ -133,7 +136,7 @@ impl Job for GenerateGraphsJob {
                     }
                     "stock" => {
                         let output: models::StockDataOutput =
-                            task.run_structured(API.clone(), &input).await?;
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(StockDataOutput))?).await?;
                         let chart = graphing::create_graph(
                             "stock".to_string(),
                             None,
@@ -150,7 +153,7 @@ impl Job for GenerateGraphsJob {
                     }
                     "table" => {
                         let output: models::TableDataOutput =
-                            task.run_structured(API.clone(), &input).await?;
+                            task.run_structured(API.clone(), &input, serde_json::to_string_pretty(&schema_for!(TableDataOutput))?).await?;
                         tables.push(output.graph_data);
                     }
                     _ => {}
