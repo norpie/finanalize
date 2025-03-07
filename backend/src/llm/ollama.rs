@@ -160,7 +160,10 @@ mod tests {
     async fn test_generate() {
         let ollama = Ollama::default();
         let response = ollama
-            .generate("Q: How tall is the Madou Tower in Brussels?\nA:".to_string())
+            .generate(
+                &GenerationParams::default(),
+                "Q: How tall is the Madou Tower in Brussels?\nA:".to_string(),
+            )
             .await;
         assert!(response.is_ok());
         dbg!(response.unwrap());
@@ -172,6 +175,7 @@ mod tests {
         let ollama = Ollama::default();
         let response = ollama
             .generate_json(
+                &GenerationParams::default(),
                 "Ollama is 22 years old and is busy saving the world. Respond using JSON"
                     .to_string(),
                 r#"{
