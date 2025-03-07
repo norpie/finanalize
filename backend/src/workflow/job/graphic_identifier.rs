@@ -56,7 +56,7 @@ impl Job for GraphIdentifierJob {
         let mut graphics = Vec::new();
         if let Some(texts) = state.state.texts.clone() {
             for text in texts {
-                let prompt = prompting::get_prompt("graph".into())?;
+                let prompt = prompting::get_prompt("graph-identifier".into())?;
                 let task = Task::new(&prompt);
                 let input = models::GraphInput {
                     chart_options: vec![
