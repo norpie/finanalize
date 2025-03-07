@@ -30,6 +30,11 @@ impl Default for GenerationParams {
 pub trait LLMApi: Send + Sync + 'static {
     /// Generate a response to a prompt, return the tokens as a string
     async fn generate(&self, params: &GenerationParams, prompt: String) -> Result<String>;
-    async fn generate_json(&self, params: &GenerationParams, prompt: String, json_schema: String) -> Result<String>;
+    async fn generate_json(
+        &self,
+        params: &GenerationParams,
+        prompt: String,
+        json_schema: String,
+    ) -> Result<String>;
     async fn embed(&self, text: String) -> Result<Vec<f32>>;
 }

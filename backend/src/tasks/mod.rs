@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use crate::{llm::{GenerationParams, LLMApi}, prelude::*};
+use crate::{
+    llm::{GenerationParams, LLMApi},
+    prelude::*,
+};
 use handlebars::Handlebars;
 use log::{debug, error, info, warn};
 use serde::{de::DeserializeOwned, Serialize};
@@ -71,8 +74,11 @@ impl Task {
     where
         T: Serialize,
     {
-        api.generate(&self.params, Handlebars::default().render_template(&self.prompt, input)?)
-            .await
+        api.generate(
+            &self.params,
+            Handlebars::default().render_template(&self.prompt, input)?,
+        )
+        .await
     }
 
     pub async fn run_structured<T, U>(
@@ -127,7 +133,9 @@ impl Task {
         U: DeserializeOwned + std::fmt::Debug,
     {
         debug!("Starting generation.");
-        let generated = api.generate_json(&self.params, prompt.clone(), schema).await?;
+        let generated = api
+            .generate_json(&self.params, prompt.clone(), schema)
+            .await?;
         info!("Generated");
         let full = format!("{}{}", prompt, generated);
         debug!("Parsing output.");
