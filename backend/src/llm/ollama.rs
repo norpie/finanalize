@@ -7,7 +7,7 @@ use crate::prelude::*;
 
 use std::{collections::HashMap, env};
 
-use super::LLMApi;
+use super::{GenerationParams, LLMApi};
 
 #[derive(Debug, Clone)]
 pub struct Ollama {
@@ -94,10 +94,67 @@ impl LLMApi for Ollama {
         Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
     }
 
+    async fn generate_paramed(&self, params: GenerationParams, prompt: String) -> Result<String> {
+        let mut options = default_options();
+        options.insert("num_ctx", Value::Number(Number::from_u128(params.ctx).unwrap()));
+        let request = OllamaCompletionRequest {
+            model: params.model,
+            prompt,
+            format: None,
+            options,
+            stream: false,
+            raw: true,
+        };
+        debug!("Ollama request: {:?}", request.model);
+        let value = self
+            .client
+            .post(format!("{}/api/generate", self.base_url))
+            .json(&request)
+            .send()
+            .await?
+            .json::<Value>()
+            .await?;
+        debug!("Ollama response");
+        Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
+    }
+
     async fn generate_json(&self, prompt: String, json_schema: String) -> Result<String> {
         let options = default_options();
         let request = OllamaCompletionRequest {
             model: self.completion_model.clone(),
+            prompt,
+            options,
+            stream: false,
+            raw: true,
+            format: Some(serde_json::from_str(&json_schema)?),
+        };
+
+        debug!("Ollama JSON request");
+
+        let value = self
+            .client
+            .post(format!("{}/api/generate", self.base_url))
+            .json(&request)
+            .send()
+            .await?
+            .json::<Value>()
+            .await?;
+
+        debug!("Ollama JSON response");
+
+        Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
+    }
+
+    async fn generate_json_paramed(
+        &self,
+        params: GenerationParams,
+        prompt: String,
+        json_schema: String,
+    ) -> Result<String> {
+        let mut options = default_options();
+        options.insert("num_ctx", Value::Number(Number::from_u128(params.ctx).unwrap()));
+        let request = OllamaCompletionRequest {
+            model: params.model,
             prompt,
             options,
             stream: false,
