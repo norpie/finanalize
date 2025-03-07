@@ -46,11 +46,13 @@ impl Task {
     }
 
     pub fn with_model(mut self, model: String) -> Self {
+        debug!("Setting model to: {}", model);
         self.params.model = model;
         self
     }
 
     pub fn with_context_len(mut self, ctx: u128) -> Self {
+        debug!("Setting context length to: {}", ctx);
         self.params.ctx = ctx;
         self
     }
