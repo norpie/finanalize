@@ -234,7 +234,6 @@ mod tests {
         },
         JobType,
     };
-    use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
 
     impl FullReport {
         pub fn new(id: String, user_input: String) -> Self {
