@@ -65,6 +65,7 @@ fn default_options() -> HashMap<&'static str, Value> {
     let mut options = HashMap::new();
     options.insert("stop", Value::Array(vec!["```".into(), "</Output>".into()]));
     options.insert("num_ctx", Value::Number(Number::from_u128(12228).unwrap()));
+    options.insert("keep_alice", Value::String("1m".into()));
     options.insert("temperature", Value::Number(Number::from_f64(0.5).unwrap()));
     options
 }
