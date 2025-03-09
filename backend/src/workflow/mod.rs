@@ -132,6 +132,8 @@ pub enum JobType {
     IndexChunks,
     // Answer the questions with RAG
     AnswerQuestions,
+    // Convert the question and answers into subsection conbtent
+    SectionizeQuestions,
     // Put all the content in the template, render it, then compile it to a PDF
     RenderLaTeXPdf,
     // The two end conditions
