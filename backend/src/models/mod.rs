@@ -138,6 +138,7 @@ pub struct FullSDBReport {
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
     pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
+    pub sub_section_contents: Option<Vec<Vec<String>>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
@@ -165,6 +166,7 @@ impl From<FullSDBReport> for FullReport {
             chunks: report.chunks,
             chunk_embeddings: report.chunk_embeddings,
             question_answer_pairs: report.question_answer_pairs,
+            sub_section_contents: report.sub_section_contents,
             report: report.report,
             texts: report.texts,
             graphics: report.graphics,
@@ -199,6 +201,7 @@ pub struct FullReport {
     pub chunks: Option<Vec<Chunk>>,
     pub chunk_embeddings: Option<Vec<EmbeddedChunk>>,
     pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
+    pub sub_section_contents: Option<Vec<Vec<String>>>,
     pub report: Option<String>,
     pub texts: Option<Vec<Text>>,
     pub graphics: Option<Vec<Graphic>>,
@@ -250,6 +253,7 @@ mod tests {
                 chunk_embeddings: None,
 
                 question_answer_pairs: None,
+                sub_section_contents: None,
 
                 report: None,
                 texts: None,
