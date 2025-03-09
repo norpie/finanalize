@@ -168,13 +168,6 @@ mod tests {
             tokio::time::sleep(Duration::from_secs(1)).await;
         }
         println!("{:?}", state.state.status);
-        let _deleted: SDBWorkflowState = DB
-            .get()
-            .unwrap()
-            .delete(("workflow_state", &state.id))
-            .await
-            .unwrap()
-            .unwrap();
         let _deleted: Vec<EmbeddedChunk> = DB
             .get()
             .unwrap()
