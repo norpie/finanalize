@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use log::debug;
+use models::SectionizeQuestionsJobInput;
 
 use crate::llm::API;
 use crate::tasks::Task;
@@ -41,8 +42,16 @@ impl Job for SectionizeQuestionsJob {
                     content.push_str(&qa_pair.answer);
                     content.push('\n');
                 }
-                debug!("Running task for section {} of {} and sub-section {} of {}", i + 1, sections_len, j + 1, sub_sections_len);
-                let sub_section_content = task.run_raw(API.clone(), &content).await?;
+                debug!(
+                    "Running task for section {} of {} and sub-section {} of {}",
+                    i + 1,
+                    sections_len,
+                    j + 1,
+                    sub_sections_len
+                );
+                let sub_section_content = task
+                    .run_raw(API.clone(), &SectionizeQuestionsJobInput { input: content })
+                    .await?;
                 sub_sections.push(sub_section_content);
             }
             sections.push(sub_sections);
