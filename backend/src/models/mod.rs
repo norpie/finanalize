@@ -2,6 +2,7 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
+use crate::extractors::Data;
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::classify_sources::models::ClassifiedSource;
 use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
@@ -134,6 +135,7 @@ pub struct FullSDBReport {
     pub html_sources: Option<Vec<PreClassificationSource>>,
     pub raw_sources: Option<Vec<PreClassificationSource>>,
     pub csv_sources: Option<Vec<String>>,
+    pub data_sources: Option<Vec<Data>>,
     pub formatted_sources: Option<Vec<PreClassificationSource>>,
     pub sources: Option<Vec<ClassifiedSource>>,
     pub chunks: Option<Vec<Chunk>>,
@@ -163,6 +165,7 @@ impl From<FullSDBReport> for FullReport {
             html_sources: report.html_sources,
             md_sources: report.raw_sources,
             csv_sources: report.csv_sources,
+            data_sources: report.data_sources,
             formatted_sources: report.formatted_sources,
             sources: report.sources,
             chunks: report.chunks,
@@ -199,6 +202,7 @@ pub struct FullReport {
     pub html_sources: Option<Vec<PreClassificationSource>>,
     pub md_sources: Option<Vec<PreClassificationSource>>,
     pub csv_sources: Option<Vec<String>>,
+    pub data_sources: Option<Vec<Data>>,
     pub formatted_sources: Option<Vec<PreClassificationSource>>,
     pub sources: Option<Vec<ClassifiedSource>>,
     pub chunks: Option<Vec<Chunk>>,
@@ -251,6 +255,7 @@ mod tests {
                 html_sources: None,
                 md_sources: None,
                 csv_sources: None,
+                data_sources: None,
                 formatted_sources: None,
                 sources: None,
                 chunks: None,
