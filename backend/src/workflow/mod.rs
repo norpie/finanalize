@@ -128,6 +128,8 @@ pub enum JobType {
     FormatContent,
     // Classify the content
     ClassifyContent,
+    // Classify the data
+    ClassifyData,
     // Chunk content
     ChunkContent,
     // Index the chunks
