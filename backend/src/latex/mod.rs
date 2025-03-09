@@ -122,7 +122,7 @@ pub fn get_commands(components: Vec<LatexComponent>) -> Result<Vec<LatexCommand>
             LatexComponent::Paragraph(paragraph) => {
                 commands.push(LatexCommand {
                     command: format!(r"\paragraph{{{}}}", paragraph.text.clone()),
-                    args: paragraph.text.clone(),
+                    args: "".into(),
                 });
             }
             LatexComponent::Text(text) => {
