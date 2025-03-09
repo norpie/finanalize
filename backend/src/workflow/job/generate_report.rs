@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use itertools::izip;
 use log::debug;
 
-use crate::latex::{self, LatexComponent, Paragraph, Section, Source, Subsection};
+use crate::latex::{self, LatexComponent, Section, Source, Subsection};
 use crate::prelude::*;
 
 use crate::workflow::WorkflowState;
@@ -22,12 +22,12 @@ impl Job for GenerateReportJob {
             "Generating report for: {}",
             state.state.title.clone().unwrap()
         );
-        for (section_name, sub_sections, sub_section_questions) in izip!(
+        for (section_name, sub_sections, sub_section_contents) in izip!(
             state.state.sections.clone().unwrap().into_iter(),
             state.state.sub_sections.clone().unwrap().into_iter(),
             state
                 .state
-                .question_answer_pairs
+                .sub_section_contents
                 .clone()
                 .unwrap()
                 .into_iter(),
@@ -35,18 +35,13 @@ impl Job for GenerateReportJob {
             components.push(LatexComponent::Section(Section {
                 heading: section_name,
             }));
-            for (sub_section_name, question_answer_pairs) in
-                sub_sections.into_iter().zip(sub_section_questions)
+            for (sub_section_name, sub_section_content) in
+                sub_sections.into_iter().zip(sub_section_contents)
             {
                 components.push(LatexComponent::Subsection(Subsection {
                     heading: sub_section_name,
                 }));
-                for pair in question_answer_pairs.into_iter() {
-                    components.push(LatexComponent::Paragraph(Paragraph {
-                        text: pair.question,
-                    }));
-                    components.push(LatexComponent::Text(pair.answer));
-                }
+                components.push(LatexComponent::Text(sub_section_content));
             }
         }
 
