@@ -5,6 +5,7 @@ use super::{JobType, WorkflowState};
 
 pub mod answer_questions;
 pub mod chunk_content;
+pub mod classify_data;
 pub mod classify_sources;
 pub mod content_formatter;
 pub mod extract_content;
@@ -44,7 +45,8 @@ impl JobType {
             JobType::ExtractContent => Some(JobType::ExtractData),
             JobType::ExtractData => Some(JobType::FormatContent),
             JobType::FormatContent => Some(JobType::ClassifyContent),
-            JobType::ClassifyContent => Some(JobType::ChunkContent),
+            JobType::ClassifyContent => Some(JobType::ClassifyData),
+            JobType::ClassifyData => Some(JobType::ChunkContent),
             JobType::ChunkContent => Some(JobType::IndexChunks),
             JobType::IndexChunks => Some(JobType::AnswerQuestions),
             JobType::AnswerQuestions => Some(JobType::SectionizeQuestions),
@@ -75,6 +77,7 @@ impl JobType {
             JobType::ExtractData => Some(Box::new(extract_data::ExtractDataJob)),
             JobType::FormatContent => Some(Box::new(content_formatter::FormatContentJob)),
             JobType::ClassifyContent => Some(Box::new(classify_sources::ClassifySourcesJob)),
+            JobType::ClassifyData => Some(Box::new(classify_data::ClassifyDataJob)),
             JobType::ChunkContent => Some(Box::new(chunk_content::ChunkContentJob)),
             JobType::IndexChunks => Some(Box::new(index_chunks::IndexChunksJob)),
             JobType::AnswerQuestions => Some(Box::new(answer_questions::AnswerQuestionsJob)),
