@@ -38,7 +38,7 @@ impl Job for SectionizeQuestionsJob {
                     content.push_str(&qa_pair.question);
                     content.push('\n');
                     content.push('\n');
-                    content.push_str(&qa_pair.question);
+                    content.push_str(&qa_pair.answer);
                     content.push('\n');
                 }
                 debug!("Running task for section {} of {} and sub-section {} of {}", i + 1, sections_len, j + 1, sub_sections_len);
