@@ -143,6 +143,8 @@ pub enum JobType {
 mod tests {
     use std::time::Duration;
 
+    use job::index_chunks::models::EmbeddedChunk;
+
     use crate::db::{self, DB};
 
     use super::*;
@@ -166,5 +168,21 @@ mod tests {
             tokio::time::sleep(Duration::from_secs(1)).await;
         }
         println!("{:?}", state.state.status);
+        let _deleted: SDBWorkflowState = DB
+            .get()
+            .unwrap()
+            .delete(("workflow_state", &state.id))
+            .await
+            .unwrap()
+            .unwrap();
+        let _deleted: Vec<EmbeddedChunk> = DB
+            .get()
+            .unwrap()
+            .query("DELETE embedded_chunk WHERE report_id = $id")
+            .bind(("id", state.id))
+            .await
+            .unwrap()
+            .take(0)
+            .unwrap();
     }
 }
