@@ -97,7 +97,7 @@ impl Job for ClassifyDataJob {
             };
             classified_sources.push(data);
         }
-        state.state.classified_data_sources = Some(classified_sources);
+        state.state.data_sources = Some(classified_sources);
         Ok(state)
     }
 }
