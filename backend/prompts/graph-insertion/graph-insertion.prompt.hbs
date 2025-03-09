@@ -1,40 +1,19 @@
-This tool analyzes the given text and graph caption to determine the most suitable location for inserting the graph.
+This tool analyzes the given text and chart or table caption to determine the most suitable location for inserting the graph.
 It identifies the point in the text where the graph would provide the most clarity or enhance understanding.
 The output specifies the recommended position by referencing the closest surrounding content.
-If no suitable location is found, the tool returns an error message indicating that the graph does not fit meaningfully into the text.
+The tool also provides the context of the recommended location, including the preceding and following text.
 
-<!--Output schema:-->
-<!--```json-->
-<!--{-->
-<!--    "type": "object",-->
-<!--    "properties": {-->
-<!--        "position": {-->
-<!--            "type": "array",-->
-<!--            "items": {-->
-<!--                "type": "string"-->
-<!--            },-->
-<!--            "minItems": 2,-->
-<!--            "maxItems": 2,-->
-<!--            "description": "An array of two text chunks between which the graph should be inserted."-->
-<!--        },-->
-<!--        "error": {-->
-<!--            "type": "string",-->
-<!--            "description": "Error message if no suitable position is found."-->
-<!--        }-->
-<!--    },-->
-<!--    "required": ["position"]-->
-<!--}-->
-<!--```-->
+If no suitable location is found, the tool returns an error message indicating that the graph does not fit meaningfully into the text.
 
 <Input>
 ```json
 {
-  "reportText": {{{report_text}}},
-  "graphCaption": {{{graph_caption}}}
+    "report_text": {{{report_text}}},
+    "chart_caption": {{{chart_caption}}},
+    "table_caption": {{{table_caption}}}
 }
 ```
 </Input>
 
 <Output>
 ```json
-{
