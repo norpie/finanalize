@@ -15,6 +15,7 @@ pub mod scrape_pages;
 pub mod search_queries;
 pub mod search_terms;
 pub mod section_names;
+pub mod sectionize_questions;
 pub mod sub_section_questions;
 pub mod sub_sections;
 pub mod title;
@@ -44,7 +45,8 @@ impl JobType {
             JobType::ClassifyContent => Some(JobType::ChunkContent),
             JobType::ChunkContent => Some(JobType::IndexChunks),
             JobType::IndexChunks => Some(JobType::AnswerQuestions),
-            JobType::AnswerQuestions => Some(JobType::RenderLaTeXPdf),
+            JobType::AnswerQuestions => Some(JobType::SectionizeQuestions),
+            JobType::SectionizeQuestions => Some(JobType::RenderLaTeXPdf),
             JobType::RenderLaTeXPdf => Some(JobType::Done),
             // Done
             JobType::Invalid => None,
@@ -73,6 +75,7 @@ impl JobType {
             JobType::ChunkContent => Some(Box::new(chunk_content::ChunkContentJob)),
             JobType::IndexChunks => Some(Box::new(index_chunks::IndexChunksJob)),
             JobType::AnswerQuestions => Some(Box::new(answer_questions::AnswerQuestionsJob)),
+            JobType::SectionizeQuestions => Some(Box::new(sectionize_questions::SectionizeQuestionsJob)),
             JobType::RenderLaTeXPdf => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }
