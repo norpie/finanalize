@@ -13,9 +13,7 @@ use crate::workflow::{
     },
     JobType,
 };
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use surrealdb::sql::Thing;
+use crate::workflow::job::graph_insertion::models::GraphInsertionOutput;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -150,6 +148,9 @@ pub struct FullSDBReport {
     pub graphics: Option<Vec<Graphic>>,
     pub charts: Option<Vec<GraphFileOutput>>,
     pub tables: Option<Vec<TableOutput>>,
+    pub report_text: Option<String>,
+    pub chart_positions: Option<Vec<GraphInsertionOutput>>,
+    pub table_positions: Option<Vec<GraphInsertionOutput>>,
 }
 
 impl From<FullSDBReport> for FullReport {
@@ -182,6 +183,9 @@ impl From<FullSDBReport> for FullReport {
             graphics: report.graphics,
             charts: report.charts,
             tables: report.tables,
+            report_text: report.report_text,
+            chart_positions: report.chart_positions,
+            table_positions: report.table_positions,
         }
     }
 }
@@ -221,6 +225,9 @@ pub struct FullReport {
     pub graphics: Option<Vec<Graphic>>,
     pub charts: Option<Vec<GraphFileOutput>>,
     pub tables: Option<Vec<TableOutput>>,
+    pub report_text: Option<String>,
+    pub chart_positions: Option<Vec<GraphInsertionOutput>>,
+    pub table_positions: Option<Vec<GraphInsertionOutput>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -240,10 +247,11 @@ mod tests {
     use crate::workflow::{
         job::{
             chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
-            validation::models::ValidationOutput,
+            validation::models::ValidationOutput, graphic_identifier::models::{Graphic, Text}
         },
         JobType,
     };
+    use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
 
     impl FullReport {
         pub fn new(id: String, user_input: String) -> Self {
@@ -279,6 +287,9 @@ mod tests {
                 graphics: None,
                 charts: None,
                 tables: None,
+                report_text: None,
+                chart_positions: None,
+                table_positions: None,
             }
         }
 
@@ -347,6 +358,21 @@ mod tests {
 
         pub fn with_graphics(mut self, graphics: Vec<Graphic>) -> Self {
             self.graphics = Some(graphics);
+            self
+        }
+
+        pub fn with_report_text(mut self, report_text: String) -> Self {
+            self.report_text = Some(report_text);
+            self
+        }
+
+        pub fn with_charts(mut self, charts: Vec<GraphFileOutput>) -> Self {
+            self.charts = Some(charts);
+            self
+        }
+
+        pub fn with_tables(mut self, tables: Vec<TableOutput>) -> Self {
+            self.tables = Some(tables);
             self
         }
     }
