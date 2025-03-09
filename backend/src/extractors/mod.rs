@@ -42,16 +42,16 @@ pub struct Figure {
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Data {
-    title: String,
-    description: String,
-    columns: Vec<Column>,
+    pub title: String,
+    pub description: String,
+    pub columns: Vec<Column>,
 }
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Column {
-    name: String,
-    description: String,
-    values: Vec<String>,
+    pub name: String,
+    pub description: String,
+    pub values: Vec<String>,
 }
 
 #[async_trait]
