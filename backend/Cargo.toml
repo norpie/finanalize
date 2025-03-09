@@ -47,3 +47,4 @@ mdka = "1.4.3"
 schemars = { version = "0.8.22", features = ["derive_json_schema"] }
 markup5ever = "0.14.1"
 regex = "1.11.1"
+markdown = "1.0.0-alpha.23"
