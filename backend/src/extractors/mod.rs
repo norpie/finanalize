@@ -40,14 +40,14 @@ pub struct Figure {
     pub caption: Option<String>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Data {
     pub title: String,
     pub description: String,
     pub columns: Vec<Column>,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Column {
     pub name: String,
     pub description: String,
