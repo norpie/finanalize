@@ -2,23 +2,33 @@ use crate::llm::API;
 use crate::prelude::*;
 use crate::prompting;
 use crate::tasks::Task;
-use crate::workflow::job::generate_visualizations::models::{Visualization, VisualizationOutput};
+use crate::workflow::job::generate_visualizations::models::{ColumnInput, DataInput, Visualization, VisualizationOutput};
 use crate::workflow::job::Job;
 use crate::workflow::WorkflowState;
 use async_trait::async_trait;
 use log::debug;
 use schemars::schema_for;
-// TODO: Output only graph type, data no need for it
 pub struct GenerateVisualizationsJob;
-
 pub mod models {
     use crate::extractors::Data;
     use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
-
+    
+    #[derive(Debug, Serialize, Deserialize, Clone)]
+    pub struct DataInput {
+        pub title: String,
+        pub description: String,
+        pub columns: Vec<ColumnInput>,
+    }
+    
+    #[derive(Debug, Serialize, Deserialize, Clone)]
+    pub struct ColumnInput {
+        pub name: String,
+        pub description: String,
+    }
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct VisualizationInput {
-        pub data: Data,
+        pub data: DataInput,
         pub graph_types: Vec<String>,
     }
 
@@ -41,8 +51,16 @@ impl Job for GenerateVisualizationsJob {
         let mut visuals = Vec::new();
         if let Some(extracted_data) = state.state.extracted_data.clone() {
             for data in extracted_data {
+                let data_input = DataInput {
+                    title: data.title.clone(),
+                    description: data.description.clone(),
+                    columns: data.columns.iter().map(|c| ColumnInput {
+                        name: c.name.clone(),
+                        description: c.description.clone()
+                    }).collect()
+                };
                 let input = models::VisualizationInput {
-                    data: data.clone(),
+                    data: data_input.clone(),
                     graph_types: vec![
                         "bar".to_string(),
                         "line".to_string(),
