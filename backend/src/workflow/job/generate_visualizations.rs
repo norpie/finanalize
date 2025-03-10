@@ -41,7 +41,6 @@ impl Job for GenerateVisualizationsJob {
         let mut visuals = Vec::new();
         if let Some(extracted_data) = state.state.extracted_data.clone() {
             for data in extracted_data {
-                dbg!(&data);
                 let input = models::VisualizationInput {
                     data: data.clone(),
                     graph_types: vec![
@@ -52,7 +51,6 @@ impl Job for GenerateVisualizationsJob {
                         "table".to_string(),
                     ],
                 };
-                dbg!(&input);
                 debug!("Prepared input: {:#?}", input);
                 debug!("Running task...");
                 let prompt = prompting::get_prompt("graph-visualization".into())?;
@@ -64,7 +62,6 @@ impl Job for GenerateVisualizationsJob {
                         serde_json::to_string_pretty(&schema_for!(Visualization))?
                     )
                     .await?;
-                dbg!(&output);
                 visuals.push( Visualization {
                     visual_type: output.visual_type.clone(),
                     data: data.clone()
