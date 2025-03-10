@@ -13,9 +13,6 @@
         <nav class="flex gap-6">
             <a href="/" class="hover:text-purple-400">Home</a>
             <a href="/about" class="hover:text-purple-400">About</a>
-            <div class="relative">
-                <button class="hover:text-purple-400">ENG ▼</button>
-            </div>
         </nav>
         <div class="flex gap-2">
             <a href="/login">
