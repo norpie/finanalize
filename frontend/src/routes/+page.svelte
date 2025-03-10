@@ -4,8 +4,16 @@
 
 	import { goto } from '$app/navigation';
 	import { user } from '$lib/store';
+	import { func } from 'effect/FastCheck';
 
-    $inspect($user);
+	$inspect($user);
+
+	function showText(event) {
+		event.target.querySelectorAll('p')[1].classList.remove('hidden');
+	}	
+	function hideText(event) {
+		event.target.querySelectorAll('p')[1].classList.add('hidden');
+	}
 </script>
 
 <div class="landing-page-wrapper min-h-screen bg-black text-white">
@@ -18,9 +26,6 @@
 		<nav class="flex gap-6">
 			<a href="/about" class="hover:text-purple-400">About</a>
 			<a href="/contact" class="hover:text-purple-400">Contact</a>
-			<div class="relative">
-				<button class="hover:text-purple-400">ENG ▼</button>
-			</div>
 		</nav>
 		<div class="flex gap-2">
 			<!-- Existing Button Logic -->
@@ -54,35 +59,52 @@
 		<section class="features py-16 text-center">
 			<div class="grid grid-cols-1 gap-6 md:grid-cols-3">
 				<div
-					class="feature-card rounded-lg bg-gray-800 p-6 text-white shadow transition-all duration-300"
+				role="contentinfo"
+					class="feature-card rounded-lg bg-purple-900 p-6 text-white shadow transition-all duration-300"
+					onmouseenter={showText} onmouseleave={hideText}
 				>
-					<h3 class="mb-2 text-xl font-medium">Our Trained Finanalize Bot</h3>
-					<p class="text-gray-400">Get insights from our advanced AI-driven bot.</p>
+					<h3 class="mb-2 text-xl font-medium">Your AI-Powered Investment Assistant</h3>
+					<p class="text-gray-400">
+						Make data-driven decisions with cutting-edge financial analysis.
+					</p>
 					<p class="mt-4 hidden text-gray-300">
-						Our Finanalize Bot uses state-of-the-art AI algorithms to analyze financial data and
-						provide you with actionable insights. Whether you're looking for trends, anomalies, or
-						detailed reports, our bot has you covered.
+						Our AI-driven assistant scours the internet, aggregating and analyzing financial data
+						from trusted sources, news articles, company reports, and market trends. Using advanced
+						data-scraping techniques, it compiles a well-structured financial report tailored to the
+						company, stock, or asset you’re researching. Whether you need insights on historical
+						performance, industry sentiment, or risk factors, our system ensures you have all the
+						relevant data in one place to make informed investment decisions with confidence.
 					</p>
 				</div>
 				<div
-					class="feature-card rounded-lg bg-gray-800 p-6 text-white shadow transition-all duration-300"
+				role="contentinfo"
+					class="feature-card rounded-lg bg-purple-900 p-6 text-white shadow transition-all duration-300"
+					onmouseenter={showText} onmouseleave={hideText}
 				>
 					<h3 class="mb-2 text-xl font-medium">Prestigious Companies</h3>
 					<p class="text-gray-400">Analyze data from the top companies worldwide.</p>
 					<p class="mt-4 hidden text-gray-300">
-						We provide detailed financial reports from the most prestigious companies around the
-						globe. Stay informed with the latest data and make well-informed investment decisions.
+						Stay informed with comprehensive financial reports from leading global companies across
+						various industries. Our system aggregates and processes real-time market data,
+						historical performance records, and industry insights, giving you a complete picture of
+						a company's financial health. With this valuable information, you can confidently assess
+						potential investment opportunities and align them with your financial goals.
 					</p>
 				</div>
 				<div
-					class="feature-card rounded-lg bg-gray-800 p-6 text-white shadow transition-all duration-300"
+				role="contentinfo"
+					class="feature-card rounded-lg bg-purple-900 p-6 text-white shadow transition-all duration-300"
+					onmouseenter={showText} onmouseleave={hideText}
 				>
 					<h3 class="mb-2 text-xl font-medium">Precise Search</h3>
 					<p class="text-gray-400">Quickly find the data you need with precision.</p>
 					<p class="mt-4 hidden text-gray-300">
-						Our precise search functionality allows you to quickly find the financial data you need.
-						With advanced filtering and sorting options, you can easily navigate through vast
-						amounts of information.
+						Our powerful search instantly scans and retrieves relevant financial data from multiple
+						sources, helping you cut through the noise. Whether you're searching for company
+						fundamentals, stock performance, or breaking financial news, our system delivers precise
+						and up-to-date results. With advanced filtering and sorting options, you can quickly
+						refine your search and access the critical information you need—without endless
+						scrolling or guesswork.
 					</p>
 				</div>
 			</div>
@@ -99,10 +121,21 @@
 	.hero {
 		background-image: linear-gradient(to right, #2d2d2d, #1a1a1a);
 	}
+	.feature-card{
+		transition: transform 0.2s ease-in-out;
+	}
 
 	.feature-card:hover {
 		transform: scale(1.05);
-		transition: transform 0.2s ease-in-out;
 		background-color: #4c3c88;
+	}
+
+	/* Add margin to the left of the first card and right of the last card */
+	.feature-card:first-child {
+		margin-left: 1rem;
+	}
+
+	.feature-card:last-child {
+		margin-right: 1rem;
 	}
 </style>

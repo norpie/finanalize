@@ -8,10 +8,14 @@
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import { get, post } from '$lib/request';
-	import {onDestroy, onMount} from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import Spinner from '$lib/components/spinner.svelte';
 	import { toast } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
+	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	import { sumAll } from 'effect/BigInt';
+	import { samples } from 'effect/TestServices';
+	import { size } from 'effect/Record';
 
 	interface Report {
 		id: string;
@@ -25,6 +29,8 @@
 	function boop(page: number) {
 		console.log(page);
 	}
+	let selectedSize = $state('small');
+	let selectedModel = $state('l');
 
 	const startStatuses = ['Pending'];
 	const endStatuses = ['Invalid', 'Done'];
@@ -70,32 +76,49 @@
 		dialogOpen = false;
 		let newReport = (
 			await post<Report>('v1/protected/reports', {
-				user_input: newReportSubject
+				user_input: newReportSubject,
+				size: selectedSize,
+				model: 'l'
 			})
 		).result;
 		if (!newReport) {
 			toast.error('Failed to create new report');
 		}
+		console.log('Size:', selectedSize);
+		console.log('Model:', selectedModel);
 		goto(`/reports/${newReport.id}`);
 	}
 
 	onMount(async () => {
 		reports = (await get<Report[]>('v1/protected/reports?page=0&perPage=20')).result;
 	});
-
 </script>
 
 <div class="flex flex-1 flex-col gap-4 p-4">
 	<Dialog.Root bind:open={dialogOpen}>
 		<Dialog.Trigger>New Report</Dialog.Trigger>
 		<Dialog.Header>New Report</Dialog.Header>
-		<Dialog.Content>
-			<Dialog.Title>What is the subject of your report?</Dialog.Title>
+		<Dialog.Content class="flex flex-col items-center">
+			<Tabs.Root bind:value={selectedSize} class="w-[400px]" >
+				<Tabs.List class="mb-4 grid w-full grid-cols-3">
+					<Tabs.Trigger value="small">Small</Tabs.Trigger>
+					<Tabs.Trigger value="medium">Medium</Tabs.Trigger>
+					<Tabs.Trigger value="large">Large</Tabs.Trigger>
+				</Tabs.List>
+			</Tabs.Root>
+			<Tabs.Root bind:value={selectedModel} class="w-[400px]">
+				<Tabs.List class="grid w-full grid-cols-2">
+					<Tabs.Trigger value="l">L</Tabs.Trigger>
+					<Tabs.Trigger value="l">Q</Tabs.Trigger>
+				</Tabs.List>
+			</Tabs.Root>
+
+			<Dialog.Title class="mt-4">What is the subject of your report?</Dialog.Title>
 			<Textarea class="mt-4 resize-none" bind:value={newReportSubject} />
-			<Button onclick={newReport}>Submit</Button>
+			<Button class="mt-4" onclick={newReport}>Submit</Button>
 		</Dialog.Content>
 	</Dialog.Root>
-	<div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min">
+	<div class="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min">
 		{#if reports}
 			<Table.Root>
 				<Table.Header>
