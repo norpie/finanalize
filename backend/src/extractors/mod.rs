@@ -1,5 +1,6 @@
 use crate::prelude::*;
 use async_trait::async_trait;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 pub mod csv;
@@ -40,14 +41,14 @@ pub struct Figure {
     pub caption: Option<String>,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, JsonSchema)]
 pub struct Data {
     pub title: String,
     pub description: String,
     pub columns: Vec<Column>,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Clone, JsonSchema)]
 pub struct Column {
     pub name: String,
     pub description: String,
