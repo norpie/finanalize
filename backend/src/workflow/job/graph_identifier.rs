@@ -100,7 +100,7 @@ mod tests {
     };
 
     #[tokio::test]
-    // #[ignore = "Uses LLM API (External Service)"]
+    #[ignore = "Uses LLM API (External Service)"]
     async fn test_identify_graphs_job() {
         env_logger::init();
         dotenvy::from_filename(".env").ok();
