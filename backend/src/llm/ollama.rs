@@ -1,13 +1,18 @@
 use async_trait::async_trait;
+use chrono::Duration;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{Number, Value};
+use serde_with::serde_as;
 
-use crate::prelude::*;
+use crate::{
+    llm::{Api, GenerationResult},
+    prelude::*,
+};
 
 use std::{collections::HashMap, env};
 
-use super::{GenerationParams, LLMApi};
+use super::{GenerationCaching, GenerationParams, LLMApi};
 
 #[derive(Debug, Clone)]
 pub struct Ollama {
@@ -56,9 +61,14 @@ pub struct OllamaEmbedResponse {
     embeddings: Vec<Vec<f32>>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct OllamaCompletionResponse {
+#[serde_as]
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct OllamaCompletionResult {
     response: String,
+    #[serde_as(as = "serde_with::DurationNanoSeconds<i64>")]
+    pub total_duration: Duration,
+    pub prompt_eval_count: usize,
+    pub eval_count: usize,
 }
 
 fn default_options() -> HashMap<&'static str, Value> {
@@ -72,7 +82,11 @@ fn default_options() -> HashMap<&'static str, Value> {
 
 #[async_trait]
 impl LLMApi for Ollama {
-    async fn generate(&self, params: &GenerationParams, prompt: String) -> Result<String> {
+    async fn generate(
+        &self,
+        params: &GenerationParams,
+        prompt: String,
+    ) -> Result<GenerationResult> {
         let mut options = default_options();
         options.insert(
             "num_ctx",
@@ -96,7 +110,15 @@ impl LLMApi for Ollama {
             .json::<Value>()
             .await?;
         debug!("Ollama response");
-        Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
+        let result = serde_json::from_value::<OllamaCompletionResult>(value)?;
+        Ok(GenerationResult {
+            generated: result.response,
+            api: Api::Ollama,
+            prompt_token_count: result.prompt_eval_count,
+            generated_token_count: result.eval_count,
+            caching: GenerationCaching::None,
+            total_duration_us: result.total_duration.num_microseconds().unwrap_or(0),
+        })
     }
 
     async fn generate_json(
@@ -104,7 +126,7 @@ impl LLMApi for Ollama {
         params: &GenerationParams,
         prompt: String,
         json_schema: String,
-    ) -> Result<String> {
+    ) -> Result<GenerationResult> {
         let mut options = default_options();
         options.insert(
             "num_ctx",
@@ -131,8 +153,15 @@ impl LLMApi for Ollama {
             .await?;
 
         debug!("Ollama JSON response");
-
-        Ok(serde_json::from_value::<OllamaCompletionResponse>(value)?.response)
+        let result = serde_json::from_value::<OllamaCompletionResult>(value)?;
+        Ok(GenerationResult {
+            generated: result.response,
+            api: Api::Ollama,
+            prompt_token_count: result.prompt_eval_count,
+            generated_token_count: result.eval_count,
+            caching: GenerationCaching::None,
+            total_duration_us: result.total_duration.num_microseconds().unwrap_or(0),
+        })
     }
 
     async fn embed(&self, text: String) -> Result<Vec<f32>> {
@@ -163,7 +192,7 @@ mod tests {
         let response = ollama
             .generate(
                 &GenerationParams::default(),
-                "Q: How tall is the Madou Tower in Brussels?\nA:".to_string(),
+                "# Hello World in python\n```py\n".to_string(),
             )
             .await;
         assert!(response.is_ok());

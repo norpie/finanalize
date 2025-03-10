@@ -79,6 +79,7 @@ impl Task {
             Handlebars::default().render_template(&self.prompt, input)?,
         )
         .await
+        .map(|res| res.generated)
     }
 
     pub async fn run_structured<T, U>(
@@ -135,7 +136,8 @@ impl Task {
         debug!("Starting generation.");
         let generated = api
             .generate_json(&self.params, prompt.clone(), schema)
-            .await?;
+            .await
+            .map(|res| res.generated)?;
         info!("Generated");
         let full = format!("{}{}", prompt, generated);
         debug!("Parsing output.");
