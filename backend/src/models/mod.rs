@@ -5,7 +5,7 @@ use crate::extractors::Data;
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::classify_sources::models::ClassifiedSource;
 use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
-use crate::workflow::job::graphic_identifier::models::{Graphic, Text};
+use crate::workflow::job::generate_visualizations::models::Visualization;
 use crate::workflow::{
     job::{
         chunk_content::models::Chunk, index_chunks::models::EmbeddedChunk,
@@ -13,7 +13,7 @@ use crate::workflow::{
     },
     JobType,
 };
-use crate::workflow::job::graph_insertion::models::GraphInsertionOutput;
+use crate::workflow::job::graph_identifier::models::GraphIdentifierOutput;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -144,13 +144,13 @@ pub struct FullSDBReport {
     pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
     pub sub_section_contents: Option<Vec<Vec<String>>>,
     pub report: Option<String>,
-    pub texts: Option<Vec<Text>>,
-    pub graphics: Option<Vec<Graphic>>,
+    pub extracted_data: Option<Vec<Data>>,
+    pub visuals: Option<Vec<Visualization>>,
     pub charts: Option<Vec<GraphFileOutput>>,
     pub tables: Option<Vec<TableOutput>>,
     pub report_text: Option<String>,
-    pub chart_positions: Option<Vec<GraphInsertionOutput>>,
-    pub table_positions: Option<Vec<GraphInsertionOutput>>,
+    pub chart_positions: Option<Vec<GraphIdentifierOutput>>,
+    pub table_positions: Option<Vec<GraphIdentifierOutput>>,
 }
 
 impl From<FullSDBReport> for FullReport {
@@ -179,8 +179,8 @@ impl From<FullSDBReport> for FullReport {
             question_answer_pairs: report.question_answer_pairs,
             sub_section_contents: report.sub_section_contents,
             report: report.report,
-            texts: report.texts,
-            graphics: report.graphics,
+            extracted_data: report.extracted_data,
+            visuals: report.visuals,
             charts: report.charts,
             tables: report.tables,
             report_text: report.report_text,
@@ -221,13 +221,13 @@ pub struct FullReport {
     pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
     pub sub_section_contents: Option<Vec<Vec<String>>>,
     pub report: Option<String>,
-    pub texts: Option<Vec<Text>>,
-    pub graphics: Option<Vec<Graphic>>,
+    pub extracted_data: Option<Vec<Data>>,
+    pub visuals: Option<Vec<Visualization>>,
     pub charts: Option<Vec<GraphFileOutput>>,
     pub tables: Option<Vec<TableOutput>>,
     pub report_text: Option<String>,
-    pub chart_positions: Option<Vec<GraphInsertionOutput>>,
-    pub table_positions: Option<Vec<GraphInsertionOutput>>,
+    pub chart_positions: Option<Vec<GraphIdentifierOutput>>,
+    pub table_positions: Option<Vec<GraphIdentifierOutput>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -247,7 +247,7 @@ mod tests {
     use crate::workflow::{
         job::{
             chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
-            validation::models::ValidationOutput, graphic_identifier::models::{Graphic, Text}
+            validation::models::ValidationOutput,
         },
         JobType,
     };
@@ -283,13 +283,14 @@ mod tests {
                 sub_section_contents: None,
 
                 report: None,
-                texts: None,
-                graphics: None,
+                extracted_data: None,
+                visuals: None,
                 charts: None,
                 tables: None,
                 report_text: None,
                 chart_positions: None,
                 table_positions: None,
+
             }
         }
 
@@ -346,18 +347,18 @@ mod tests {
             self
         }
 
-        pub fn with_texts(mut self, texts: Vec<Text>) -> Self {
-            self.texts = Some(texts);
-            self
-        }
-
         pub fn with_chunks(mut self, chunks: Vec<Chunk>) -> Self {
             self.chunks = Some(chunks);
             self
         }
 
-        pub fn with_graphics(mut self, graphics: Vec<Graphic>) -> Self {
-            self.graphics = Some(graphics);
+        pub fn with_extracted_data(mut self, extracted_data: Vec<crate::extractors::Data>) -> Self {
+            self.extracted_data = Some(extracted_data);
+            self
+        }
+        
+        pub fn with_visuals(mut self, visuals: Vec<crate::workflow::job::generate_visualizations::models::Visualization>) -> Self {
+            self.visuals = Some(visuals);
             self
         }
 
