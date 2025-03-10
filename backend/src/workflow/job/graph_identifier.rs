@@ -2,27 +2,27 @@ use crate::llm::API;
 use crate::prelude::*;
 use crate::prompting;
 use crate::tasks::Task;
-use crate::workflow::job::graph_insertion::models::GraphInsertionOutput;
+use crate::workflow::job::graph_identifier::models::GraphIdentifierOutput;
 use crate::workflow::job::Job;
 use crate::workflow::WorkflowState;
 use async_trait::async_trait;
 use log::debug;
 use schemars::schema_for;
 
-pub struct GraphInsertionJob;
+pub struct GraphIdentifierJob;
 pub mod models {
     use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct GraphInsertionInput {
+    pub struct GraphIdentifierInput {
         pub report_text: String,
         pub chart_caption: Option<String>,
         pub table_caption: Option<String>,
     }
 
     #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-    pub struct GraphInsertionOutput {
+    pub struct GraphIdentifierOutput {
         pub chart_caption: Option<String>,
         pub table_caption: Option<String>,
         pub position: Vec<String>,
@@ -30,9 +30,9 @@ pub mod models {
 }
 
 #[async_trait]
-impl Job for GraphInsertionJob {
+impl Job for GraphIdentifierJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
-        debug!("Running GraphInsertionJob...");
+        debug!("Running GraphIdentifierJob...");
         let mut chart_positions = Vec::new();
         let mut table_positions = Vec::new();
         if let Some(report_text) = state.state.report_text.clone() {
@@ -40,20 +40,20 @@ impl Job for GraphInsertionJob {
             let tables = state.state.tables.clone();
             if let Some(charts) = charts {
                 for chart in charts {
-                    let prompt = prompting::get_prompt("graph-insertion".into())?;
+                    let prompt = prompting::get_prompt("graph-identifier".into())?;
                     let task = Task::new(&prompt);
-                    let input = models::GraphInsertionInput {
+                    let input = models::GraphIdentifierInput {
                         report_text: report_text.clone(),
                         chart_caption: Some(chart.graph_caption.clone()),
                         table_caption: None,
                     };
                     debug!("Prepared input: {:#?}", input);
                     debug!("Running task...");
-                    let output: GraphInsertionOutput = task
+                    let output: GraphIdentifierOutput = task
                         .run_structured(
                             API.clone(),
                             &input,
-                            serde_json::to_string_pretty(&schema_for!(GraphInsertionOutput))?,
+                            serde_json::to_string_pretty(&schema_for!(GraphIdentifierOutput))?,
                         )
                         .await?;
                     chart_positions.push(output);
@@ -62,20 +62,20 @@ impl Job for GraphInsertionJob {
             }
             if let Some(tables) = tables {
                 for table in tables {
-                    let prompt = prompting::get_prompt("graph-insertion".into())?;
+                    let prompt = prompting::get_prompt("graph-identifier".into())?;
                     let task = Task::new(&prompt);
-                    let input = models::GraphInsertionInput {
+                    let input = models::GraphIdentifierInput {
                         report_text: report_text.clone(),
                         chart_caption: None,
                         table_caption: Some(table.caption.clone()),
                     };
                     debug!("Prepared input: {:#?}", input);
                     debug!("Running task...");
-                    let output: GraphInsertionOutput = task
+                    let output: GraphIdentifierOutput = task
                         .run_structured(
                             API.clone(),
                             &input,
-                            serde_json::to_string_pretty(&schema_for!(GraphInsertionOutput))?,
+                            serde_json::to_string_pretty(&schema_for!(GraphIdentifierOutput))?,
                         )
                         .await?;
                     table_positions.push(output);
@@ -101,10 +101,10 @@ mod tests {
 
     #[tokio::test]
     // #[ignore = "Uses LLM API (External Service)"]
-    async fn test_generate_graphs_job() {
+    async fn test_identify_graphs_job() {
         env_logger::init();
         dotenvy::from_filename(".env").ok();
-        let job = GraphInsertionJob;
+        let job = GraphIdentifierJob;
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
