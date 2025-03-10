@@ -65,7 +65,8 @@ impl From<GenerationResult> for String {
 #[async_trait]
 pub trait LLMApi: Send + Sync + 'static {
     /// Generate a response to a prompt, return the tokens as a string
-    async fn generate(&self, params: &GenerationParams, prompt: String) -> Result<GenerationResult>;
+    async fn generate(&self, params: &GenerationParams, prompt: String)
+        -> Result<GenerationResult>;
     async fn generate_json(
         &self,
         params: &GenerationParams,
