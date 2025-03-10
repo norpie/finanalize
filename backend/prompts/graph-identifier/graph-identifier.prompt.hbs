@@ -1,7 +1,7 @@
 This tool analyzes the given text and chart or table caption to determine the most suitable location for inserting the graph.
 It identifies the point in the text where the graph would provide the most clarity or enhance understanding.
 The output specifies the recommended position by referencing the closest surrounding content.
-The tool also provides the context of the recommended location, including the preceding and following text.
+The `position` field in the output is an array of two chunks of text, where the chart or table shall be placed in between.
 
 If no suitable location is found, the tool returns an error message indicating that the graph does not fit meaningfully into the text.
 
