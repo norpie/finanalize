@@ -15,7 +15,7 @@ pub mod models {
     use crate::graphing::{GraphData, HistogramData, PieChartData, StockChartData};
     use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
-    use crate::workflow::job::generate_visualizations::models::Visualization;
+    
 
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct Input {
