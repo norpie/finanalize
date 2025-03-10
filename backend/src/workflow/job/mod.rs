@@ -12,7 +12,6 @@ pub mod extract_content;
 pub mod extract_data;
 pub mod generate_graphs;
 pub mod generate_report;
-pub mod graphic_identifier;
 pub mod index_chunks;
 pub mod scrape_pages;
 pub mod search_queries;
@@ -23,7 +22,8 @@ pub mod sub_section_questions;
 pub mod sub_sections;
 pub mod title;
 pub mod validation;
-pub mod graph_insertion;
+pub mod graph_identifier;
+pub mod generate_visualizations;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
