@@ -246,7 +246,7 @@ mod tests {
     use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
     use crate::workflow::{
         job::{
-            chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
+            chunk_content::models::Chunk,
             validation::models::ValidationOutput,
         },
         JobType,
