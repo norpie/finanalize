@@ -10,7 +10,6 @@ use crate::{
 };
 
 use async_trait::async_trait;
-use log::debug;
 use polars::{io::SerReader, prelude::CsvReader};
 use schemars::schema_for;
 

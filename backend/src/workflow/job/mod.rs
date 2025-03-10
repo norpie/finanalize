@@ -81,7 +81,9 @@ impl JobType {
             JobType::ChunkContent => Some(Box::new(chunk_content::ChunkContentJob)),
             JobType::IndexChunks => Some(Box::new(index_chunks::IndexChunksJob)),
             JobType::AnswerQuestions => Some(Box::new(answer_questions::AnswerQuestionsJob)),
-            JobType::SectionizeQuestions => Some(Box::new(sectionize_questions::SectionizeQuestionsJob)),
+            JobType::SectionizeQuestions => {
+                Some(Box::new(sectionize_questions::SectionizeQuestionsJob))
+            }
             JobType::RenderLaTeXPdf => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }
