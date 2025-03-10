@@ -63,6 +63,7 @@ pub struct StockChartData {
 }
 
 pub struct Chart {
+    pub chart_caption: String,
     pub chart_type: String,
     pub chart_file: String,
 }
@@ -168,6 +169,7 @@ fn create_line_graph(graph_data: GraphData) -> Result<Chart> {
     root.present().expect("Unable to save result");
     println!("Graph created at: {}", out_file_name);
     Ok(Chart {
+        chart_caption: graph_data.caption.clone(),
         chart_type: "line".to_string(),
         chart_file: out_file_name.to_string(),
     })
@@ -221,6 +223,7 @@ fn create_histogram(histogram_data: HistogramData) -> Result<Chart> {
     root.present().expect("Unable to save result");
     println!("Bar chart created at: {}", out_file_name);
     Ok(Chart {
+        chart_caption: histogram_data.caption.clone(),
         chart_type: "bar".to_string(),
         chart_file: out_file_name.to_string(),
     })
@@ -258,6 +261,7 @@ fn create_pie_chart(pie_chart_data: PieChartData) -> Result<Chart> {
     root.present().expect("Unable to save result");
     println!("Pie chart created at: {}", out_file_name);
     Ok(Chart {
+        chart_caption: pie_chart_data.caption.clone(),
         chart_type: "pie".to_string(),
         chart_file: out_file_name.to_string(),
     })
@@ -313,6 +317,7 @@ fn create_stock_chart(stock_data: StockChartData) -> Result<Chart> {
     root.present().expect("Unable to save result");
     println!("Stock chart created at: {}", out_file_name);
     Ok(Chart {
+        chart_caption: stock_data.caption.clone(),
         chart_type: "stock".to_string(),
         chart_file: out_file_name.to_string(),
     })
