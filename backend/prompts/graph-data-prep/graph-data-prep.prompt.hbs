@@ -1,102 +1,206 @@
-This tool will process the given input based on the `graph_type` field and return structured data necessary to construct a valid chart or table.
-The `data` field in the input provides the values needed to generate the chart.
-The tool will extract and format these values according to predefined data structures.
-If the `data` field does not conform to these rules, the tool will reject the chart and return an empty `graph_data` output.
+This tool receives a visual, in other words a graph/table that needs to be generated,
+as input and returns the formatted data suited for the type of graph.
+The purpose of the tool is to prepare the data received in the visual to passed to another tool that will take care of generating the requested graph.
+Look at the examples as inspiration for all the four types of graphs.
 
-Rules for Data Validation and Formatting:
+General Steps:
+Understand the Visual Type:
+The visual type is provided under the "visual_type" key. This will determine the structure of the graph and how the data should be organized.
+Handle Data Transformation:
+All numeric data that is provided as strings (e.g., "10", "15", "5.0") should be converted to the correct data type:
+For whole numbers (like "10"), convert them to u32 (unsigned integer).
+For decimal numbers (like "5.0"), convert them to f32 (floating-point number).
+The "values" field in each column should be correctly parsed and converted based on its intended type.
+Structure the Output:
+The output must be formatted in a way that is suitable for generating the visual as described.
+The result should include:
+For charts: Values must be placed in arrays corresponding to the correct axes, labeled appropriately.
+For stock charts: Ensure that stock prices (like open, high, low, close) are organized as separate arrays.
+For pie charts: Ensure that the labels and values are clearly separated.
+Provide Metadata:
+Include information such as the caption, x_label, and y_label (when applicable) to describe the graph, ensuring that the final tool can display the graph properly.
 
-For Line and Bar Charts:
-`data` must contain x_values and y_values, both as arrays of numbers.
-If the chart is a bar chart, x_values must contain integers (rounded if necessary).
-The lengths of x_values and y_values must be equal.
-For Pie Charts:
-`data` must contain values (array of numbers) and labels (array of strings).
-values and labels must be equal in length.
-For Stock Charts:
-`data` must contain dates, open, high, low, and close.
-All arrays must have the same length.
-For Tables:
-`data` must contain rows (nested arrays of strings) and columns (array of column names).
-Each row must match the length of columns.
-
-Chart Rejection Criteria:
-
-If `data` does not match the expected format for the given `graph_type`, the tool will not generate a chart.
-If the input contains missing, inconsistent, or misformatted `data`, the tool will return an empty `graph_data` output instead of an invalid chart.
-The tool must not guess or infer missing values—only valid, structured data is accepted.
-
-```json
-{
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "type": "object",
-    "properties": {
-        "graph_data": {
-            "oneOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "x_values": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "y_values": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "caption": { "type": "string" },
-                        "x_label": { "type": "string" },
-                        "y_label": { "type": "string" }
-                    },
-                    "required": ["x_values", "y_values", "caption", "x_label", "y_label"]
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "values": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "labels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-                        "caption": { "type": "string" }
-                    },
-                    "required": ["values", "labels", "caption"]
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "dates": { "type": "array", "items": { "type": "string", "format": "date" }, "minItems": 1 },
-                        "open": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "high": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "low": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "close": { "type": "array", "items": { "type": "number" }, "minItems": 1 },
-                        "caption": { "type": "string" }
-                    },
-                    "required": ["dates", "open", "high", "low", "close", "caption"]
-                },
-                {
-                    "type": "object",
-                    "properties": {
-                        "rows": {
-                            "type": "array",
-                            "items": { "type": "array", "items": { "type": "string" } },
-                            "minItems": 1
+<Example>
+    <Input>
+    ```json
+        {
+            "visual": {
+                "visual_type": "bar",
+                "data": {
+                    "title": "Product Sales",
+                    "description": "Sales of products A and B over four quarters.",
+                    "columns": [
+                        {
+                            "name": "Quarter",
+                            "description": "The fiscal quarters",
+                            "values": ["Q1", "Q2", "Q3", "Q4"]
                         },
-                        "columns": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-                        "caption": { "type": "string" }
-                    },
-                    "required": ["rows", "columns", "caption"]
+                        {
+                            "name": "Sales",
+                            "description": "Total sales in millions",
+                            "values": ["10", "15", "20", "25"]
+                        }
+                    ]
                 }
-            ]
+            }
         }
-    },
-    "required": ["graph_data"]
-}
-```
+    ```
+    </Input>
+    <Output>
+        ```json
+            {
+                "graph_data": {
+                    "x_values": [1, 2, 3, 4],
+                    "y_values": [10.0, 15.0, 20.0, 25.0],
+                    "caption": "Product Sales",
+                    "x_label": "Quarter",
+                    "y_label": "Sales"
+                }
+            }
+        ```
+    </Output>
+</Example>
 
+<Example>
+    <Input>
+    ```json
+        {
+            "visual": {
+                "visual_type": "line",
+                "data": {
+                    "title": "Temperature Trends",
+                    "description": "Average temperatures over the past year.",
+                    "columns": [
+                        {
+                            "name": "Month",
+                            "description": "Months of the year",
+                            "values": ["Jan", "Feb", "Mar", "Apr"]
+                        },
+                        {
+                            "name": "Temperature",
+                            "description": "Average temperature in Celsius",
+                            "values": ["5.0", "6.5", "10.0", "15.0"]
+                        }
+                    ]
+                }
+            }
+        }
+    ```
+    </Input>
+    <Output>
+        ```json
+            {
+                "graph_data": {
+                    "x_values": [1.0, 2.0, 3.0, 4.0],
+                    "y_values": [5.0, 6.5, 10.0, 15.0],
+                    "caption": "Temperature Trends",
+                    "x_label": "Month",
+                    "y_label": "Temperature"
+                }
+            }
+        ```
+    </Output>
+</Example>
+
+<Example>
+    <Input>
+    ```json
+        {
+            "visual": {
+                "visual_type": "pie",
+                "data": {
+                    "title": "Market Share",
+                    "description": "Market share of various products.",
+                    "columns": [
+                        {
+                            "name": "Product",
+                            "description": "Product names",
+                            "values": ["Product A", "Product B", "Product C"]
+                        },
+                        {
+                            "name": "Market Share",
+                            "description": "Percentage of market share",
+                            "values": ["50.0", "30.0", "20.0"]
+                        }
+                    ]
+                }
+            }
+        }
+    ```
+    </Input>
+    <Output>
+        ```json
+            {
+                "graph_data": {
+                    "values": [50.0, 30.0, 20.0],
+                    "labels": ["Product A", "Product B", "Product C"],
+                    "caption": "Market Share"
+                }
+            }
+        ```
+    </Output>
+</Example>
+<Example>
+    <Input>
+    ```json
+        {
+            "visual": {
+                "visual_type": "stock",
+                "data": {
+                    "title": "Stock Prices",
+                    "description": "Daily stock prices for a company.",
+                    "columns": [
+                        {
+                            "name": "Date",
+                            "description": "Dates of observation",
+                            "values": ["2025-01-01", "2025-01-02", "2025-01-03"]
+                        },
+                        {
+                            "name": "Open",
+                            "description": "Opening price",
+                            "values": ["100.0", "102.0", "101.0"]
+                        },
+                        {
+                            "name": "High",
+                            "description": "Highest price",
+                            "values": ["105.0", "106.0", "104.0"]
+                        },
+                        {
+                            "name": "Low",
+                            "description": "Lowest price",
+                            "values": ["98.0", "99.0", "100.0"]
+                        },
+                        {
+                            "name": "Close",
+                            "description": "Closing price",
+                            "values": ["103.0", "104.0", "102.0"]
+                        }
+                    ]
+                }
+            }
+        }
+    ```
+    </Input>
+    <Output>
+        ```json
+            {
+                "graph_data": {
+                    "dates": ["2025-01-01", "2025-01-02", "2025-01-03"],
+                    "open": [100.0, 102.0, 101.0],
+                    "high": [105.0, 106.0, 104.0],
+                    "low": [98.0, 99.0, 100.0],
+                    "close": [103.0, 104.0, 102.0],
+                    "caption": "Stock Prices"
+                }
+            }
+        ```
+    </Output>
+</Example>
 <Input>
 ```json
-{
-"graph_type": {{{graph_type}}},
-"text_id": {{{text_id}}},
-"data": {{{data}}},
-"purpose": {{{purpose}}},
-"x_label": {{{x_label}}},
-"y_label": {{{y_label}}}
-}
+{{{input}}}
 ```
 </Input>
 
 <Output>
-    {
-       "graph_data": {
+```json
