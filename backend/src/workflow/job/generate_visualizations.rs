@@ -90,7 +90,7 @@ mod tests {
     use crate::extractors::{Column, Data};
 
     #[tokio::test]
-    // #[ignore = "Uses LLM API (External Service)"]
+    #[ignore = "Uses LLM API (External Service)"]
     async fn test_generate_visuals_job() {
         env_logger::init();
         dotenvy::from_filename(".env").ok();
