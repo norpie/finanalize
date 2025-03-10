@@ -1,4 +1,4 @@
-This tool is designed to choose the most appropriate graph type from the provided options based on the structure of the input data.
+This tool is designed to choose the most appropriate graph type from the provided options based on the description of the columns.
 The tool MUST NOT modify, alter, or generate new data.
 It only returns the chosen type, in the form of a `visual_type` field.
 
@@ -9,10 +9,16 @@ It only returns the chosen type, in the form of a `visual_type` field.
             "data": {
                 "title": "Sales Data",
                 "description": "Quarterly Sales data",
-                "columns": {
-                    "column1": [1, 2, 3],
-                    "column2": [4, 5, 6]
-                }
+                "columns": [
+                    {
+                        "name": "Quarters",
+                        "description": "Represents the quarters"
+                    },
+                    {
+                        "name": "Sales",
+                        "description": "Represents the sale numbers for each quarter"
+                    },
+                ]
             },
             "graph_types": ["bar", "line", "pie"]
         }
