@@ -4,9 +4,9 @@ use plotters::prelude::*;
 use plotters::style::full_palette::{
     BLUE_400, CYAN_400, DEEPORANGE_500, GREEN_400, LIGHTBLUE_400, RED_400, YELLOW_400,
 };
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use std::env;
-use schemars::JsonSchema;
 
 #[derive(Debug)]
 enum GraphType {

@@ -1,7 +1,9 @@
 use crate::llm::API;
 use crate::prelude::*;
 use crate::tasks::Task;
-use crate::workflow::job::generate_graphs::models::{BarDataOutput, LineDataOutput, PieDataOutput, StockDataOutput, TableDataOutput};
+use crate::workflow::job::generate_graphs::models::{
+    BarDataOutput, LineDataOutput, PieDataOutput, StockDataOutput, TableDataOutput,
+};
 use crate::workflow::job::Job;
 use crate::workflow::WorkflowState;
 use crate::{graphing, prompting};
@@ -15,11 +17,10 @@ pub mod models {
     use crate::graphing::{GraphData, HistogramData, PieChartData, StockChartData};
     use schemars::JsonSchema;
     use serde::{Deserialize, Serialize};
-    
 
     #[derive(Debug, Serialize, Deserialize, Clone)]
     pub struct Input {
-        pub input: String
+        pub input: String,
     }
 
     #[derive(Debug, Serialize, Deserialize, Clone, JsonSchema)]
@@ -113,7 +114,7 @@ impl Job for GenerateGraphsJob {
                             None,
                             Some(output.graph_data),
                             None,
-                            None
+                            None,
                         )
                         .expect("Could not create histogram");
                         let graph_file_output = models::GraphFileOutput {
@@ -198,12 +199,12 @@ impl Job for GenerateGraphsJob {
 mod tests {
     use super::*;
 
+    use crate::extractors::{Column, Data};
+    use crate::workflow::job::generate_visualizations::models::Visualization;
     use crate::{
         models::FullReport,
         workflow::{JobType, WorkflowState},
     };
-    use crate::extractors::{Column, Data};
-    use crate::workflow::job::generate_visualizations::models::Visualization;
 
     #[tokio::test]
     #[ignore = "Uses LLM API (External Service)"]

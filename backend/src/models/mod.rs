@@ -1,11 +1,9 @@
-use chrono::{DateTime, Utc};
-use serde::{Deserialize, Serialize};
-use surrealdb::sql::Thing;
 use crate::extractors::Data;
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::classify_sources::models::ClassifiedSource;
 use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
 use crate::workflow::job::generate_visualizations::models::Visualization;
+use crate::workflow::job::graph_identifier::models::GraphIdentifierOutput;
 use crate::workflow::{
     job::{
         chunk_content::models::Chunk, index_chunks::models::EmbeddedChunk,
@@ -13,7 +11,9 @@ use crate::workflow::{
     },
     JobType,
 };
-use crate::workflow::job::graph_identifier::models::GraphIdentifierOutput;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct User {
@@ -241,9 +241,9 @@ pub struct FrontendReport {
 
 #[cfg(test)]
 mod tests {
-    use chrono::Utc;
     use super::{FullReport, PreClassificationSource};
     use crate::workflow::job::classify_sources::models::ClassifiedSource;
+    use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
     use crate::workflow::{
         job::{
             chunk_content::models::Chunk, classify_sources::models::ClassifySourcesOutput,
@@ -251,7 +251,7 @@ mod tests {
         },
         JobType,
     };
-    use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
+    use chrono::Utc;
 
     impl FullReport {
         pub fn new(id: String, user_input: String) -> Self {
@@ -290,7 +290,6 @@ mod tests {
                 report_text: None,
                 chart_positions: None,
                 table_positions: None,
-
             }
         }
 
@@ -356,8 +355,11 @@ mod tests {
             self.extracted_data = Some(extracted_data);
             self
         }
-        
-        pub fn with_visuals(mut self, visuals: Vec<crate::workflow::job::generate_visualizations::models::Visualization>) -> Self {
+
+        pub fn with_visuals(
+            mut self,
+            visuals: Vec<crate::workflow::job::generate_visualizations::models::Visualization>,
+        ) -> Self {
             self.visuals = Some(visuals);
             self
         }
