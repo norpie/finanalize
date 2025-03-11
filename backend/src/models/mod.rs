@@ -231,8 +231,6 @@ pub struct FullReport {
     pub report_text: Option<String>,
     pub chart_positions: Option<Vec<GraphIdentifierOutput>>,
     pub table_positions: Option<Vec<GraphIdentifierOutput>>,
-    pub texts: Option<Vec<Text>>,
-    pub graphics: Option<Vec<Graphic>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
