@@ -109,7 +109,7 @@ pub async fn get_report(
         .bind(("workflow_state", workflow_state_id_thing))
         .await?
         .take::<Option<SDBWorkflowState>>(0)?
-        .ok_or(FinanalizeError::NotFound)?; 
+        .ok_or(FinanalizeError::NotFound)?;
     debug!("Workflow state: {:#?}", workflow_state);
     let user_input = workflow_state.state.user_input.clone();
     let status = workflow_state.state.status;
@@ -148,7 +148,7 @@ pub async fn retry(
     //     .bind(("workflow_state", Thing::from(("workflow_state", report_id.as_str()))))
     //     .await?.take::<Option<SDBWorkflowState>>(0)?.ok_or(FinanalizeError::NotFound)?;
     // let workflow_status: WorkflowState = WorkflowState::from(sdb_workflow_state);
-    // 
+    //
     //    PUBLISHER
     //         .get()
     //         .unwrap()
