@@ -13,6 +13,11 @@ pub static DB: Lazy<SurrealDb> =
 
 pub type SurrealDb = Surreal<ws::Client>;
 
+pub async fn init() -> Result<()> {
+    DB.force().await;
+    Ok(())
+}
+
 pub async fn connect() -> Result<SurrealDb> {
     let mut default_address = "localhost:8000".to_string();
     if let Ok(env_address) = std::env::var("SURREALDB_URL") {
