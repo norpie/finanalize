@@ -78,7 +78,7 @@
 			await post<Report>('v1/protected/reports', {
 				user_input: newReportSubject,
 				size: selectedSize,
-				model: 'l'
+				model: selectedModel
 			})
 		).result;
 		if (!newReport) {
@@ -109,7 +109,7 @@
 			<Tabs.Root bind:value={selectedModel} class="w-[400px]">
 				<Tabs.List class="grid w-full grid-cols-2">
 					<Tabs.Trigger value="l">L</Tabs.Trigger>
-					<Tabs.Trigger value="l">Q</Tabs.Trigger>
+					<Tabs.Trigger disabled={true} class="opacity-50 cursor-not-allowed" value="q">Q</Tabs.Trigger>
 				</Tabs.List>
 			</Tabs.Root>
 
