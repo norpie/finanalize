@@ -57,6 +57,8 @@ async fn main() -> Result<()> {
     dotenvy::from_filename(".env").ok();
     env_logger::init();
 
+    db::init().await?;
+
     let token_factory: TokenFactory = "secret".into();
 
     debug!(
