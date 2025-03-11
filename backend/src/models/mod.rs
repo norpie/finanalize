@@ -263,7 +263,7 @@ mod tests {
                 user_input,
                 created_at: Utc::now(),
                 updated_at: Utc::now(),
-                
+
                 initial_search_sources: None,
                 validation: None,
                 title: None,

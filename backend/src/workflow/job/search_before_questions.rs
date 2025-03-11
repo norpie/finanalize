@@ -1,8 +1,12 @@
-use std::sync::Arc;
 use crate::llm::API;
+use crate::models::PreClassificationSource;
 use crate::prelude::*;
 use crate::prompting;
+use crate::search::SEARCH;
 use crate::tasks::Task;
+use crate::workflow::job::content_formatter::models::FormatContentJobInput;
+use crate::workflow::job::scrape_pages::scrape_page;
+use crate::workflow::job::search_before_questions::models::SingleSearchOutput;
 use crate::workflow::job::Job;
 use crate::workflow::WorkflowState;
 use async_trait::async_trait;
@@ -12,13 +16,9 @@ use markup5ever::interface::TreeSink;
 use regex::Regex;
 use schemars::schema_for;
 use scraper::{Html, HtmlTreeSink, Selector};
+use std::sync::Arc;
 use tokio::sync::{Mutex, Semaphore};
 use tokio::task::{JoinHandle, JoinSet};
-use crate::models::PreClassificationSource;
-use crate::workflow::job::search_before_questions::models::SingleSearchOutput;
-use crate::search::SEARCH;
-use crate::workflow::job::content_formatter::models::FormatContentJobInput;
-use crate::workflow::job::scrape_pages::scrape_page;
 
 pub struct SearchBeforeQuestionsJob;
 
@@ -56,7 +56,7 @@ impl Job for SearchBeforeQuestionsJob {
             .await?;
         for company in &search_output.companies {
             debug!("Company: {:#?}", company);
-        };
+        }
         let search_query = format!("{:#?} recent events", search_output.companies.join(" and"));
         debug!("Search query: {}", search_query);
         dbg!(&search_query);
@@ -80,7 +80,7 @@ impl Job for SearchBeforeQuestionsJob {
         let total_to_search = 3;
         let sources_to_search = all_urls.get(..3).unwrap().to_vec();
         let mut join_set = JoinSet::new();
-        for(i, source) in sources_to_search.into_iter().enumerate() {
+        for (i, source) in sources_to_search.into_iter().enumerate() {
             let browser = browsers.clone();
             let sources = sources.clone();
             debug!("Spawning task for scraping URL {}: {}", i + 1, source);
@@ -108,7 +108,7 @@ impl Job for SearchBeforeQuestionsJob {
         debug!("Scraped all pages, closing browser instances...");
         let browser = browsers.remove().await?;
         browser.close().await?;
-        
+
         let scraped_html_sources = sources.lock().await.clone();
         // Extract top 3 sources content
         let mut mds = vec![];
@@ -229,9 +229,13 @@ mod tests {
                     error: None,
                 }),
         };
-        job.run(state).await.unwrap().state.initial_search_sources.unwrap(); 
+        job.run(state)
+            .await
+            .unwrap()
+            .state
+            .initial_search_sources
+            .unwrap();
     }
-
 
     #[tokio::test]
     // #[ignore = "Uses LLM API (External Service)"]
@@ -241,12 +245,20 @@ mod tests {
         let state = WorkflowState {
             id: "tlksajbdfaln".into(),
             last_job_type: JobType::Pending,
-            state: FullReport::new("sjaudnhcrlas".into(), "Apple and Microsoft stocks in 2025".into())
-                .with_validation(ValidationOutput {
-                    valid: true,
-                    error: None,
-                }),
+            state: FullReport::new(
+                "sjaudnhcrlas".into(),
+                "Apple and Microsoft stocks in 2025".into(),
+            )
+            .with_validation(ValidationOutput {
+                valid: true,
+                error: None,
+            }),
         };
-        job.run(state).await.unwrap().state.initial_search_sources.unwrap(); 
+        job.run(state)
+            .await
+            .unwrap()
+            .state
+            .initial_search_sources
+            .unwrap();
     }
 }

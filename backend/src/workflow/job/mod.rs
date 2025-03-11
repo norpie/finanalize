@@ -16,6 +16,7 @@ pub mod generate_visualizations;
 pub mod graph_identifier;
 pub mod index_chunks;
 pub mod scrape_pages;
+pub mod search_before_questions;
 pub mod search_queries;
 pub mod search_terms;
 pub mod section_names;
@@ -24,7 +25,6 @@ pub mod sub_section_questions;
 pub mod sub_sections;
 pub mod title;
 pub mod validation;
-pub mod search_before_questions;
 
 #[async_trait]
 pub trait Job: Send + Sync + 'static {
