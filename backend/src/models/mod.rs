@@ -126,6 +126,7 @@ pub struct FullSDBReport {
     pub status: JobType,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub initial_search_sources: Option<Vec<PreClassificationSource>>,
     pub validation: Option<ValidationOutput>,
     pub title: Option<String>,
     pub sections: Option<Vec<String>>,
@@ -161,6 +162,7 @@ impl From<FullSDBReport> for FullReport {
             status: report.status,
             created_at: report.created_at.to_utc(),
             updated_at: report.updated_at.to_utc(),
+            initial_search_sources: report.initial_search_sources,
             validation: report.validation,
             title: report.title,
             sections: report.sections,
@@ -203,6 +205,7 @@ pub struct FullReport {
     pub status: JobType,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub initial_search_sources: Option<Vec<PreClassificationSource>>,
     pub validation: Option<ValidationOutput>,
     pub title: Option<String>,
     pub sections: Option<Vec<String>>,
@@ -228,6 +231,8 @@ pub struct FullReport {
     pub report_text: Option<String>,
     pub chart_positions: Option<Vec<GraphIdentifierOutput>>,
     pub table_positions: Option<Vec<GraphIdentifierOutput>>,
+    pub texts: Option<Vec<Text>>,
+    pub graphics: Option<Vec<Graphic>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -258,7 +263,8 @@ mod tests {
                 user_input,
                 created_at: Utc::now(),
                 updated_at: Utc::now(),
-
+                
+                initial_search_sources: None,
                 validation: None,
                 title: None,
                 sections: None,
