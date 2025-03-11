@@ -18,7 +18,7 @@ pub struct ScrapePagesJob;
 const BROWSER_COUNT: u16 = 4;
 const FIRST_PORT: u16 = 4444;
 
-async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
+pub async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
     debug!("Initializing {} browsers...", amount);
     let mut browsers = vec![];
     for i in 0..amount {
@@ -48,7 +48,7 @@ async fn make_browsers(amount: u16) -> Result<Pool<Client>> {
     Ok(Pool::from(browsers))
 }
 
-async fn scrape_page(browser: &Object<Client>, url: &str) -> Result<String> {
+pub async fn scrape_page(browser: &Object<Client>, url: &str) -> Result<String> {
     // browser.goto(url).await?;
     let goto_result = timeout(Duration::from_secs(2), browser.goto(url)).await;
     match goto_result {
@@ -63,7 +63,7 @@ async fn scrape_page(browser: &Object<Client>, url: &str) -> Result<String> {
     // Ok(source)
 }
 
-fn split_evenly(items: Vec<String>, n: usize) -> Vec<Vec<String>> {
+pub fn split_evenly(items: Vec<String>, n: usize) -> Vec<Vec<String>> {
     let mut chunks = vec![Vec::new(); n];
     for (index, item) in items.into_iter().enumerate() {
         chunks[index % n].push(item);
