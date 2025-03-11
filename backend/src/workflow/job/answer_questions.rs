@@ -120,7 +120,6 @@ mod tests {
     use super::*;
 
     use crate::{
-        db::{self, DB},
         models::FullReport,
         workflow::{job::classify_sources::models::ClassifiedSource, JobType, WorkflowState},
     };
@@ -129,7 +128,6 @@ mod tests {
     #[ignore = "Uses LLM API (External Service)"]
     async fn test_classify_job_valid() {
         env_logger::init();
-        DB.set(db::connect().await.unwrap()).unwrap();
         let job = AnswerQuestionsJob;
         let state = WorkflowState {
             id: "asdlfjhasldfjh".into(),

@@ -16,8 +16,9 @@ use api::{
 use auth_middleware::Auth;
 use credit::get_wallet_transactions;
 use credit::{add_credits, generate_wallet_bill, get_wallet_balance, use_tokens_on_report};
-use db::{DB, DB_HTTP};
+use db::DB;
 use jwt::TokenFactory;
+use log::debug;
 use rabbitmq::RabbitMQPublisher;
 
 mod api;
@@ -57,10 +58,10 @@ async fn main() -> Result<()> {
 
     let token_factory: TokenFactory = "secret".into();
 
-    let db = db::connect().await?;
-    let db_http = db::connect_http().await?;
-    DB.set(db.clone()).unwrap();
-    DB_HTTP.set(db_http).unwrap();
+    debug!(
+        "Connected to surrealdb version: {}",
+        DB.get().unwrap().version().await.unwrap().to_string()
+    );
 
     RabbitMQPublisher::setup().await?;
 
@@ -84,7 +85,7 @@ async fn main() -> Result<()> {
         App::new()
             .wrap(cors)
             .app_data(Data::new(token_factory.clone()))
-            .app_data(Data::new(db.clone()))
+            .app_data(Data::new(DB.get().unwrap()))
             .default_service(web::route().to(not_found))
             .service(
                 web::scope("/api/v1/auth")

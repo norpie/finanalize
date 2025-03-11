@@ -1,4 +1,4 @@
-use crate::{db::DB_HTTP, models::FullReport, prelude::*, rabbitmq::PUBLISHER};
+use crate::{db::DB, models::FullReport, prelude::*, rabbitmq::PUBLISHER};
 
 use lapin::{message::Delivery, options::BasicPublishOptions, BasicProperties, Channel};
 use log::debug;
@@ -41,7 +41,7 @@ pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Re
     tbs_clone.state.html_sources = None;
     tbs_clone.state.chunks = None;
     tbs_clone.state.chunk_embeddings = None;
-    let saved: SDBWorkflowState = DB_HTTP
+    let saved: SDBWorkflowState = DB
         .get()
         .unwrap()
         .upsert(("workflow_state", &output.id))
@@ -151,7 +151,7 @@ mod tests {
 
     use job::index_chunks::models::EmbeddedChunk;
 
-    use crate::db::{self, DB};
+    use crate::db::DB;
 
     use super::*;
 
@@ -159,7 +159,6 @@ mod tests {
     #[ignore = "Depends on external services"]
     async fn test_process_state() {
         env_logger::init();
-        DB.set(db::connect().await.unwrap()).unwrap();
         let mut state = WorkflowState {
             id: "asdlfjhasldfjh".to_string(),
             last_job_type: JobType::Pending,

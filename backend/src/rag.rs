@@ -34,15 +34,12 @@ pub async fn vector_search(report: Thing, query: String) -> Result<Vec<Distanced
 
 #[cfg(test)]
 mod tests {
-    use crate::db;
-
     use super::*;
     use surrealdb::sql::Thing;
 
     #[tokio::test]
     #[ignore = "Depends on external service"]
     async fn test_vector_search() {
-        DB.set(db::connect().await.unwrap()).unwrap();
         let report = Thing::from(("report", "sjaudnhcrlas"));
         let query = "Hello".to_string();
         let results = vector_search(report, query).await.unwrap();
