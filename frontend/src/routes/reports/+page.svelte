@@ -72,8 +72,11 @@
 	let newReportSubject: string = $state('');
 	let dialogOpen = $state(false);
 
+	let isSubmitting = $state(false);
 	async function newReport() {
-		dialogOpen = false;
+		dialogOpen = true;
+		isSubmitting = true;
+
 		let newReport = (
 			await post<Report>('v1/protected/reports', {
 				user_input: newReportSubject,
@@ -81,8 +84,12 @@
 				model: selectedModel
 			})
 		).result;
+
 		if (!newReport) {
 			toast.error('Failed to create new report');
+			dialogOpen = false;
+			isSubmitting = false;
+			return;
 		}
 		console.log('Size:', selectedSize);
 		console.log('Model:', selectedModel);
@@ -93,7 +100,35 @@
 		} else {
 			goto(`/reports/${newReport.id}`);
 		}
+
+		localStorage.setItem(`reportStartTime_${newReport.id}`, Date.now().toString());
+
+		// Polling the report until it's available
+		let retries = 0;
+		const maxRetries = 10;
+		const retryInterval = 1500;
+
+		const fetchReport = async () => {
+			const getReportResponse = await get(`v1/protected/reports/${newReport.id}`);
+
+			if (getReportResponse.result) {
+				goto(`/reports/${newReport.id}`);
+				dialogOpen = false;
+				isSubmitting = false;
+			} else {
+				retries++;
+				if (retries < maxRetries) {
+					setTimeout(fetchReport, retryInterval);
+				} else {
+					toast.error('Failed to fetch the new report after several attempts');
+					dialogOpen = false;
+					isSubmitting = false;
+				}
+			}
+		};
+		fetchReport();
 	}
+
 
 	onMount(async () => {
 		reports = (await get<Report[]>('v1/protected/reports?page=0&perPage=20')).result;
@@ -121,7 +156,13 @@
 
 			<Dialog.Title class="mt-4">What is the subject of your report?</Dialog.Title>
 			<Textarea class="mt-4 resize-none" bind:value={newReportSubject} />
-			<Button class="mt-4" onclick={newReport}>Submit</Button>
+			<Button onclick={newReport} disabled={isSubmitting}>
+				{#if isSubmitting}
+				Submitting report...
+				{:else}
+				Submit
+				{/if}
+				</Button>
 		</Dialog.Content>
 	</Dialog.Root>
 	<div class="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min">
