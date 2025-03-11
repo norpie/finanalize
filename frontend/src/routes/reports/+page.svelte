@@ -86,7 +86,13 @@
 		}
 		console.log('Size:', selectedSize);
 		console.log('Model:', selectedModel);
-		goto(`/reports/${newReport.id}`);
+		
+		let get_report = await get(`v1/protected/reports/${newReport.id}`);
+		if (!get_report.result) {
+			toast.error('Failed to fetch new report');
+		} else {
+			goto(`/reports/${newReport.id}`);
+		}
 	}
 
 	onMount(async () => {
