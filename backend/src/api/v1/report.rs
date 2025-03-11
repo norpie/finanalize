@@ -109,8 +109,8 @@ pub async fn get_report(
         .bind(("workflow_state", workflow_state_id_thing))
         .await?
         .take::<Option<SDBWorkflowState>>(0)?
-        .ok_or(FinanalizeError::NotFound)?;
-
+        .ok_or(FinanalizeError::NotFound)?; 
+    debug!("Workflow state: {:#?}", workflow_state);
     let user_input = workflow_state.state.user_input.clone();
     let status = workflow_state.state.status;
     let title = workflow_state.state.title.clone();
@@ -138,12 +138,29 @@ pub async fn retry(
     _user: SurrealDBUser,
     _db: Data<SurrealDb>,
 ) -> Result<impl Responder> {
-    // let _report = db
+    // let _sdb_report = db
     //     .query("SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports).reports[0] WHERE id = $report;")
-    //     .bind(("user", user.id))
+    //     .bind(("user", user.id.clone()))
     //     .bind(("report", Thing::from(("report", report_id.as_str()))))
     //     .await?.take::<Option<SurrealDBReport>>(0)?.ok_or(FinanalizeError::NotFound)?;
-    //
+    // let sdb_workflow_state = db
+    //     .query("SELECT * FROM $workflow_state")
+    //     .bind(("workflow_state", Thing::from(("workflow_state", report_id.as_str()))))
+    //     .await?.take::<Option<SDBWorkflowState>>(0)?.ok_or(FinanalizeError::NotFound)?;
+    // let workflow_status: WorkflowState = WorkflowState::from(sdb_workflow_state);
+    // 
+    //    PUBLISHER
+    //         .get()
+    //         .unwrap()
+    //         .channel
+    //         .basic_publish(
+    //             "",
+    //             "report_status",
+    //             Default::default(),
+    //             serde_json::to_string(&workflow_status)?.as_bytes(),
+    //             Default::default(),
+    //         )
+    //         .await?;
     // TODO: Implement retry logic
     //
     Ok(ApiResponse::new("OK"))
@@ -236,7 +253,7 @@ pub async fn get_live_report(
         .await?;
 
     rt::spawn(async move {
-        debug!("starting live query stream");
+        debug!("Starting live query stream");
         while let Some(res) = stream.next().await {
             let Ok(notification) = res else {
                 debug!("error {:#?}", res.unwrap_err());
@@ -268,7 +285,7 @@ pub async fn get_live_report(
                 break;
             }
         }
-        debug!("ending live query stream");
+        debug!("Ending live query stream");
     });
     Ok(res)
 }
