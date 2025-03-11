@@ -15,7 +15,7 @@ pub struct SDBPersistedBlob {
 impl From<SDBPersistedBlob> for PersistedBlob {
     fn from(blob: SDBPersistedBlob) -> Self {
         PersistedBlob {
-            id: blob.id.to_string(),
+            id: blob.id.id.to_string(),
             path: blob.path,
         }
     }
@@ -60,10 +60,52 @@ pub async fn persist(file: PathBuf) -> Result<PersistedBlob> {
 }
 
 pub async fn retrieve(id: &str) -> Result<PersistedBlob> {
-    DB.get()
+    let sdb: Option<SDBPersistedBlob> = DB.get()
         .unwrap()
         .select(("blob", id))
-        .await?
-        .map(|sdb: SDBPersistedBlob| sdb.into())
-        .ok_or(FinanalizeError::NotFound)
+        .await?;
+    let Some(sdb) = sdb else {
+        return Err(FinanalizeError::NotFound);
+    };
+    Ok(sdb.into())
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::db;
+
+    use super::*;
+    use std::fs::File;
+    use std::io::Write;
+
+    #[tokio::test]
+    #[ignore = "Depends on external state"]
+    async fn test_persist() {
+        env_logger::init();
+        db::init().await.unwrap();
+        env::set_var("PERSISTANCE_DIR", "/tmp/persists");
+        let file_path = PathBuf::from("test.txt");
+        let mut file = File::create(&file_path).unwrap();
+        file.write_all(b"Hello, world!").unwrap();
+        let blob = persist(file_path).await.unwrap();
+        assert_eq!(blob.path.exists(), true);
+        dbg!(&blob);
+    }
+
+    #[tokio::test]
+    #[ignore = "Depends on external state"]
+    async fn test_retrieve() {
+        env_logger::init();
+        db::init().await.unwrap();
+        env::set_var("PERSISTANCE_DIR", "/tmp/persists");
+        let file_path = PathBuf::from("test.txt");
+        let mut file = File::create(&file_path).unwrap();
+        file.write_all(b"Hello, world!").unwrap();
+        let blob = persist(file_path).await.unwrap();
+        println!("Blob: {:?}", blob);
+        let retrieved = retrieve(&blob.id).await.unwrap();
+        assert_eq!(retrieved.id, blob.id);
+        assert_eq!(retrieved.path.exists(), true);
+        dbg!(&retrieved);
+    }
 }
