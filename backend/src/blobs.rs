@@ -60,8 +60,7 @@ pub async fn persist(file: PathBuf) -> Result<PersistedBlob> {
 }
 
 pub async fn retrieve(id: &str) -> Result<PersistedBlob> {
-    DB
-        .get()
+    DB.get()
         .unwrap()
         .select(("blob", id))
         .await?
