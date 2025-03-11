@@ -25,6 +25,7 @@ mod api;
 mod auth_middleware;
 #[allow(dead_code)]
 mod credit;
+mod blobs;
 mod db;
 #[allow(dead_code)]
 mod extractors;
