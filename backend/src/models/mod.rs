@@ -245,10 +245,7 @@ mod tests {
     use crate::workflow::job::classify_sources::models::ClassifiedSource;
     use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
     use crate::workflow::{
-        job::{
-            chunk_content::models::Chunk,
-            validation::models::ValidationOutput,
-        },
+        job::{chunk_content::models::Chunk, validation::models::ValidationOutput},
         JobType,
     };
     use chrono::Utc;
