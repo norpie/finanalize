@@ -51,7 +51,7 @@ async fn generate_initial_search_query(user_input: String) -> Result<Vec<String>
         )
         .await?;
     let mut search_queries = Vec::new();
-    for company in search_output.companies.clone(){
+    for company in search_output.companies.clone() {
         let search_query = format!("{} recent events", company.clone());
         debug!("Search query: {}", search_query);
         search_queries.push(search_query);
@@ -59,7 +59,7 @@ async fn generate_initial_search_query(user_input: String) -> Result<Vec<String>
     Ok(search_queries)
 }
 
-async fn perform_search(search_query: String) -> Result<Vec<String>>{
+async fn perform_search(search_query: String) -> Result<Vec<String>> {
     let mut search_futures = JoinSet::new();
     search_futures.spawn(async move { SEARCH.clone().search(&search_query).await });
     let search_results = search_futures.join_all().await;
@@ -76,7 +76,7 @@ async fn perform_search(search_query: String) -> Result<Vec<String>>{
     Ok(all_urls)
 }
 
-async fn scrape_top_results(urls: Vec<String>) -> Result<Vec<PreClassificationSource>>{
+async fn scrape_top_results(urls: Vec<String>) -> Result<Vec<PreClassificationSource>> {
     dbg!(&urls);
     let sources: Arc<Mutex<Vec<PreClassificationSource>>> = Arc::new(Mutex::new(vec![]));
     let browsers = Arc::new(crate::workflow::job::scrape_pages::make_browsers(1).await?);
@@ -116,7 +116,9 @@ async fn scrape_top_results(urls: Vec<String>) -> Result<Vec<PreClassificationSo
     Ok(scraped_html_sources)
 }
 
-async fn extract_content_results(html_sources: Vec<PreClassificationSource>) -> Result<Vec<PreClassificationSource>> {
+async fn extract_content_results(
+    html_sources: Vec<PreClassificationSource>,
+) -> Result<Vec<PreClassificationSource>> {
     let mut mds = vec![];
     let total = html_sources.len();
     let pattern = Regex::new("(?i)<span[^>]*>")?;
@@ -166,7 +168,9 @@ async fn extract_content_results(html_sources: Vec<PreClassificationSource>) -> 
     Ok(mds)
 }
 
-async fn format_results_content(md_sources: Vec<PreClassificationSource>) -> Result<Vec<PreClassificationSource>> {
+async fn format_results_content(
+    md_sources: Vec<PreClassificationSource>,
+) -> Result<Vec<PreClassificationSource>> {
     let prompt = prompting::get_prompt("source-formatter".into())?;
     let task = Task::new(&prompt);
     let max_jobs = 1;
