@@ -60,10 +60,7 @@ pub async fn persist(file: PathBuf) -> Result<PersistedBlob> {
 }
 
 pub async fn retrieve(id: &str) -> Result<PersistedBlob> {
-    let sdb: Option<SDBPersistedBlob> = DB.get()
-        .unwrap()
-        .select(("blob", id))
-        .await?;
+    let sdb: Option<SDBPersistedBlob> = DB.get().unwrap().select(("blob", id)).await?;
     let Some(sdb) = sdb else {
         return Err(FinanalizeError::NotFound);
     };
@@ -88,7 +85,7 @@ mod tests {
         let mut file = File::create(&file_path).unwrap();
         file.write_all(b"Hello, world!").unwrap();
         let blob = persist(file_path).await.unwrap();
-        assert_eq!(blob.path.exists(), true);
+        assert!(blob.path.exists());
         dbg!(&blob);
     }
 
@@ -105,7 +102,7 @@ mod tests {
         println!("Blob: {:?}", blob);
         let retrieved = retrieve(&blob.id).await.unwrap();
         assert_eq!(retrieved.id, blob.id);
-        assert_eq!(retrieved.path.exists(), true);
+        assert!(retrieved.path.exists());
         dbg!(&retrieved);
     }
 }
