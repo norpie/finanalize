@@ -60,7 +60,6 @@ mod tests {
     use super::*;
 
     use crate::{
-        db,
         models::FullReport,
         workflow::{
             job::{chunk_content::models::Chunk, classify_sources::models::ClassifiedSource},
@@ -72,7 +71,6 @@ mod tests {
     #[ignore = "Uses LLM API (External Service)"]
     async fn test_classify_job_valid() {
         env_logger::init();
-        DB.set(db::connect().await.unwrap()).unwrap();
         let job = IndexChunksJob;
         let state = WorkflowState {
             id: "asdlfjhasldfjh".into(),
