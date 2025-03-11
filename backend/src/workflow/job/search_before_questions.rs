@@ -216,7 +216,7 @@ mod tests {
     };
 
     #[tokio::test]
-    // #[ignore = "Uses LLM API (External Service)"]
+    #[ignore = "Uses LLM API (External Service)"]
     async fn test_search_before_questions_job_company() {
         env_logger::init();
         let job = SearchBeforeQuestionsJob;
@@ -238,7 +238,7 @@ mod tests {
     }
 
     #[tokio::test]
-    // #[ignore = "Uses LLM API (External Service)"]
+    #[ignore = "Uses LLM API (External Service)"]
     async fn test_search_before_questions_job_companies() {
         env_logger::init();
         let job = SearchBeforeQuestionsJob;
