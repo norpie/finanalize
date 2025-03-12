@@ -1,3 +1,4 @@
+use crate::api::v1::report::{ReportModel, ReportSize};
 use crate::extractors::Data;
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::classify_sources::models::ClassifiedSource;
@@ -59,6 +60,8 @@ pub struct SurrealDBReport {
     pub id: Thing,
     pub user_input: String,
     pub status: JobType,
+    pub size: ReportSize,
+    pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -69,6 +72,8 @@ impl From<SurrealDBReport> for Report {
             id: report.id.id.to_string(),
             user_input: report.user_input,
             status: report.status,
+            size: report.size,
+            model: report.model,
             created_at: report.created_at.to_utc(),
             updated_at: report.updated_at.to_utc(),
         }
@@ -95,6 +100,8 @@ pub struct Report {
     pub id: String,
     pub user_input: String,
     pub status: JobType,
+    pub size: ReportSize,
+    pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -103,16 +110,20 @@ pub struct Report {
 pub struct ReportCreation {
     pub user_input: String,
     pub status: JobType,
+    pub size: ReportSize,
+    pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
 
 impl ReportCreation {
-    pub fn new(user_input: String) -> Self {
+    pub fn new(user_input: String, size: ReportSize, model: ReportModel) -> Self {
         let now = Utc::now();
         ReportCreation {
             user_input,
             status: JobType::Pending,
+            size,
+            model,
             created_at: now,
             updated_at: now,
         }
@@ -124,6 +135,8 @@ pub struct FullSDBReport {
     pub id: Thing,
     pub user_input: String,
     pub status: JobType,
+    pub size: ReportSize,
+    pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub initial_search_sources: Option<Vec<PreClassificationSource>>,
@@ -160,6 +173,8 @@ impl From<FullSDBReport> for FullReport {
             id: report.id.id.to_string(),
             user_input: report.user_input,
             status: report.status,
+            size: report.size,
+            model: report.model,
             created_at: report.created_at.to_utc(),
             updated_at: report.updated_at.to_utc(),
             initial_search_sources: report.initial_search_sources,
@@ -203,6 +218,8 @@ pub struct FullReport {
     pub id: String,
     pub user_input: String,
     pub status: JobType,
+    pub size: ReportSize,
+    pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub initial_search_sources: Option<Vec<PreClassificationSource>>,
@@ -237,6 +254,8 @@ pub struct FullReport {
 pub struct FrontendReport {
     pub user_input: String,
     pub status: JobType,
+    pub size: ReportSize,
+    pub model: ReportModel,
     pub error: Option<String>,
     pub valid: Option<bool>,
     pub title: Option<String>,
@@ -245,6 +264,7 @@ pub struct FrontendReport {
 #[cfg(test)]
 mod tests {
     use super::{FullReport, PreClassificationSource};
+    use crate::api::v1::report::{ReportModel, ReportSize};
     use crate::workflow::job::classify_sources::models::ClassifiedSource;
     use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
     use crate::workflow::{
@@ -259,6 +279,8 @@ mod tests {
                 id,
                 status: JobType::Pending,
                 user_input,
+                size: ReportSize::Small,
+                model: ReportModel::Llama,
                 created_at: Utc::now(),
                 updated_at: Utc::now(),
 

@@ -21,19 +21,21 @@ use surrealdb::sql::Thing;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ReportSize {
     #[serde(rename = "s")]
-    SMALL,
+    Small,
     #[serde(rename = "m")]
-    MEDIUM,
+    Medium,
     #[serde(rename = "l")]
-    LARGE,
+    Large,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ReportModel {
     #[serde(rename = "l")]
-    L,
+    Llama,
     #[serde(rename = "q")]
-    Q
+    Qwen,
+    #[serde(rename = "o")]
+    OpenAI,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -49,7 +51,11 @@ pub async fn create_report(
     db: Data<SurrealDb>,
     report_creation: Json<ReportCreationLight>,
 ) -> Result<impl Responder> {
-    let report_creation = ReportCreation::new(report_creation.user_input.clone());
+    let report_creation = ReportCreation::new(
+        report_creation.user_input.clone(),
+        report_creation.size.clone(),
+        report_creation.model.clone(),
+    );
     let report: FullSDBReport = db
         .create("report")
         .content(report_creation)
@@ -131,9 +137,6 @@ pub async fn get_report(
         .take::<Option<SDBWorkflowState>>(0)?
         .ok_or(FinanalizeError::NotFound)?;
     debug!("Workflow state: {:#?}", workflow_state);
-    let user_input = workflow_state.state.user_input.clone();
-    let status = workflow_state.state.status;
-    let title = workflow_state.state.title.clone();
     let (valid, error) = workflow_state
         .state
         .validation
@@ -143,9 +146,11 @@ pub async fn get_report(
             Some("Validation has not been performed yet.".to_string()),
         ));
     let frontend_report = FrontendReport {
-        user_input,
-        status,
-        title,
+        user_input: workflow_state.state.user_input,
+        status: workflow_state.state.status,
+        size: workflow_state.state.size,
+        model: workflow_state.state.model,
+        title: workflow_state.state.title,
         valid: Some(valid),
         error,
     };
@@ -284,6 +289,8 @@ pub async fn get_live_report(
             let frontend_report = FrontendReport {
                 user_input: report.state.user_input.clone(),
                 status: report.state.status,
+                size: report.state.size.clone(),
+                model: report.state.model.clone(),
                 title: report.state.title.clone(),
                 valid: Some(report.state.validation.clone().unwrap().valid),
                 error: None,
