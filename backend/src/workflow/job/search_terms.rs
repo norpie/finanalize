@@ -1,8 +1,7 @@
-use crate::{prelude::*, search::SEARCH, workflow::WorkflowState};
+use crate::{prelude::*, search::SEARCH, workflow::{JobType, WorkflowState}};
 
 use async_trait::async_trait;
 use log::debug;
-use tokio::task::JoinSet;
 
 use super::Job;
 
@@ -16,27 +15,31 @@ impl Job for SearchJob {
         let total = searches.len();
         debug!("Total searches: {}", total);
         // Create a vector to hold the futures
-        let mut search_futures = JoinSet::new();
+        // let mut search_futures = JoinSet::new();
+        let mut all_urls = Vec::new();
 
         for (i, search) in searches.into_iter().enumerate() {
             debug!("Searching for {} ({}/{})", search, i + 1, total);
             // Spawn each search as a separate task and push the future to the vector
-            search_futures.spawn(async move { SEARCH.clone().search(&search).await });
+            all_urls.extend(SEARCH.clone().search(&search).await?);
         }
 
         // Join all futures concurrently
-        let search_results = search_futures.join_all().await;
-        let mut all_urls = Vec::new();
-        for result in search_results.into_iter() {
-            debug!("Adding search result: {:?}", result);
-            all_urls.extend(result?);
-        }
+        // let search_results = search_futures.join_all().await;
+        // let mut all_urls = Vec::new();
+        // for result in search_results.into_iter() {
+        //     debug!("Adding search result: {:?}", result);
+        //     all_urls.extend(result?);
+        // }
 
         // Sort and deduplicate URLs
         debug!("Sorting and deduplicating URLs");
         all_urls.sort();
         all_urls.dedup();
         debug!("Search results: {:?}", all_urls.len());
+        if all_urls.is_empty() {
+            state.state.status = JobType::Failed;
+        }
         state.state.search_urls = Some(all_urls);
         debug!("SearchJob completed");
         Ok(state)

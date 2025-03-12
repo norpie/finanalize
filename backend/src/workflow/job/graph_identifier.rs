@@ -33,17 +33,19 @@ pub mod models {
 impl Job for GraphIdentifierJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         debug!("Running GraphIdentifierJob...");
+        let sub_section_contents = state.state.sub_section_contents.clone().unwrap();
         let mut chart_positions = Vec::new();
-        let mut table_positions = Vec::new();
-        if let Some(report_text) = state.state.report_text.clone() {
-            let charts = state.state.charts.clone();
-            let tables = state.state.tables.clone();
-            if let Some(charts) = charts {
-                for chart in charts {
-                    let prompt = prompting::get_prompt("graph-identifier".into())?;
-                    let task = Task::new(&prompt);
+        // let mut table_positions = Vec::new();
+        let prompt = prompting::get_prompt("graph-identifier".into())?;
+        let task = Task::new(&prompt);
+        let charts = state.state.charts.clone().unwrap();
+        // let tables = state.state.tables.clone().unwrap();
+        for section in sub_section_contents {
+            for sub_section_content in section.clone() {
+                for chart in &charts {
+                    let task = task.clone();
                     let input = models::GraphIdentifierInput {
-                        report_text: report_text.clone(),
+                        report_text: sub_section_content.clone(),
                         chart_caption: Some(chart.graph_caption.clone()),
                         table_caption: None,
                     };
@@ -58,33 +60,30 @@ impl Job for GraphIdentifierJob {
                         .await?;
                     chart_positions.push(output);
                 }
+                // debug!("Task completed");
+                // for table in &tables {
+                //     let input = models::GraphIdentifierInput {
+                //         report_text: sub_section_content.clone(),
+                //         chart_caption: None,
+                //         table_caption: Some(table.caption.clone()),
+                //     };
+                //     debug!("Prepared input: {:#?}", input);
+                //     debug!("Running task...");
+                //     let output: GraphIdentifierOutput = task
+                //         .run_structured(
+                //             API.clone(),
+                //             &input,
+                //             serde_json::to_string_pretty(&schema_for!(GraphIdentifierOutput))?,
+                //         )
+                //         .await?;
+                //     table_positions.push(output);
+                // }
                 debug!("Task completed");
             }
-            if let Some(tables) = tables {
-                for table in tables {
-                    let prompt = prompting::get_prompt("graph-identifier".into())?;
-                    let task = Task::new(&prompt);
-                    let input = models::GraphIdentifierInput {
-                        report_text: report_text.clone(),
-                        chart_caption: None,
-                        table_caption: Some(table.caption.clone()),
-                    };
-                    debug!("Prepared input: {:#?}", input);
-                    debug!("Running task...");
-                    let output: GraphIdentifierOutput = task
-                        .run_structured(
-                            API.clone(),
-                            &input,
-                            serde_json::to_string_pretty(&schema_for!(GraphIdentifierOutput))?,
-                        )
-                        .await?;
-                    table_positions.push(output);
-                }
-                debug!("Task completed");
-            }
-            state.state.chart_positions = Some(chart_positions);
-            state.state.table_positions = Some(table_positions);
         }
+
+        state.state.chart_positions = Some(chart_positions);
+        // state.state.table_positions = Some(table_positions);
         debug!("GraphInsertionJob completed.");
         Ok(state)
     }

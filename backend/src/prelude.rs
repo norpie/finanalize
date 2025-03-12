@@ -82,6 +82,8 @@ pub enum FinanalizeError {
     DatabaseError(String),
     #[error("Invalid amount: {0}")]
     InvalidAmount(String),
+    #[error("Invalid State")]
+    InvalidState,
 }
 
 impl<E> From<DrawingAreaErrorKind<E>> for FinanalizeError

@@ -51,51 +51,49 @@ impl Job for GenerateVisualizationsJob {
     async fn run(&self, mut state: WorkflowState) -> Result<WorkflowState> {
         debug!("Running GenerateVisualizationsJob...");
         let mut visuals = Vec::new();
-        if let Some(extracted_data) = state.state.extracted_data.clone() {
-            for data in extracted_data {
-                let data_input = DataInput {
-                    title: data.title.clone(),
-                    description: data.description.clone(),
-                    columns: data
-                        .columns
-                        .iter()
-                        .map(|c| ColumnInput {
-                            name: c.name.clone(),
-                            description: c.description.clone(),
-                        })
-                        .collect(),
-                };
-                let input = models::VisualizationInput {
-                    data: data_input.clone(),
-                    graph_types: vec![
-                        "bar".to_string(),
-                        "line".to_string(),
-                        "pie".to_string(),
-                        "stock".to_string(),
-                        "table".to_string(),
-                    ],
-                };
-                debug!("Prepared input: {:#?}", input);
-                debug!("Running task...");
-                let prompt = prompting::get_prompt("graph-visualization".into())?;
-                let task = Task::new(&prompt);
-                let output: VisualizationOutput = task
-                    .run_structured(
-                        API.clone(),
-                        &input,
-                        serde_json::to_string_pretty(&schema_for!(Visualization))?,
-                    )
-                    .await?;
-                visuals.push(Visualization {
-                    visual_type: output.visual_type.clone(),
-                    data: data.clone(),
-                });
-                debug!("Task completed");
-            }
-            state.state.visuals = Some(visuals);
-            debug!("Visualizations: {:#?}", state.state.visuals);
-            dbg!(&state.state.visuals);
+        for data in state.state.data_sources.clone().unwrap() {
+            let data_input = DataInput {
+                title: data.title.clone(),
+                description: data.description.clone(),
+                columns: data
+                    .columns
+                    .iter()
+                    .map(|c| ColumnInput {
+                        name: c.name.clone(),
+                        description: c.description.clone(),
+                    })
+                    .collect(),
+            };
+            let input = models::VisualizationInput {
+                data: data_input.clone(),
+                graph_types: vec![
+                    "bar".to_string(),
+                    "line".to_string(),
+                    "pie".to_string(),
+                    "stock".to_string(),
+                    "table".to_string(),
+                ],
+            };
+            debug!("Prepared input: {:#?}", input);
+            debug!("Running task...");
+            let prompt = prompting::get_prompt("graph-visualization".into())?;
+            let task = Task::new(&prompt);
+            let output: VisualizationOutput = task
+                .run_structured(
+                    API.clone(),
+                    &input,
+                    serde_json::to_string_pretty(&schema_for!(Visualization))?,
+                )
+                .await?;
+            visuals.push(Visualization {
+                visual_type: output.visual_type.clone(),
+                data: data.clone(),
+            });
+            debug!("Task completed");
         }
+        state.state.visuals = Some(visuals);
+        debug!("Visualizations: {:#?}", state.state.visuals);
+        dbg!(&state.state.visuals);
         debug!("GenerateVisualizationsJob completed");
         Ok(state)
     }

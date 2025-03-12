@@ -10,10 +10,10 @@ pub mod classify_sources;
 pub mod content_formatter;
 pub mod extract_content;
 pub mod extract_data;
-pub mod generate_graphs;
+pub mod generate_graphs; // png
 pub mod generate_report;
-pub mod generate_visualizations;
-pub mod graph_identifier;
+pub mod generate_visualizations; // what graphs from available data
+pub mod graph_identifier; // where to put the graphs
 pub mod index_chunks;
 pub mod scrape_pages;
 pub mod search_before_questions;
@@ -49,14 +49,18 @@ impl JobType {
             JobType::ExtractData => Some(JobType::FormatContent),
             JobType::FormatContent => Some(JobType::ClassifyContent),
             JobType::ClassifyContent => Some(JobType::ClassifyData),
-            JobType::ClassifyData => Some(JobType::ChunkContent),
+            JobType::ClassifyData => Some(JobType::GenerateVisualizations),
+            JobType::GenerateVisualizations => Some(JobType::GenerateGraphs),
+            JobType::GenerateGraphs => Some(JobType::ChunkContent),
             JobType::ChunkContent => Some(JobType::IndexChunks),
             JobType::IndexChunks => Some(JobType::AnswerQuestions),
             JobType::AnswerQuestions => Some(JobType::SectionizeQuestions),
-            JobType::SectionizeQuestions => Some(JobType::RenderLaTeXPdf),
+            JobType::SectionizeQuestions => Some(JobType::RenderGraphs),
+            JobType::RenderGraphs => Some(JobType::RenderLaTeXPdf),
             JobType::RenderLaTeXPdf => Some(JobType::Done),
             // Done
             JobType::Invalid => None,
+            JobType::Failed => None,
             JobType::Done => None,
         }
     }
@@ -81,12 +85,17 @@ impl JobType {
             JobType::FormatContent => Some(Box::new(content_formatter::FormatContentJob)),
             JobType::ClassifyContent => Some(Box::new(classify_sources::ClassifySourcesJob)),
             JobType::ClassifyData => Some(Box::new(classify_data::ClassifyDataJob)),
+            JobType::GenerateVisualizations => {
+                Some(Box::new(generate_visualizations::GenerateVisualizationsJob))
+            }
+            JobType::GenerateGraphs => Some(Box::new(generate_graphs::GenerateGraphsJob)),
             JobType::ChunkContent => Some(Box::new(chunk_content::ChunkContentJob)),
             JobType::IndexChunks => Some(Box::new(index_chunks::IndexChunksJob)),
             JobType::AnswerQuestions => Some(Box::new(answer_questions::AnswerQuestionsJob)),
             JobType::SectionizeQuestions => {
                 Some(Box::new(sectionize_questions::SectionizeQuestionsJob))
             }
+            JobType::RenderGraphs => Some(Box::new(graph_identifier::GraphIdentifierJob)),
             JobType::RenderLaTeXPdf => Some(Box::new(generate_report::GenerateReportJob)),
             _ => None,
         }
