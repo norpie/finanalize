@@ -33,7 +33,7 @@
             return;
         }
 
-        localStorage.setItem('accessToken', response.result.access_token);
+        localStorage.setItem('token', response.result.access_token);
         toast.success('Logged in successfully');
         const newUser = (await get<User>('v1/protected/me')).result;
         user.set(newUser);
