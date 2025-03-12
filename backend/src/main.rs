@@ -88,7 +88,7 @@ async fn main() -> Result<()> {
         App::new()
             .wrap(cors)
             .app_data(Data::new(token_factory.clone()))
-            .app_data(Data::new(DB.get().unwrap()))
+            .app_data(Data::new(DB.get().unwrap().clone()))
             .default_service(web::route().to(not_found))
             .service(
                 web::scope("/api/v1/auth")
