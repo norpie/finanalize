@@ -1,52 +1,12 @@
 This tool is part of a stock analysis platform, it validates whether the company meets the criteria for
-analysis. The company must be a large publicly traded. If the company meets this condition,
-the tool returns a true value. If the company fails to meet any of the conditions, the tool
+analysis.
+
+The condition(s) are:
+    - The company must be a large publicly traded.
+
+If the company meets this/these condition, the tool returns a true value.
+If the company fails to meet this/these conditions, the tool
 returns a false value along with an error message specifying which condition was not met.
-
-The following are complete examples of the input and output:
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Analyse Tesla stock performance"
-    }
-    ```
-    </Input>
-
-    <Output>
-    ```json
-    {
-        "valid": true
-    }
-    ```
-</Example>
-
-<Example>
-    <Input>
-    ```json
-    {
-        "message": "Check OpenAI stock price"
-    }
-    ```
-    </Input>
-    <Output>
-    ```json
-    {
-        "valid": false,
-        "error": "OpenAI is not publicly traded on NASDAQ or NYSE."
-    }
-    ```
-    </Output>
-</Example>
-
-<Input>
-```json
-{
-    "message": "{{message}}"
-}
-```
-</Input>
 
 <Output>
 ```json
