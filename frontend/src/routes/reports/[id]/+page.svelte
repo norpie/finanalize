@@ -265,6 +265,13 @@
 
 	let report: FrontendReport | undefined = $state();
 	let interval: number | null = $state(null);
+	$effect(() => {
+		if (report) {
+			if (report.valid != undefined || report.valid != null) {
+				verdict = report.valid ? 'Valid' : 'Invalid';
+			}
+		}
+	});
 
 	async function refreshReport() {
 		const result = await get<FrontendReport>(`v1/protected/reports/${data.id}`);
@@ -297,9 +304,9 @@
 	{#if report}
 		<div class="flex w-full flex-row justify-center p-4">
 			<Card.Root
-					class="flex w-full max-w-4xl flex-col items-center space-y-6 rounded-lg bg-sidebar backdrop-blur-md p-8 text-center text-white shadow-lg border border-gray-700 md:max-w-5xl lg:max-w-6xl xl:max-w-7xl"
+				class="flex w-full max-w-4xl flex-col items-center space-y-6 rounded-lg border border-gray-700 bg-sidebar p-8 text-center text-white shadow-lg backdrop-blur-md md:max-w-5xl lg:max-w-6xl xl:max-w-7xl"
 			>
-			<!-- Report Title -->
+				<!-- Report Title -->
 				<Card.Title class="mb-4 text-2xl font-bold text-white">
 					Title: {report.title ?? 'Untitled Report'}
 				</Card.Title>
