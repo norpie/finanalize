@@ -19,8 +19,28 @@ use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ReportSize {
+    #[serde(rename = "s")]
+    SMALL,
+    #[serde(rename = "m")]
+    MEDIUM,
+    #[serde(rename = "l")]
+    LARGE,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ReportModel {
+    #[serde(rename = "l")]
+    L,
+    #[serde(rename = "q")]
+    Q
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct ReportCreationLight {
     user_input: String,
+    size: ReportSize,
+    model: ReportModel,
 }
 
 #[post("/reports")]
