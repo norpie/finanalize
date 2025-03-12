@@ -17,6 +17,9 @@ use auth_middleware::Auth;
 use db::{DB, DB_HTTP};
 use jwt::TokenFactory;
 use rabbitmq::RabbitMQPublisher;
+use credit::{add_credits, generate_wallet_bill, get_wallet_balance, use_tokens_on_report};
+use credit::get_wallet_transactions;
+
 
 mod api;
 mod auth_middleware;
@@ -99,17 +102,28 @@ async fn main() -> Result<()> {
                     .service(retry)
                     .service(get_report)
                     .service(get_reports),
+
+
             )
             .service(
                 web::scope("/api/v1/unprotected")
                     .service(get_live_report)
                     .service(get_document),
             )
+            .service(
+                web::scope("/api/v1")
+                    .service(get_wallet_balance)
+                    .service(get_wallet_transactions)
+                    .service(add_credits)
+                    .service(use_tokens_on_report)
+                    .service(generate_wallet_bill),
+            )
     })
     .bind(("0.0.0.0", 8080))?
     .run()
     .await?;
     Ok(())
+
 }
 
 async fn not_found() -> impl Responder {
