@@ -2,7 +2,7 @@
     import * as Table from '$lib/components/ui/table/index.js';
 
     import Spinner from '$lib/components/spinner.svelte';
-    import { user } from '$lib/store';
+    import {user} from '$lib/store';
 
     // TODO: Fetch user data from the server
     const credits = 129847;
@@ -59,24 +59,24 @@
 {#if $user}
     <div class="flex flex-1 flex-col gap-4 p-4">
         <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div class="aspect-video rounded-xl bg-muted/50">
-                <p class="text-2xl">
+            <div class="aspect-video rounded-xl bg-muted/50 flex items-center justify-center">
+                <p class="text-2xl text-center">
                     👋Hi,
                     <span class="text-2xl font-bold">{nameFromEmail($user.email)}</span>
                     !
                 </p>
             </div>
-            <div class="aspect-video rounded-xl bg-muted/50">
-                <p class="text-2xl">
+            <div class="aspect-video rounded-xl bg-muted/50 flex items-center justify-center">
+                <p class="text-2xl text-center">
                     You have
                     <span class="text-2xl font-bold">{credits}</span>
                     credits remaining.
                 </p>
             </div>
-            <div class="aspect-video rounded-xl bg-muted/50">
+            <div class="aspect-video rounded-xl bg-muted/50 flex items-center justify-center">
                 <a href="/reports">
-                    <p class="text-2xl">
-                        <span class="text-2xl font-bold">View Reports</span>
+                    <p class="text-2xl text-center">
+                        <span class="text-2xl font-bold text-white hover:text-[#9333ea] transition-all">View Reports</span>
                     </p>
                 </a>
             </div>
@@ -99,7 +99,9 @@
                             <Table.Cell>{report.date}</Table.Cell>
                             <Table.Cell>{report.title}</Table.Cell>
                             <Table.Cell class="text-right"
-                                >{#if report.cost}{report.cost} Credits{:else}Unavailable{/if}</Table.Cell
+                            >
+                                {#if report.cost}{report.cost} Credits{:else}Unavailable{/if}
+                            </Table.Cell
                             >
                         </Table.Row>
                     {/each}
@@ -109,6 +111,6 @@
     </div>
 {:else}
     <div class="flex h-screen w-full items-center justify-center">
-        <Spinner />
+        <Spinner/>
     </div>
 {/if}
