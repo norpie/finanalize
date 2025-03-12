@@ -20,11 +20,11 @@ use surrealdb::sql::Thing;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ReportSize {
-    #[serde(rename = "s")]
+    #[serde(rename = "small")]
     Small,
-    #[serde(rename = "m")]
+    #[serde(rename = "medium")]
     Medium,
-    #[serde(rename = "l")]
+    #[serde(rename = "large")]
     Large,
 }
 
