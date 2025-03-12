@@ -67,7 +67,7 @@
             <p class="text-gray-300 mb-8">
                 Dive into the world of financial insights and take the first step towards smarter decisions.
             </p>
-            <Button onclick={() => goto('/signup')} class="bg-purple-700 hover:bg-purple-600 text-lg px-6 py-3">
+            <Button onclick={() => goto('/register')} class="bg-purple-700 hover:bg-purple-600 text-lg px-6 py-3">
                 Get Started Now
             </Button>
         </div>
