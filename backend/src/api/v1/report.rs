@@ -28,6 +28,32 @@ pub enum ReportSize {
     Large,
 }
 
+impl ReportSize {
+    pub fn section_amount(&self) -> u64 {
+        match self {
+            ReportSize::Small => 3,
+            ReportSize::Medium => 5,
+            ReportSize::Large => 10,
+        }
+    }
+
+    pub fn sub_section_amount(&self) -> u64 {
+        match self {
+            ReportSize::Small => 2,
+            ReportSize::Medium => 3,
+            ReportSize::Large => 5,
+        }
+    }
+
+    pub fn question_amount(&self) -> u64 {
+        match self {
+            ReportSize::Small => 2,
+            ReportSize::Medium => 4,
+            ReportSize::Large => 6,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ReportModel {
     #[serde(rename = "l")]
