@@ -22,7 +22,7 @@
     <Sidebar.Menu>
         {#each items as item (item.name)}
             <Sidebar.MenuItem>
-                <Sidebar.MenuButton>
+                <Sidebar.MenuButton   class="text-white hover:text-[#9333ea] transition-all"  >
                     {#snippet child({ props })}
                         <a href={item.location} {...props}>
                             <item.icon />
