@@ -67,129 +67,126 @@ impl Job for GenerateGraphsJob {
         debug!("Running GenerateGraphsJob...");
         let mut charts = Vec::new();
         let mut tables = Vec::new();
-        if let Some(visuals) = state.state.visuals.clone() {
-            for visual in visuals {
-                let prompt = prompting::get_prompt("graph-data-prep".to_string())?;
-                let task = Task::new(&prompt);
-                let input = models::Input {
-                    input: serde_json::to_string_pretty(&visual)?,
-                };
-                dbg!(&input);
-                debug!("Prepared input: {:#?}", input);
-                debug!("Running task...");
-                match visual.visual_type.as_str() {
-                    "line" => {
-                        let output: LineDataOutput = task
-                            .run_structured(
-                                API.clone(),
-                                &input,
-                                serde_json::to_string_pretty(&schema_for!(LineDataOutput))?,
-                            )
-                            .await?;
-                        let chart = graphing::create_graph(
-                            "line".to_string(),
-                            Some(output.graph_data),
-                            None,
-                            None,
-                            None,
+        let prompt = prompting::get_prompt("graph-data-prep".to_string())?;
+        let task = Task::new(&prompt);
+        for visual in state.state.visuals.clone().unwrap() {
+            let task = task.clone();
+            let input = models::Input {
+                input: serde_json::to_string_pretty(&visual)?,
+            };
+            dbg!(&input);
+            debug!("Prepared input: {:#?}", input);
+            debug!("Running task...");
+            match visual.visual_type.as_str() {
+                "line" => {
+                    let output: LineDataOutput = task
+                        .run_structured(
+                            API.clone(),
+                            &input,
+                            serde_json::to_string_pretty(&schema_for!(LineDataOutput))?,
                         )
-                        .expect("Could not create line/scatter graph");
-                        let graph_file_output = models::GraphFileOutput {
-                            graph_caption: chart.chart_caption.clone(),
-                            graph_type: chart.chart_type.clone(),
-                            file_path: chart.chart_file.clone(),
-                        };
-                        charts.push(graph_file_output);
-                    }
-                    "bar" => {
-                        let output: BarDataOutput = task
-                            .run_structured(
-                                API.clone(),
-                                &input,
-                                serde_json::to_string_pretty(&schema_for!(BarDataOutput))?,
-                            )
-                            .await?;
-                        let chart = graphing::create_graph(
-                            "bar".to_string(),
-                            None,
-                            Some(output.graph_data),
-                            None,
-                            None,
-                        )
-                        .expect("Could not create histogram");
-                        let graph_file_output = models::GraphFileOutput {
-                            graph_caption: chart.chart_caption.clone(),
-                            graph_type: chart.chart_type.clone(),
-                            file_path: chart.chart_file.clone(),
-                        };
-                        charts.push(graph_file_output);
-                    }
-                    "pie" => {
-                        let output: PieDataOutput = task
-                            .run_structured(
-                                API.clone(),
-                                &input,
-                                serde_json::to_string_pretty(&schema_for!(PieDataOutput))?,
-                            )
-                            .await?;
-                        let chart = graphing::create_graph(
-                            "pie".to_string(),
-                            None,
-                            None,
-                            Some(output.graph_data),
-                            None,
-                        )
-                        .expect("Could not create pie chart");
-                        let graph_file_output = models::GraphFileOutput {
-                            graph_caption: chart.chart_caption.clone(),
-                            graph_type: chart.chart_type.clone(),
-                            file_path: chart.chart_file.clone(),
-                        };
-                        charts.push(graph_file_output);
-                    }
-                    "stock" => {
-                        let output: StockDataOutput = task
-                            .run_structured(
-                                API.clone(),
-                                &input,
-                                serde_json::to_string_pretty(&schema_for!(StockDataOutput))?,
-                            )
-                            .await?;
-                        let chart = graphing::create_graph(
-                            "stock".to_string(),
-                            None,
-                            None,
-                            None,
-                            Some(output.graph_data),
-                        )
-                        .expect("Could not create stock graph");
-                        let graph_file_output = models::GraphFileOutput {
-                            graph_caption: chart.chart_caption.clone(),
-                            graph_type: chart.chart_type.clone(),
-                            file_path: chart.chart_file.clone(),
-                        };
-                        charts.push(graph_file_output);
-                    }
-                    "table" => {
-                        let output: TableDataOutput = task
-                            .run_structured(
-                                API.clone(),
-                                &input,
-                                serde_json::to_string_pretty(&schema_for!(TableDataOutput))?,
-                            )
-                            .await?;
-                        tables.push(output.graph_data);
-                    }
-                    _ => {}
+                        .await?;
+                    let chart = graphing::create_graph(
+                        "line".to_string(),
+                        Some(output.graph_data),
+                        None,
+                        None,
+                        None,
+                    )?;
+                    let graph_file_output = models::GraphFileOutput {
+                        graph_caption: chart.chart_caption.clone(),
+                        graph_type: chart.chart_type.clone(),
+                        file_path: chart.chart_file.clone(),
+                    };
+                    charts.push(graph_file_output);
                 }
-                debug!("Task completed");
+                "bar" => {
+                    let output: BarDataOutput = task
+                        .run_structured(
+                            API.clone(),
+                            &input,
+                            serde_json::to_string_pretty(&schema_for!(BarDataOutput))?,
+                        )
+                        .await?;
+                    let chart = graphing::create_graph(
+                        "bar".to_string(),
+                        None,
+                        Some(output.graph_data),
+                        None,
+                        None,
+                    )
+                    .expect("Could not create histogram");
+                    let graph_file_output = models::GraphFileOutput {
+                        graph_caption: chart.chart_caption.clone(),
+                        graph_type: chart.chart_type.clone(),
+                        file_path: chart.chart_file.clone(),
+                    };
+                    charts.push(graph_file_output);
+                }
+                "pie" => {
+                    let output: PieDataOutput = task
+                        .run_structured(
+                            API.clone(),
+                            &input,
+                            serde_json::to_string_pretty(&schema_for!(PieDataOutput))?,
+                        )
+                        .await?;
+                    let chart = graphing::create_graph(
+                        "pie".to_string(),
+                        None,
+                        None,
+                        Some(output.graph_data),
+                        None,
+                    )?;
+                    let graph_file_output = models::GraphFileOutput {
+                        graph_caption: chart.chart_caption.clone(),
+                        graph_type: chart.chart_type.clone(),
+                        file_path: chart.chart_file.clone(),
+                    };
+                    charts.push(graph_file_output);
+                }
+                "stock" => {
+                    let output: StockDataOutput = task
+                        .run_structured(
+                            API.clone(),
+                            &input,
+                            serde_json::to_string_pretty(&schema_for!(StockDataOutput))?,
+                        )
+                        .await?;
+                    let chart = graphing::create_graph(
+                        "stock".to_string(),
+                        None,
+                        None,
+                        None,
+                        Some(output.graph_data),
+                    )?;
+
+                    let graph_file_output = models::GraphFileOutput {
+                        graph_caption: chart.chart_caption.clone(),
+                        graph_type: chart.chart_type.clone(),
+                        file_path: chart.chart_file.clone(),
+                    };
+                    charts.push(graph_file_output);
+                }
+                "table" => {
+                    let output: TableDataOutput = task
+                        .run_structured(
+                            API.clone(),
+                            &input,
+                            serde_json::to_string_pretty(&schema_for!(TableDataOutput))?,
+                        )
+                        .await?;
+                    tables.push(output.graph_data);
+                }
+                _ => {}
             }
-            state.state.charts = Some(charts);
-            debug!("Charts: {:#?}", state.state.charts);
-            state.state.tables = Some(tables);
-            debug!("Tables: {:#?}", state.state.tables);
-            dbg!(&state.state.report);
+            debug!("Task completed");
         }
+        state.state.charts = Some(charts);
+        debug!("Charts: {:#?}", state.state.charts);
+        state.state.tables = Some(tables);
+        debug!("Tables: {:#?}", state.state.tables);
+        dbg!(&state.state.report);
         debug!("GenerateGraphsJob completed");
         Ok(state)
     }

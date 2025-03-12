@@ -79,22 +79,22 @@ pub fn create_graph(
     match graph_type {
         GraphType::Line => {
             let graph_data = graph_data.unwrap();
-            let chart = create_line_graph(graph_data).expect("Unable to create line graph");
+            let chart = create_line_graph(graph_data)?;
             Ok(chart)
         }
         GraphType::Bar => {
             let histogram_data = histogram_data.unwrap();
-            let chart = create_histogram(histogram_data).expect("Unable to create histogram");
+            let chart = create_histogram(histogram_data)?;
             Ok(chart)
         }
         GraphType::Pie => {
             let pie_chart_data = pie_chart_data.unwrap();
-            let chart = create_pie_chart(pie_chart_data).expect("Unable to create pie");
+            let chart = create_pie_chart(pie_chart_data)?;
             Ok(chart)
         }
         GraphType::Stock => {
             let stock_chart_data = stock_chart_data.unwrap();
-            let chart = create_stock_chart(stock_chart_data).expect("Unable to create stock chart");
+            let chart = create_stock_chart(stock_chart_data)?;
             Ok(chart)
         }
     }
@@ -103,7 +103,7 @@ pub fn create_graph(
 fn create_line_graph(graph_data: GraphData) -> Result<Chart> {
     let temp_dir = env::temp_dir();
     let output_dir = temp_dir.join(format!("{}.png", graph_data.caption));
-    let out_file_name: &str = output_dir.to_str().unwrap();
+    let out_file_name: &str = output_dir.to_str().ok_or(FinanalizeError::InvalidState)?;
     let root = BitMapBackend::new(out_file_name, (900, 600)).into_drawing_area();
     root.fill(&WHITE)?;
 
@@ -166,7 +166,7 @@ fn create_line_graph(graph_data: GraphData) -> Result<Chart> {
             .zip(graph_data.y_values.iter())
             .map(|(x, y)| Circle::new((*x, *y), 5, BLACK.mix(0.5).filled())),
     )?;
-    root.present().expect("Unable to save result");
+    root.present()?;
     println!("Graph created at: {}", out_file_name);
     Ok(Chart {
         chart_caption: graph_data.caption.clone(),
@@ -178,7 +178,7 @@ fn create_line_graph(graph_data: GraphData) -> Result<Chart> {
 fn create_histogram(histogram_data: HistogramData) -> Result<Chart> {
     let temp_dir = env::temp_dir();
     let output_dir = temp_dir.join(format!("{}.png", histogram_data.caption));
-    let out_file_name: &str = output_dir.to_str().unwrap();
+    let out_file_name: &str = output_dir.to_str().ok_or(FinanalizeError::InvalidState)?;
     let root = BitMapBackend::new(out_file_name, (900, 600)).into_drawing_area();
     root.fill(&WHITE)?;
     let x_values: Vec<u32> = histogram_data.x_values.to_vec();
@@ -220,7 +220,7 @@ fn create_histogram(histogram_data: HistogramData) -> Result<Chart> {
                     .map(|(x, y)| (*x, *y)),
             ),
     )?;
-    root.present().expect("Unable to save result");
+    root.present()?;
     println!("Bar chart created at: {}", out_file_name);
     Ok(Chart {
         chart_caption: histogram_data.caption.clone(),
@@ -232,7 +232,7 @@ fn create_histogram(histogram_data: HistogramData) -> Result<Chart> {
 fn create_pie_chart(pie_chart_data: PieChartData) -> Result<Chart> {
     let temp_dir = env::temp_dir();
     let output_dir = temp_dir.join(format!("{}.png", pie_chart_data.caption));
-    let out_file_name: &str = output_dir.to_str().unwrap();
+    let out_file_name: &str = output_dir.to_str().ok_or(FinanalizeError::InvalidState)?;
     let root = BitMapBackend::new(out_file_name, (900, 600)).into_drawing_area();
     root.fill(&WHITE)?;
     let dims = root.dim_in_pixel();
@@ -258,7 +258,7 @@ fn create_pie_chart(pie_chart_data: PieChartData) -> Result<Chart> {
             .color(&BLACK.mix(0.5)),
     );
     root.draw(&pie)?;
-    root.present().expect("Unable to save result");
+    root.present()?;
     println!("Pie chart created at: {}", out_file_name);
     Ok(Chart {
         chart_caption: pie_chart_data.caption.clone(),
@@ -267,8 +267,8 @@ fn create_pie_chart(pie_chart_data: PieChartData) -> Result<Chart> {
     })
 }
 
-fn parse_time(date_str: &str) -> NaiveDate {
-    NaiveDate::parse_from_str(date_str, "%Y-%m-%d").unwrap()
+fn parse_time(date_str: &str) -> Result<NaiveDate> {
+    NaiveDate::parse_from_str(date_str, "%Y-%m-%d").or(Err(FinanalizeError::InvalidState))
 }
 
 fn create_stock_chart(stock_data: StockChartData) -> Result<Chart> {
@@ -291,9 +291,9 @@ fn create_stock_chart(stock_data: StockChartData) -> Result<Chart> {
         .max_by(|a, b| a.partial_cmp(b).unwrap())
         .unwrap()
         + 10f32;
-    let x_min = parse_time(&stock_data.dates[0]) - chrono::Duration::days(1);
+    let x_min = parse_time(&stock_data.dates[0])? - chrono::Duration::days(1);
     let x_max =
-        parse_time(&stock_data.dates[stock_data.dates.len() - 1]) + chrono::Duration::days(1);
+        parse_time(&stock_data.dates[stock_data.dates.len() - 1])? + chrono::Duration::days(1);
     let mut chart = ChartBuilder::on(&root)
         .caption(stock_data.caption.as_str(), ("sans-serif", 50).into_font())
         .margin(5)
@@ -304,7 +304,7 @@ fn create_stock_chart(stock_data: StockChartData) -> Result<Chart> {
     chart.configure_mesh().light_line_style(WHITE).draw()?;
     chart.draw_series(stock_data.dates.iter().enumerate().map(|(i, date)| {
         CandleStick::new(
-            parse_time(date),
+            parse_time(date).unwrap(),
             stock_data.open[i],
             stock_data.high[i],
             stock_data.low[i],
@@ -314,7 +314,7 @@ fn create_stock_chart(stock_data: StockChartData) -> Result<Chart> {
             15,
         )
     }))?;
-    root.present().expect("Unable to save result");
+    root.present()?;
     println!("Stock chart created at: {}", out_file_name);
     Ok(Chart {
         chart_caption: stock_data.caption.clone(),

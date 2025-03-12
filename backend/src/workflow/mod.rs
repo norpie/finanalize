@@ -78,12 +78,12 @@ async fn process_state(mut state: WorkflowState) -> Result<WorkflowState> {
     }
     let Some(next_type) = state.last_job_type.next() else {
         state.state.status = JobType::Done;
-        debug!("No more jobs to run for report {}", &state.id);
+        debug!("(1) No more jobs to run for report {}", &state.id);
         return Ok(state);
     };
     if next_type == JobType::Done {
         state.state.status = JobType::Done;
-        debug!("No more jobs to run for report {}", &state.id);
+        debug!("(2) No more jobs to run for report {}", &state.id);
         return Ok(state);
     }
     let Some(next_job) = next_type.job() else {
@@ -130,6 +130,10 @@ pub enum JobType {
     ClassifyContent,
     // Classify the data
     ClassifyData,
+    // Generate visualizations from the data
+    GenerateVisualizations,
+    // Make the literal images of the graphs
+    GenerateGraphs,
     // Chunk content
     ChunkContent,
     // Index the chunks
@@ -138,11 +142,14 @@ pub enum JobType {
     AnswerQuestions,
     // Convert the question and answers into subsection conbtent
     SectionizeQuestions,
+    // Put the graphs in the right places
+    RenderGraphs,
     // Put all the content in the template, render it, then compile it to a PDF
     RenderLaTeXPdf,
-    // The two end conditions
+    // The three end conditions
     Invalid,
     Done,
+    Failed,
 }
 
 #[cfg(test)]
