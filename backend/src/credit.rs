@@ -1,6 +1,9 @@
-use crate::db::DB;
+use crate::api::ApiResponse;
+use crate::db::{SurrealDb, DB};
 use crate::prelude::FinanalizeError;
 use crate::prelude::*;
+use actix_web::http::StatusCode;
+use actix_web::web::Data;
 use chrono::{DateTime, Utc};
 use rust_decimal::prelude::FromPrimitive;
 use rust_decimal::Decimal;
@@ -8,6 +11,10 @@ use serde::{Deserialize, Serialize};
 use serde_json;
 use std::collections::VecDeque;
 use surrealdb::sql::{Thing, Uuid};
+use actix_web::{web, HttpResponse, Responder};
+use actix_web::get;
+use actix_web::post;
+
 
 // ----------- Wallet Struct --------------
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -245,6 +252,178 @@ where
     Ok(VecDeque::from(vec))
 }
 
+
+#[get("/wallet/{wallet_id}/balance")]
+pub async fn get_wallet_balance(db: Data<SurrealDb>, wallet_id: web::Path<String>) -> crate::prelude::Result<impl Responder> {
+    let wallet_id = wallet_id.into_inner();
+    
+    // Probeer de wallet uit de database te halen
+    let wallet: Option<Wallet> = db.select(("wallet", wallet_id.clone())).await?;
+    
+    let wallet = if let Some(wallet) = wallet {
+        wallet
+    } else {
+        // Als de wallet niet bestaat, maak er dan een aan
+        let new_wallet = Wallet {
+            id: Thing::from(("wallet", wallet_id.as_str())),
+            transactions: VecDeque::new(),
+        };
+
+        // Sla de nieuwe wallet op in de database
+        let created_wallet: Option<Wallet> = db
+            .create("wallet") // Specify the resource type
+            .content(Some(new_wallet)) // Wrap the wallet in Some()
+            .await?;
+
+            created_wallet.ok_or(FinanalizeError::DatabaseError("Failed to create wallet".to_string()))?
+    };
+
+    // Bereken de balans en geef deze terug
+    let balance = wallet.calculate_balance();
+    Ok(ApiResponse::new(balance))
+}
+
+#[get("/wallet/{wallet_id}/transactions")]
+pub async fn get_wallet_transactions(
+    db: Data<SurrealDb>,
+    wallet_id: web::Path<String>,
+) -> crate::prelude::Result<impl Responder> {
+    let wallet_id = wallet_id.into_inner();
+
+    // Try to fetch the wallet from the database
+    let wallet: Option<Wallet> = db.select(("wallet", wallet_id.clone())).await?;
+
+    let wallet = if let Some(wallet) = wallet {
+        wallet
+    } else {
+        // If the wallet doesn't exist, create a new one
+        let new_wallet = Wallet {
+            id: Thing::from(("wallet", wallet_id.as_str())),
+            transactions: VecDeque::new(),
+        };
+
+        // Save the new wallet to the database
+        let created_wallet: Option<Wallet> = db
+            .create("wallet") // Specify the resource type
+            .content(Some(new_wallet)) // Wrap the wallet in Some()
+            .await?;
+
+        created_wallet.ok_or(FinanalizeError::DatabaseError(
+            "Failed to create wallet".to_string(),
+        ))?
+    };
+
+    // Return the transactions of the wallet
+    let transactions = wallet.transactions; // Assuming `transactions` is stored as `VecDeque<Transaction>`
+
+    Ok(ApiResponse::new(transactions))
+}
+
+#[derive(Deserialize)]
+pub struct AddCreditsRequest {
+    amount: f64, // Use f64 for compatibility with Decimal
+}
+
+
+#[post("/wallet/{wallet_id}/add_credits")]
+pub async fn add_credits(
+    db: Data<SurrealDb>,
+    wallet_id: web::Path<String>,
+    body: web::Json<AddCreditsRequest>,
+) -> crate::prelude::Result<impl Responder> {
+    let wallet_id = wallet_id.into_inner();
+    
+    // Fetch the wallet from the database
+    let mut wallet: Option<Wallet> = db.select(("wallet", wallet_id.clone())).await?;
+
+    let wallet = if let Some(mut wallet) = wallet {
+        // Convert f64 to Decimal safely
+        if let Some(decimal_amount) = Decimal::from_f64(body.amount) {
+            wallet.add_credits(decimal_amount);
+        } else {
+            return Err(FinanalizeError::InvalidAmount("Invalid decimal conversion".to_string()).into());
+        }
+
+        // Clone wallet to pass an owned value instead of borrowing
+        let updated_wallet: Option<Wallet> = db
+            .update(("wallet", wallet_id.clone()))
+            .content(wallet.clone()) 
+            .await?;
+
+        // Ensure the wallet update is successful
+        updated_wallet.ok_or(FinanalizeError::DatabaseError(
+            "Failed to update wallet".to_string(),
+        ))?
+    } else {
+        return Err(FinanalizeError::NotFound.into());
+    };
+
+    Ok(HttpResponse::Ok().json(ApiResponse::new(wallet.calculate_balance())))
+}
+
+
+#[derive(Debug, Deserialize)]
+pub struct UseTokensRequest {
+    pub report_id: String,
+    pub tokens: i32,
+    pub api_type: String,
+}
+
+#[post("/wallet/{wallet_id}/use_tokens")]
+pub async fn use_tokens_on_report(
+    db: web::Data<SurrealDb>,
+    wallet_id: web::Path<String>,
+    body: web::Json<UseTokensRequest>,
+) -> crate::prelude::Result<HttpResponse> { // Explicit return type
+    let wallet_id = wallet_id.into_inner();
+    let body = body.into_inner();
+
+    // Fetch wallet from the database
+    let wallet_opt: Option<Wallet> = db.select(("wallet", wallet_id.clone())).await?;
+    let mut wallet = wallet_opt.ok_or(FinanalizeError::NotFound)?;
+
+    // Process token usage
+    let cost: Decimal = wallet
+        .use_tokens_on_report(&wallet_id, &body.report_id, body.tokens, &body.api_type)
+        .await?;
+
+        let updated_wallet: Option<Wallet> = db
+        .update(("wallet", &wallet_id))
+        .content(wallet.clone()) 
+        .await?;
+    
+    // Ensure the update was successful
+    if updated_wallet.is_none() {
+        return Err(FinanalizeError::DatabaseError("Failed to update wallet".to_string()));
+    }
+    
+
+    Ok(HttpResponse::Ok().json(ApiResponse::new(cost)))
+}
+
+
+/// Generate wallet bill
+#[get("/wallet/{wallet_id}/bill")]
+pub async fn generate_wallet_bill(
+    db: web::Data<SurrealDb>,
+    wallet_id: web::Path<String>,
+) -> crate::prelude::Result<impl Responder> {
+    let wallet_id = wallet_id.into_inner();
+
+    // Fetch wallet
+    let wallet: Wallet = match db.select(("wallet", &wallet_id)).await? {
+        Some(wallet) => wallet,
+        None => return Err(FinanalizeError::NotFound.into()),
+    };
+
+    // Generate the bill as a string
+    let bill = wallet.generate_wallet_bill();
+
+    Ok(HttpResponse::Ok().json(ApiResponse::new(bill)))
+}
+
+
+
 #[cfg(test)]
 mod tests {
     use crate::db;
@@ -285,7 +464,7 @@ mod tests {
 
         let wallet_id_str = wallet.id.to_string();
 
-        // Use tokens for different reports
+        // Use tokens for difrent reports
         let report_1 = wallet
             .use_tokens_on_report(&wallet_id_str, "report_1", 20, "OpenAI")
             .await

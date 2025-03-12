@@ -44,6 +44,7 @@
 	},
 	"dependencies": {
 		"effect": "^3.12.5",
-		"svelte-pdf": "^1.0.26"
+		"svelte-pdf": "^1.0.26",
+		"axios": "^1.8.1"
 	}
 }
