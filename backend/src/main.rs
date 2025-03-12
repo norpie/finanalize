@@ -14,15 +14,16 @@ use api::{
     ApiResponse,
 };
 use auth_middleware::Auth;
+use credit::get_wallet_transactions;
+use credit::{add_credits, generate_wallet_bill, get_wallet_balance, use_tokens_on_report};
 use db::{DB, DB_HTTP};
 use jwt::TokenFactory;
 use rabbitmq::RabbitMQPublisher;
-use credit::{add_credits, generate_wallet_bill, get_wallet_balance, use_tokens_on_report};
-use credit::get_wallet_transactions;
-
 
 mod api;
 mod auth_middleware;
+#[allow(dead_code)]
+mod credit;
 mod db;
 #[allow(dead_code)]
 mod extractors;
@@ -48,9 +49,7 @@ mod sec;
 mod tasks;
 #[allow(dead_code)]
 mod workflow;
-mod credit;
 #[allow(dead_code)]
-
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenvy::from_filename(".env").ok();
@@ -102,8 +101,6 @@ async fn main() -> Result<()> {
                     .service(retry)
                     .service(get_report)
                     .service(get_reports),
-
-
             )
             .service(
                 web::scope("/api/v1/unprotected")
@@ -123,7 +120,6 @@ async fn main() -> Result<()> {
     .run()
     .await?;
     Ok(())
-
 }
 
 async fn not_found() -> impl Responder {
