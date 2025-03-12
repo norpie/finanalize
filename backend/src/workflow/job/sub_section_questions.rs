@@ -20,6 +20,7 @@ pub mod models {
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
     pub struct RawSubSectionQuestionsInput {
+        pub amount: u64,
         pub input: String,
     }
 
@@ -75,6 +76,7 @@ impl Job for SubSectionQuestionsJob {
             sections,
         };
         let raw_input = RawSubSectionQuestionsInput {
+            amount: state.state.size.question_amount(),
             input: serde_json::to_string_pretty(&input)?,
         };
         println!("input: {}", &raw_input.input);

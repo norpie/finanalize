@@ -15,6 +15,7 @@ pub mod models {
 
     #[derive(Debug, Clone, Deserialize, Serialize)]
     pub struct SectionNamesInput {
+        pub amount: u64,
         pub title: String,
         pub message: String,
     }
@@ -34,6 +35,7 @@ impl Job for SectionNamesJob {
         let prompt = prompting::get_prompt("section".into())?;
         let task = Task::new(&prompt);
         let input = SectionNamesInput {
+            amount: state.state.size.section_amount(),
             title: state.state.title.clone().unwrap(),
             message: state.state.user_input.clone(),
         };
