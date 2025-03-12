@@ -502,7 +502,7 @@ engines:
   - name: bing
     engine: bing
     shortcut: bi
-    disabled: true
+    disabled: false
 
   - name: bing images
     engine: bing_images
@@ -762,6 +762,7 @@ engines:
   - name: duckduckgo
     engine: duckduckgo
     shortcut: ddg
+    disabled: true
 
   - name: duckduckgo images
     engine: duckduckgo_extra
@@ -950,6 +951,7 @@ engines:
   - name: google
     engine: google
     shortcut: go
+    disabled: true
     # additional_tests:
     #   android: *test_android
 
@@ -1516,8 +1518,8 @@ engines:
     search_type: search
     categories: [general, web]
     shortcut: ps
-    timeout: 4.0
-    disabled: true
+    timeout: 10.0
+    disabled: false
 
   - name: presearch images
     engine: presearch
@@ -1918,7 +1920,7 @@ engines:
   - name: yahoo
     engine: yahoo
     shortcut: yh
-    disabled: true
+    disabled: false
 
   - name: yahoo news
     engine: yahoo_news
