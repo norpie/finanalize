@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use models::{ClassifiedSource, ClassifySourcesInput, ClassifySourcesOutput};
 use schemars::schema_for;
 
-use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowState};
+use crate::{llm::API, prelude::*, prompting, tasks::{Task, TaskResult}, workflow::WorkflowState};
 
 use super::Job;
 
@@ -76,13 +76,15 @@ impl Job for ClassifySourcesJob {
             let input = ClassifySourcesInput {
                 input: source.content.clone(),
             };
-            let output: ClassifySourcesOutput = task
+            let res: TaskResult<ClassifySourcesOutput> = task
                 .run_structured(
                     API.clone(),
                     &input,
                     serde_json::to_string_pretty(&schema_for!(ClassifySourcesOutput))?,
                 )
                 .await?;
+            let output = res.output;
+            state.state.generation_results.push(res.info);
             sources.push(ClassifiedSource::from_id(
                 format!("website{}", i),
                 output,

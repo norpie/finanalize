@@ -1,4 +1,5 @@
 use super::{Column, Data, DataExtract};
+use crate::tasks::TaskResult;
 use crate::workflow::job::classify_sources::models::ClassifySourcesInput;
 use crate::{llm::API, prelude::*, prompting, tasks::Task};
 use async_trait::async_trait;
@@ -64,13 +65,14 @@ impl DataExtract for CsvExtractor {
         //Start job run structured data classification
         let prompt = prompting::get_prompt("data-classifier".into())?;
         let task = Task::new(&prompt);
-        let output: DataClassifierOuput = task
+        let res: TaskResult<DataClassifierOuput> = task
             .run_structured(
                 API.clone(),
                 &input,
                 serde_json::to_string_pretty(&schema_for!(DataClassifierOuput))?,
             )
             .await?;
+        let output = res.output;
 
         // After getting your output from the task.run_structured call
         let mut columns = vec![];

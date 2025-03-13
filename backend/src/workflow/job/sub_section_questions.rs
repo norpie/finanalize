@@ -1,5 +1,9 @@
 use crate::{
-    llm::API, prelude::*, prompting, tasks::Task, workflow::job::search_queries::models::Section,
+    llm::API,
+    prelude::*,
+    prompting,
+    tasks::{Task, TaskResult},
+    workflow::job::search_queries::models::Section,
 };
 
 use async_trait::async_trait;
@@ -82,13 +86,15 @@ impl Job for SubSectionQuestionsJob {
         println!("input: {}", &raw_input.input);
         let prompt = prompting::get_prompt("sub-section-questions".into())?;
         let task = Task::new(&prompt);
-        let output: SubSectionQuestionsOutput = task
+        let res: TaskResult<SubSectionQuestionsOutput> = task
             .run_structured(
                 API.clone(),
                 &raw_input,
                 serde_json::to_string_pretty(&schema_for!(SubSectionQuestionsOutput))?,
             )
             .await?;
+        let output = res.output;
+        state.state.generation_results.push(res.info);
         let mut sections: Vec<Vec<Vec<String>>> = Vec::new();
         for section in output.sections {
             let mut sub_sections: Vec<Vec<String>> = Vec::new();

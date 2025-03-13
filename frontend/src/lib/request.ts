@@ -57,23 +57,22 @@ async function refresh(): Promise<Result<{ access_token: string }> | null> {
 
 /** Create a new wallet */
 async function createWallet() {
-    return post("v1/wallet/new", {});
+    return post("v1/protected/wallet/new", {});
 }
 
 /** Get wallet balance */
-async function getWalletBalance(walletId: string) {
-    return get(`v1/wallet/${walletId}/balance`); 
+async function getWalletBalance() {
+    return get(`v1/protected/wallet/balance`);
 }
 
-async function getWalletTransactions(walletId: string) {
-    return get(`/v1/wallet/${walletId}/transactions`);
+async function getWalletTransactions() {
+    return get(`/v1/protected/wallet/transactions`);
 
 }
-
 
 /** Add credits to a wallet */
 async function addCredits(walletId: string, amount: number) {
-    return post(`v1/wallet/${walletId}/add_credits`, { amount });
+    return post(`v1/protected/wallet/add_credits`, { amount });
 }
 
 /** Use tokens on a report */
@@ -93,4 +92,3 @@ async function relateWalletToUser(walletId: string, userId: string) {
 
 export { createWallet, getWalletBalance, addCredits, useTokens, generateWalletBill, relateWalletToUser, getWalletTransactions };
 export { request, get, post };
-

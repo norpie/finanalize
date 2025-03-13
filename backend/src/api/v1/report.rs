@@ -13,8 +13,10 @@ use actix_files::NamedFile;
 use actix_web::web::{self, Data, Json, Path};
 use actix_web::{get, post, rt, HttpRequest, Responder};
 use actix_ws::Message;
+use chrono::{DateTime, Utc};
 use futures_util::StreamExt;
 use log::debug;
+use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -230,7 +232,7 @@ pub async fn get_reports(
     db: Data<SurrealDb>,
     page: web::Query<UserReportPage>,
 ) -> Result<impl Responder> {
-    Ok(ApiResponse::new(db
+    let reports = db
         .query(
             "SELECT * FROM (SELECT ->has->report as reports FROM $user FETCH reports)[0].reports ORDER BY created_at DESC LIMIT $perPage START $start",
         )
@@ -241,7 +243,32 @@ pub async fn get_reports(
         .take::<Vec<SurrealDBReport>>(0)?
         .into_iter()
         .map(Report::from)
-        .collect::<Vec<Report>>()))
+        .collect::<Vec<Report>>();
+    let mut extended_reports = Vec::new();
+    for report in reports {
+        let mut total = Decimal::ZERO;
+        for gr in report.generation_results {
+            let api = gr.api.clone();
+            total += api.cost(gr.clone());
+        }
+        extended_reports.push(ExtendedReport {
+            id: report.id.clone(),
+            status: report.status,
+            user_input: report.user_input.clone(),
+            created_at: report.created_at,
+            cost: total,
+        });
+    }
+    Ok(ApiResponse::new(extended_reports))
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ExtendedReport {
+    id: String,
+    status: JobType,
+    user_input: String,
+    created_at: DateTime<Utc>,
+    cost: Decimal,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -266,6 +293,27 @@ pub async fn get_document(db: Data<SurrealDb>, report_id: Path<String>) -> Resul
     dbg!("here2");
 
     let Some(src) = workflow_state.state.report.clone() else {
+        dbg!("here3");
+        return Err(FinanalizeError::NotFound);
+    };
+    dbg!("here4");
+    let report = NamedFile::open_async(src).await?;
+    Ok(report)
+}
+
+#[get("/reports/{report_id}/preview.pdf")]
+pub async fn get_preview(db: Data<SurrealDb>, report_id: Path<String>) -> Result<impl Responder> {
+    let workflow_state_id_thing: Thing = ("workflow_state", report_id.as_str()).into();
+    dbg!("here");
+    let workflow_state = db
+        .query("SELECT * FROM $workflow_state")
+        .bind(("workflow_state", workflow_state_id_thing))
+        .await?
+        .take::<Option<SDBWorkflowState>>(0)?
+        .ok_or(FinanalizeError::NotFound)?;
+    dbg!("here2");
+
+    let Some(src) = workflow_state.state.preview.clone() else {
         dbg!("here3");
         return Err(FinanalizeError::NotFound);
     };

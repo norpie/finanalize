@@ -1,4 +1,4 @@
-use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowState};
+use crate::{llm::API, prelude::*, prompting, tasks::{Task, TaskResult}, workflow::WorkflowState};
 
 use super::{validation::models::ValidationInput, Job};
 
@@ -30,7 +30,7 @@ impl Job for TitleJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: TitleOutput = task
+        let res: TaskResult<TitleOutput> = task
             .run_structured(
                 API.clone(),
                 &input,
@@ -38,7 +38,8 @@ impl Job for TitleJob {
             )
             .await?;
         debug!("Task completed");
-        state.state.title = Some(output.title);
+        state.state.title = Some(res.output.title);
+        state.state.generation_results.push(res.info);
         debug!("Title: {:#?}", state.state.title);
         dbg!(&state.state.title);
         debug!("TitleJob completed");

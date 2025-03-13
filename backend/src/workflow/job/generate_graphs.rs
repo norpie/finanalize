@@ -1,6 +1,6 @@
 use crate::llm::API;
 use crate::prelude::*;
-use crate::tasks::Task;
+use crate::tasks::{Task, TaskResult};
 use crate::workflow::job::generate_graphs::models::{
     BarDataOutput, LineDataOutput, PieDataOutput, StockDataOutput, TableDataOutput,
 };
@@ -79,13 +79,15 @@ impl Job for GenerateGraphsJob {
             debug!("Running task...");
             match visual.visual_type.as_str() {
                 "line" => {
-                    let output: LineDataOutput = task
+                    let res: TaskResult<LineDataOutput> = task
                         .run_structured(
                             API.clone(),
                             &input,
                             serde_json::to_string_pretty(&schema_for!(LineDataOutput))?,
                         )
                         .await?;
+                    let output = res.output;
+                    state.state.generation_results.push(res.info);
                     let chart = graphing::create_graph(
                         "line".to_string(),
                         Some(output.graph_data),

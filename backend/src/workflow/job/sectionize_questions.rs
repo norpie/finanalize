@@ -49,9 +49,11 @@ impl Job for SectionizeQuestionsJob {
                     j + 1,
                     sub_sections_len
                 );
-                let sub_section_content = task
+                let res = task
                     .run_raw(API.clone(), &SectionizeQuestionsJobInput { input: content })
                     .await?;
+                let sub_section_content = res.output;
+                state.state.generation_results.push(res.info);
                 sub_sections.push(sub_section_content);
             }
             sections.push(sub_sections);

@@ -4,8 +4,9 @@
     import { Button } from '$lib/components/ui/button/index.js';
     import { getWalletBalance, addCredits, getWalletTransactions } from '$lib/request.ts';
     import { toast } from 'svelte-sonner';
+    import { user } from '$lib/store';
 
-    let walletId = "your-wallet-id-here"; // Replace with actual wallet ID
+    let walletId = $user.id;
     let balance = $state(0);
     let transactions = $state<LedgerEntry[]>([]); // Ensure this is an array of LedgerEntry type
     let loading = $state(false);
@@ -34,14 +35,14 @@
 
 
         transactions = transactionData.result.map((entry: any) => {
-            const credit = entry.Credit || entry;  
+            const credit = entry.Credit || entry;
 
 
             return {
                 date: credit.date || new Date().toLocaleDateString(),  // Use current date if no date is found
-                description: credit.description || 'No Description',  
-                amount: credit.amount || 0,  // Ensure a valid amount
-                incoming: parseFloat(credit.amount || 0) >= 0,  
+                description: credit.description || credit.Report.report_id,
+                amount: credit.amount || credit.Report.total_cost || "N/A",  // Ensure a valid amount
+                incoming: parseFloat(credit.amount || credit.total_cost || 0) >= 0,
             };
         });
     } catch (err) {
@@ -72,8 +73,8 @@
     {:else}
         <h2 class="text-xl">You have <span class="text-green-400">{balance}</span> credits</h2>
 
-        <Button onclick={() => handleAddCredits(500)} class="bg-purple-700 hover:bg-purple-600">
-            Add 500 Credits
+        <Button onclick={() => handleAddCredits(50000)} class="bg-purple-700 hover:bg-purple-600">
+            Add 50000 Credits
         </Button>
 
         <h3 class="mt-6 text-lg">Transaction History</h3>
@@ -91,7 +92,11 @@
                     {#each transactions as entry, i (i)}
                         <Table.Row>
                             <Table.Cell class="font-medium">{entry.date}</Table.Cell>
-                            <Table.Cell>{entry.description}</Table.Cell>
+                            {#if entry.description == "Added credits"}
+                                <Table.Cell>{entry.description}</Table.Cell>
+                            {:else}
+                                <Table.Cell><a href={`/reports/${entry.description}`}>{entry.description}</a></Table.Cell>
+                            {/if}
                             <Table.Cell class={entry.incoming ? 'text-right text-green-500' : 'text-right text-red-500'}>
                                 {entry.amount}
                             </Table.Cell>
@@ -102,4 +107,3 @@
         </div>
     {/if}
 </div>
-
