@@ -9,13 +9,13 @@ use actix_web::{
 use api::{
     v1::{
         auth::{login, logout, me, refresh, register},
-        report::{create_report, get_live_report, get_report, get_reports, retry},
+        report::{create_report, get_live_report, get_preview, get_report, get_reports, retry},
     },
     ApiResponse,
 };
 use auth_middleware::Auth;
 use credit::get_wallet_transactions;
-use credit::{add_credits, generate_wallet_bill, get_wallet_balance, use_tokens_on_report};
+use credit::{add_credits, buy_report, get_wallet_balance};
 use db::DB;
 use jwt::TokenFactory;
 use log::debug;
@@ -23,9 +23,9 @@ use rabbitmq::RabbitMQPublisher;
 
 mod api;
 mod auth_middleware;
+mod blobs;
 #[allow(dead_code)]
 mod credit;
-mod blobs;
 mod db;
 #[allow(dead_code)]
 mod extractors;
@@ -104,20 +104,17 @@ async fn main() -> Result<()> {
                     .service(create_report)
                     .service(retry)
                     .service(get_report)
-                    .service(get_reports),
+                    .service(get_reports)
+                    .service(get_wallet_balance)
+                    .service(get_wallet_transactions)
+                    .service(add_credits)
+                    .service(buy_report),
             )
             .service(
                 web::scope("/api/v1/unprotected")
                     .service(get_live_report)
-                    .service(get_document),
-            )
-            .service(
-                web::scope("/api/v1")
-                    .service(get_wallet_balance)
-                    .service(get_wallet_transactions)
-                    .service(add_credits)
-                    .service(use_tokens_on_report)
-                    .service(generate_wallet_bill),
+                    .service(get_document)
+                    .service(get_preview),
             )
     })
     .bind(("0.0.0.0", 8080))?

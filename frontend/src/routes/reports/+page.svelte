@@ -134,6 +134,7 @@
 
     onMount(async () => {
         reports = (await get<Report[]>('v1/protected/reports?page=0&perPage=20')).result;
+        console.log(reports);
     });
 </script>
 

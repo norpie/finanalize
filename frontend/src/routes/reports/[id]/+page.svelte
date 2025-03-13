@@ -8,6 +8,7 @@
 	import { Progress } from '$lib/components/ui/progress/index.js';
 	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
 	import { Skeleton } from '$lib/components/ui/skeleton/index.js';
+	import { getWalletTransactions } from '$lib/request';
 	import PdfViewer from 'svelte-pdf';
 
 	import * as Card from '$lib/components/ui/card/index.js';
@@ -21,6 +22,7 @@
 	let timerStart: number | null = $state(null);
 	let elapsedTime: string = $state('00:00:00');
 	let timerInterval: number | null = $state(null);
+	let bought: boolean = $state(false);
 
 	function formatTime(seconds: number): string {
 		const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
@@ -198,6 +200,7 @@
 		'ChunkContent',
 		'IndexChunks',
 		'AnswerQuestions',
+        'SectionizeQuestions',
 		'RenderLaTeXPdf'
 	];
 
@@ -218,6 +221,7 @@
 			ChunkContent: 'Chunking content',
 			IndexChunks: 'Indexing chunks',
 			AnswerQuestions: 'Answering questions',
+            SectionizeQuestions: 'Converting Q&A\'s into sections',
 			RenderLaTeXPdf: 'Rendering PDF',
 			Done: 'Report generated',
 			Invalid: 'Input was invalid'
@@ -275,12 +279,24 @@
 
 	async function refreshReport() {
 		const result = await get<FrontendReport>(`v1/protected/reports/${data.id}`);
+		const transactions = await getWalletTransactions();
+		bought = transactions.result.some((entry) => entry.Report?.report_id === data.id);
 		if (result.result) {
 			report = result.result;
 			startTimer();
 			// toast.success('Report has been refreshed');
 		} else {
 			toast.error('Failed to refresh report');
+		}
+	}
+
+	async function buyReport() {
+		const result = await post(`v1/protected/wallet/buy_report/${data.id}`, {});
+		if (result.result) {
+			bought = true;
+			toast.success('Report has been purchased');
+		} else {
+			toast.error('Failed to purchase report');
 		}
 	}
 
@@ -298,10 +314,42 @@
 	});
 </script>
 
-<div class="m-4 flex justify-center space-y-4 p-4">
-	<Button onclick={retry} class="mb-6 hover:bg-[#9333ea] hover:text-white">Retry</Button>
-
+<div class="m-4 flex flex-col justify-center space-y-4 p-4">
 	{#if report}
+		<div class="flex flex-col">
+			{#if report.status === 'Done'}
+				<div class="mt-6 flex justify-center">
+					{#if bought}
+						<a
+							href={`${import.meta.env.VITE_BACKEND_URL}/v1/unprotected/reports/${data.id}/document.pdf`}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							<Button class="mb-6 hover:bg-[#9333ea] hover:text-white"
+								>Download {report.title}</Button
+							>
+						</a>
+					{:else}
+						<div class="flex flex-col items-center space-y-4">
+							<Button class="mb-6 hover:bg-[#9333ea] hover:text-white" onclick={() => buyReport()}
+								>Buy Full Report</Button
+							>
+							<a
+								href={`${import.meta.env.VITE_BACKEND_URL}/v1/unprotected/reports/${data.id}/preview.pdf`}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								<Button class="mb-6 hover:bg-[#9333ea] hover:text-white"
+									>Download Preview {report.title}</Button
+								>
+							</a>
+						</div>
+					{/if}
+				</div>
+			{:else if report.status === 'Failed'}
+				<Button onclick={retry} class="mb-6 hover:bg-[#9333ea] hover:text-white">Retry</Button>
+			{/if}
+		</div>
 		<div class="flex w-full flex-row justify-center p-4">
 			<Card.Root
 				class="flex w-full max-w-4xl flex-col items-center space-y-6 rounded-lg border border-gray-700 bg-sidebar p-8 text-center text-white shadow-lg backdrop-blur-md md:max-w-5xl lg:max-w-6xl xl:max-w-7xl"
@@ -316,10 +364,12 @@
 						<span class="font-semibold">Requested subject:</span>
 						{report.user_input}
 					</p>
-					<p class="text-sm text-gray-300">
-						<span class="font-semibold">Generation time:</span>
-						{elapsedTime}
-					</p>
+					{#if report.status !== 'Failed' && report.status !== 'Done' && report.status !== 'invalid'}
+						<p class="text-sm text-gray-300">
+							<span class="font-semibold">Generation time:</span>
+							{elapsedTime}
+						</p>
+					{/if}
 				</div>
 
 				<Card.Content class="flex w-full flex-col items-center space-y-6">
@@ -363,18 +413,6 @@
 				</Card.Content>
 			</Card.Root>
 		</div>
-
-		{#if report.status === 'Done'}
-			<div class="mt-6 flex justify-center">
-				<a
-					href={`${import.meta.env.VITE_BACKEND_URL}/v1/unprotected/reports/${data.id}/document.pdf`}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					<Button class="mb-6 hover:bg-[#9333ea] hover:text-white">Download {report.title}</Button>
-				</a>
-			</div>
-		{/if}
 	{:else}
 		<div class="flex h-screen w-full items-center justify-center">
 			<Spinner />

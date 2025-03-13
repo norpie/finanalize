@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    llm::{GenerationParams, LLMApi},
+    llm::{GenerationParams, GenerationResult, LLMApi},
     prelude::*,
 };
 use handlebars::Handlebars;
@@ -38,6 +38,15 @@ pub struct Task {
     fix_strategies: Vec<FixStrategy>,
 }
 
+#[derive(Debug, Clone)]
+pub struct TaskResult<U>
+where
+    U: DeserializeOwned + std::fmt::Debug,
+{
+    pub output: U,
+    pub info: GenerationResult,
+}
+
 impl Task {
     pub fn new(template: &str) -> Self {
         Self {
@@ -70,16 +79,36 @@ impl Task {
         self
     }
 
-    pub async fn run_raw<T>(&self, api: Arc<dyn LLMApi>, input: &T) -> Result<String>
+    pub async fn run_raw<T>(&self, api: Arc<dyn LLMApi>, input: &T) -> Result<TaskResult<String>>
     where
         T: Serialize,
     {
-        api.generate(
-            &self.params,
-            Handlebars::default().render_template(&self.prompt, input)?,
-        )
-        .await
-        .map(|res| res.generated)
+        use std::time::Duration;
+        use tokio::time::{sleep, timeout};
+
+        let template = Handlebars::default().render_template(&self.prompt, input)?;
+
+        loop {
+            debug!("trying to generate");
+            match timeout(
+                Duration::from_secs(60),
+                api.generate(&self.params, template.clone()),
+            )
+            .await
+            {
+                Ok(res) => {
+                    return res.map(|res| TaskResult {
+                        output: res.generated.clone(),
+                        info: res,
+                    })
+                }
+                Err(_) => {
+                    // Timeout occurred, retry indefinitely
+                    debug!("Timeout occurred, retrying indefinitely");
+                    sleep(Duration::from_millis(500)).await; // Wait before retrying
+                }
+            }
+        }
     }
 
     pub async fn run_structured<T, U>(
@@ -87,7 +116,7 @@ impl Task {
         api: Arc<dyn LLMApi>,
         input: &T,
         schema: String,
-    ) -> Result<U>
+    ) -> Result<TaskResult<U>>
     where
         T: Serialize,
         U: DeserializeOwned + std::fmt::Debug,
@@ -129,22 +158,30 @@ impl Task {
         }
     }
 
-    async fn try_run<U>(&self, api: Arc<dyn LLMApi>, prompt: String, schema: String) -> Result<U>
+    async fn try_run<U>(
+        &self,
+        api: Arc<dyn LLMApi>,
+        prompt: String,
+        schema: String,
+    ) -> Result<TaskResult<U>>
     where
         U: DeserializeOwned + std::fmt::Debug,
     {
         debug!("Starting generation.");
-        let generated = api
+        let res = api
             .generate_json(&self.params, prompt.clone(), schema)
-            .await
-            .map(|res| res.generated)?;
+            .await?;
+        let json = res.generated.clone();
         info!("Generated");
-        let full = format!("{}{}", prompt, generated);
+        let full = format!("{}{}", prompt, json);
         debug!("Parsing output.");
         let json = self.parse_output(&full)?;
         info!("Parsed output");
         debug!("Deserializing output.");
-        self.deserialize_output(json)
+        Ok(TaskResult {
+            output: self.deserialize_output(json)?,
+            info: res,
+        })
     }
 
     fn deserialize_output<U>(&self, json: String) -> Result<U>

@@ -4,6 +4,7 @@ use crate::prelude::*;
 use crate::prompting;
 use crate::search::SEARCH;
 use crate::tasks::Task;
+use crate::tasks::TaskResult;
 use crate::workflow::job::content_formatter::models::FormatContentJobInput;
 use crate::workflow::job::scrape_pages::scrape_page;
 use crate::workflow::job::search_before_questions::models::SingleSearchOutput;
@@ -43,13 +44,14 @@ async fn generate_initial_search_query(user_input: String) -> Result<Vec<String>
     let prompt_input = models::SingleSearchInput {
         input: user_input.clone(),
     };
-    let search_output: SingleSearchOutput = task
+    let res: TaskResult<SingleSearchOutput> = task
         .run_structured(
             API.clone(),
             &prompt_input,
             serde_json::to_string_pretty(&schema_for!(SingleSearchOutput))?,
         )
         .await?;
+    let search_output = res.output;
     let mut search_queries = Vec::new();
     for company in search_output.companies.clone() {
         let search_query = format!("{} recent events", company.clone());

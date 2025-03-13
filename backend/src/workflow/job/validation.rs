@@ -1,4 +1,4 @@
-use crate::{llm, prelude::*, prompting, tasks::Task};
+use crate::{llm, prelude::*, prompting, tasks::{Task, TaskResult}, workflow::JobType};
 
 use async_trait::async_trait;
 use log::debug;
@@ -39,14 +39,17 @@ impl Job for ValidationJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: ValidationOutput = task
+        let res: TaskResult<ValidationOutput> = task
             .run_structured(
                 llm::API.clone(),
                 &input,
                 serde_json::to_string_pretty(&schema_for!(ValidationOutput))?,
             )
             .await?;
+        let output = res.output;
+        state.state.generation_results.push(res.info);
         debug!("Task completed");
+        state.state.status = JobType::Invalid;
         state.state.validation = Some(output);
         debug!("Validation: {:#?}", state.state.validation);
         dbg!(&state.state.validation);

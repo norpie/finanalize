@@ -1,4 +1,4 @@
-use crate::{llm::API, prelude::*, prompting, tasks::Task};
+use crate::{llm::API, prelude::*, prompting, tasks::{Task, TaskResult}};
 
 use async_trait::async_trait;
 use log::debug;
@@ -41,13 +41,14 @@ impl Job for SectionNamesJob {
         };
         debug!("Prepared input: {:#?}", input);
         debug!("Running task...");
-        let output: SectionNamesOutput = task
+        let res: TaskResult<SectionNamesOutput> = task
             .run_structured(
                 API.clone(),
                 &input,
                 serde_json::to_string_pretty(&schema_for!(SectionNamesOutput))?,
             )
             .await?;
+        let output = res.output;
         debug!("Task completed");
         state.state.sections = Some(output.sections);
         debug!("Sections: {:#?}", state.state.sections);

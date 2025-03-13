@@ -6,7 +6,7 @@ use models::{RawSearchQueriesInput, SearchQueriesInput, SearchQueriesOutput};
 use schemars::schema_for;
 
 use crate::llm::API;
-use crate::tasks::Task;
+use crate::tasks::{Task, TaskResult};
 use crate::workflow::job::sub_section_questions::models::{
     SectionWithQuestions, SubSectionWithQuestions,
 };
@@ -92,13 +92,15 @@ impl Job for GenerateSearchQueriesJob {
             input: serde_json::to_string_pretty(&input)?,
         };
         debug!("Running task to generate search queries...");
-        let output: SearchQueriesOutput = task
+        let res: TaskResult<SearchQueriesOutput> = task
             .run_structured(
                 API.clone(),
                 &raw_input,
                 serde_json::to_string_pretty(&schema_for!(SearchQueriesOutput))?,
             )
             .await?;
+        let output = res.output;
+        state.state.generation_results.push(res.info);
         debug!(
             "Generated search queries successfully. Total queries: {}",
             output.queries.len()

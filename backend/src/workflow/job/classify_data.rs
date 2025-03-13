@@ -5,7 +5,7 @@ use crate::{
     llm::API,
     prelude::*,
     prompting,
-    tasks::Task,
+    tasks::{Task, TaskResult},
     workflow::{job::classify_sources::models::ClassifySourcesInput, WorkflowState},
 };
 
@@ -57,13 +57,15 @@ impl Job for ClassifyDataJob {
             //Start job run structured data classification
             let prompt = prompting::get_prompt("data-classifier".into())?;
             let task = Task::new(&prompt);
-            let output: DataClassifierOuput = task
+            let res: TaskResult<DataClassifierOuput> = task
                 .run_structured(
                     API.clone(),
                     &input,
                     serde_json::to_string_pretty(&schema_for!(DataClassifierOuput))?,
                 )
                 .await?;
+            state.state.generation_results.push(res.info);
+            let output = res.output;
 
             // After getting your output from the task.run_structured call
             let mut columns = vec![];

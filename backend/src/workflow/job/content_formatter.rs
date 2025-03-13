@@ -7,7 +7,11 @@ use models::FormatContentJobInput;
 use tokio::{sync::Semaphore, task::JoinHandle};
 
 use crate::{
-    llm::API, models::PreClassificationSource, prelude::*, prompting, tasks::Task,
+    llm::{GenerationResult, API},
+    models::PreClassificationSource,
+    prelude::*,
+    prompting,
+    tasks::Task,
     workflow::WorkflowState,
 };
 
@@ -32,37 +36,25 @@ impl Job for FormatContentJob {
         let prompt = prompting::get_prompt("source-formatter".into())?;
         let task = Task::new(&prompt);
         let md_sources = state.state.md_sources.clone().unwrap();
-        let max_jobs = 1;
-        let sem = Arc::new(Semaphore::new(max_jobs));
         let len = md_sources.len();
-        let mut handles = vec![];
-        for (i, source) in md_sources.into_iter().enumerate() {
-            let task = task.clone();
-            let sem = sem.clone();
-            let handle: JoinHandle<Result<PreClassificationSource>> = tokio::spawn(async move {
-                let permit = sem.acquire().await.unwrap();
-                debug!("Formatting source {} of {}", i + 1, len);
-                let input = FormatContentJobInput {
-                    date: Utc::now().format("%Y-%m-%d").to_string(),
-                    content: source.content,
-                    url: source.url,
-                };
-                let output = task.run_raw(API.clone(), &input).await?;
-                let source = PreClassificationSource {
-                    url: input.url,
-                    content: output,
-                };
-                drop(permit);
-                Ok(source)
-            });
-            handles.push(handle);
-        }
         let mut sources = Vec::new();
-        for handle in handles {
-            let source = handle.await??;
-            sources.push(source);
+
+        for (i, source) in md_sources.into_iter().enumerate() {
+            debug!("Formatting source {} of {}", i + 1, len);
+            let input = FormatContentJobInput {
+                date: Utc::now().format("%Y-%m-%d").to_string(),
+                content: source.content,
+                url: source.url,
+            };
+            let res = task.run_raw(API.clone(), &input).await?;
+            let output = res.output;
+            let formatted_source = PreClassificationSource {
+                url: input.url,
+                content: output,
+            };
+            sources.push(formatted_source);
+            state.state.generation_results.push(res.info);
         }
-        // sources.push(source);
         state.state.md_sources = Some(sources);
         Ok(state)
     }

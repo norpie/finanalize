@@ -101,7 +101,9 @@ impl Job for AnswerQuestionsJob {
                         sub_section: sub_section_name.clone(),
                         question: question.clone(),
                     };
-                    let answer = task.run_raw(API.clone(), &input).await?;
+                    let res = task.run_raw(API.clone(), &input).await?;
+                    let answer = res.output;
+                    state.state.generation_results.push(res.info);
                     sub_section.push(QuestionAnswer { question, answer });
                 }
                 section.push(sub_section);

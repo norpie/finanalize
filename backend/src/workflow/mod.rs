@@ -1,7 +1,10 @@
-use crate::{db::DB, models::FullReport, prelude::*, rabbitmq::PUBLISHER};
+use crate::{
+    db::DB, llm::GenerationResult, models::{FullReport, SurrealDBReport}, prelude::*, rabbitmq::PUBLISHER
+};
 
+use job::validation::models::ValidationOutput;
 use lapin::{message::Delivery, options::BasicPublishOptions, BasicProperties, Channel};
-use log::debug;
+use log::{debug, error};
 use serde::{Deserialize, Serialize};
 use surrealdb::sql::Thing;
 
@@ -31,10 +34,60 @@ impl From<SDBWorkflowState> for WorkflowState {
 
 pub mod job;
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct StatusUpdate {
+    status: JobType,
+    generation_results: Vec<GenerationResult>
+}
+
 pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Result<()> {
     let workflow_state: WorkflowState = serde_json::from_slice(&delivery.data)?;
-    let output = process_state(workflow_state.clone()).await?;
-    // If it's not done, publish the next job
+    if workflow_state.last_job_type.is_end_condition() {
+        channel
+            .basic_ack(delivery.delivery_tag, Default::default())
+            .await?;
+        return Ok(());
+    }
+    let next_type = workflow_state.last_job_type.next().unwrap();
+    let next_job = next_type.job().unwrap();
+    debug!(
+        "Running job {:?} for report {}",
+        next_type, &workflow_state.id
+    );
+    let res = next_job.run(workflow_state.clone()).await;
+    if let Err(err) = res {
+        error!(
+            "Error running job {:?} for report {}: {:?}",
+            next_type, &workflow_state.id, &err
+        );
+        let mut tbs_clone = workflow_state.clone();
+        tbs_clone.state.sources = None;
+        tbs_clone.state.md_sources = None;
+        tbs_clone.state.html_sources = None;
+        tbs_clone.state.chunks = None;
+        tbs_clone.state.chunk_embeddings = None;
+        tbs_clone.state.status = JobType::Failed;
+        tbs_clone.state.validation = Some(ValidationOutput {
+            valid: false,
+            error: Some("Failed while generating.".to_string()),
+        });
+        let _saved: SDBWorkflowState = DB
+            .get()
+            .unwrap()
+            .upsert(("workflow_state", &workflow_state.id))
+            .content(tbs_clone)
+            .await?
+            .ok_or(FinanalizeError::NotFound)?;
+        channel
+            .basic_nack(delivery.delivery_tag, Default::default())
+            .await?;
+
+        return Ok(());
+    };
+    let mut output = res.unwrap();
+    debug!("Job {:?} for report {} completed", next_type, output.id);
+    output.last_job_type = next_type;
+    output.state.status = next_type.next().unwrap();
     let mut tbs_clone = output.clone();
     tbs_clone.state.sources = None;
     tbs_clone.state.md_sources = None;
@@ -48,11 +101,26 @@ pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Re
         .content(tbs_clone)
         .await?
         .ok_or(FinanalizeError::NotFound)?;
-    if output.state.status.next().is_none() {
+    debug!("Saved workflow state for report {}", &saved.id);
+    let _new_report_state: SurrealDBReport = DB
+        .get()
+        .unwrap()
+        .update(("report", saved.id.id.to_string().as_str()))
+        .merge(StatusUpdate {
+            status: output.state.status,
+            generation_results: output.state.generation_results.clone()
+        })
+        .await?
+        .ok_or(FinanalizeError::NotFound)?;
+    // debug!("Updated report state for report {:#?}", &new_report_state);
+    if output.state.status.is_end_condition() {
         debug!("Workflow for report {} is done", output.id);
+        channel
+            .basic_ack(delivery.delivery_tag, Default::default())
+            .await?;
         return Ok(());
     }
-    debug!("Saved workflow state for report {}", saved.id);
+    // If it's not done, publish the next job
     let publisher = PUBLISHER.get().unwrap();
     publisher
         .channel
@@ -69,34 +137,6 @@ pub async fn consume_report_status(channel: &Channel, delivery: &Delivery) -> Re
         .basic_ack(delivery.delivery_tag, Default::default())
         .await?;
     Ok(())
-}
-
-async fn process_state(mut state: WorkflowState) -> Result<WorkflowState> {
-    if state.state.status == JobType::Done {
-        debug!("report is already done {}", &state.id);
-        return Ok(state);
-    }
-    let Some(next_type) = state.last_job_type.next() else {
-        state.state.status = JobType::Done;
-        debug!("(1) No more jobs to run for report {}", &state.id);
-        return Ok(state);
-    };
-    if next_type == JobType::Done {
-        state.state.status = JobType::Done;
-        debug!("(2) No more jobs to run for report {}", &state.id);
-        return Ok(state);
-    }
-    let Some(next_job) = next_type.job() else {
-        state.state.status = JobType::Invalid;
-        debug!("No job for type {:?}", next_type);
-        return Ok(state);
-    };
-    debug!("Running job {:?} for report {}", next_type, &state.id);
-    let mut output = next_job.run(state).await?;
-    debug!("Job {:?} for report {} completed", next_type, output.id);
-    output.last_job_type = next_type;
-    output.state.status = next_type;
-    Ok(output)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -123,17 +163,17 @@ pub enum JobType {
     // Extract the content of the scraped pages
     ExtractContent,
     // Extract the data from the scraped content
-    ExtractData,
+    // ExtractData,
     // Format and summarize the content
     FormatContent,
     // Classify the content
     ClassifyContent,
     // Classify the data
-    ClassifyData,
+    // ClassifyData,
     // Generate visualizations from the data
-    GenerateVisualizations,
+    // GenerateVisualizations,
     // Make the literal images of the graphs
-    GenerateGraphs,
+    // GenerateGraphs,
     // Chunk content
     ChunkContent,
     // Index the chunks
@@ -143,51 +183,19 @@ pub enum JobType {
     // Convert the question and answers into subsection conbtent
     SectionizeQuestions,
     // Put the graphs in the right places
-    RenderGraphs,
+    // RenderGraphs,
     // Put all the content in the template, render it, then compile it to a PDF
     RenderLaTeXPdf,
+    // Generate a preview of the PDF
+    GeneratePreviewDocument,
     // The three end conditions
     Invalid,
     Done,
     Failed,
 }
 
-#[cfg(test)]
-mod tests {
-    use std::time::Duration;
-
-    use job::index_chunks::models::EmbeddedChunk;
-
-    use crate::db::DB;
-
-    use super::*;
-
-    #[tokio::test]
-    #[ignore = "Depends on external services"]
-    async fn test_process_state() {
-        env_logger::init();
-        let mut state = WorkflowState {
-            id: "asdlfjhasldfjh".to_string(),
-            last_job_type: JobType::Pending,
-            state: FullReport::new("asdlfjhasldfjh".into(), "Apple in 2025".into()),
-        };
-        loop {
-            println!("{:?}", state.state.status);
-            state = process_state(state).await.unwrap();
-            if state.state.status.next().is_none() {
-                break;
-            }
-            tokio::time::sleep(Duration::from_secs(1)).await;
-        }
-        println!("{:?}", state.state.status);
-        let _deleted: Vec<EmbeddedChunk> = DB
-            .get()
-            .unwrap()
-            .query("DELETE embedded_chunk WHERE report_id = $id")
-            .bind(("id", state.id))
-            .await
-            .unwrap()
-            .take(0)
-            .unwrap();
+impl JobType {
+    pub fn is_end_condition(&self) -> bool {
+        matches!(self, JobType::Invalid | JobType::Done | JobType::Failed)
     }
 }

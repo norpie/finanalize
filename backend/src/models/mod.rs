@@ -1,10 +1,11 @@
 use crate::api::v1::report::{ReportModel, ReportSize};
 use crate::extractors::Data;
+use crate::llm::GenerationResult;
 use crate::workflow::job::answer_questions::models::QuestionAnswer;
 use crate::workflow::job::classify_sources::models::ClassifiedSource;
-use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
-use crate::workflow::job::generate_visualizations::models::Visualization;
-use crate::workflow::job::graph_identifier::models::GraphIdentifierOutput;
+// use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
+// use crate::workflow::job::generate_visualizations::models::Visualization;
+// use crate::workflow::job::graph_identifier::models::GraphIdentifierOutput;
 use crate::workflow::{
     job::{
         chunk_content::models::Chunk, index_chunks::models::EmbeddedChunk,
@@ -64,6 +65,7 @@ pub struct SurrealDBReport {
     pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub generation_results: Vec<GenerationResult>,
 }
 
 impl From<SurrealDBReport> for Report {
@@ -76,6 +78,7 @@ impl From<SurrealDBReport> for Report {
             model: report.model,
             created_at: report.created_at.to_utc(),
             updated_at: report.updated_at.to_utc(),
+            generation_results: report.generation_results,
         }
     }
 }
@@ -104,6 +107,7 @@ pub struct Report {
     pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub generation_results: Vec<GenerationResult>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -114,6 +118,7 @@ pub struct ReportCreation {
     pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub generation_results: Vec<GenerationResult>,
 }
 
 impl ReportCreation {
@@ -126,6 +131,7 @@ impl ReportCreation {
             model,
             created_at: now,
             updated_at: now,
+            generation_results: Vec::new(),
         }
     }
 }
@@ -139,6 +145,7 @@ pub struct FullSDBReport {
     pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub generation_results: Vec<GenerationResult>,
     pub initial_search_sources: Option<Vec<PreClassificationSource>>,
     pub validation: Option<ValidationOutput>,
     pub title: Option<String>,
@@ -158,11 +165,12 @@ pub struct FullSDBReport {
     pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
     pub sub_section_contents: Option<Vec<Vec<String>>>,
     pub report: Option<String>,
-    pub visuals: Option<Vec<Visualization>>,
-    pub charts: Option<Vec<GraphFileOutput>>,
-    pub tables: Option<Vec<TableOutput>>,
-    pub chart_positions: Option<Vec<GraphIdentifierOutput>>,
-    pub table_positions: Option<Vec<GraphIdentifierOutput>>,
+    pub preview: Option<String>,
+    // pub visuals: Option<Vec<Visualization>>,
+    // pub charts: Option<Vec<GraphFileOutput>>,
+    // pub tables: Option<Vec<TableOutput>>,
+    // pub chart_positions: Option<Vec<GraphIdentifierOutput>>,
+    // pub table_positions: Option<Vec<GraphIdentifierOutput>>,
 }
 
 impl From<FullSDBReport> for FullReport {
@@ -175,6 +183,7 @@ impl From<FullSDBReport> for FullReport {
             model: report.model,
             created_at: report.created_at.to_utc(),
             updated_at: report.updated_at.to_utc(),
+            generation_results: report.generation_results,
             initial_search_sources: report.initial_search_sources,
             validation: report.validation,
             title: report.title,
@@ -194,11 +203,12 @@ impl From<FullSDBReport> for FullReport {
             question_answer_pairs: report.question_answer_pairs,
             sub_section_contents: report.sub_section_contents,
             report: report.report,
-            visuals: report.visuals,
-            charts: report.charts,
-            tables: report.tables,
-            chart_positions: report.chart_positions,
-            table_positions: report.table_positions,
+            preview: report.preview,
+            // visuals: report.visuals,
+            // charts: report.charts,
+            // tables: report.tables,
+            // chart_positions: report.chart_positions,
+            // table_positions: report.table_positions,
         }
     }
 }
@@ -218,6 +228,7 @@ pub struct FullReport {
     pub model: ReportModel,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub generation_results: Vec<GenerationResult>,
     pub initial_search_sources: Option<Vec<PreClassificationSource>>,
     pub validation: Option<ValidationOutput>,
     pub title: Option<String>,
@@ -237,11 +248,12 @@ pub struct FullReport {
     pub question_answer_pairs: Option<Vec<Vec<Vec<QuestionAnswer>>>>,
     pub sub_section_contents: Option<Vec<Vec<String>>>,
     pub report: Option<String>,
-    pub visuals: Option<Vec<Visualization>>,
-    pub charts: Option<Vec<GraphFileOutput>>,
-    pub tables: Option<Vec<TableOutput>>,
-    pub chart_positions: Option<Vec<GraphIdentifierOutput>>,
-    pub table_positions: Option<Vec<GraphIdentifierOutput>>,
+    pub preview: Option<String>,
+    // pub visuals: Option<Vec<Visualization>>,
+    // pub charts: Option<Vec<GraphFileOutput>>,
+    // pub tables: Option<Vec<TableOutput>>,
+    // pub chart_positions: Option<Vec<GraphIdentifierOutput>>,
+    // pub table_positions: Option<Vec<GraphIdentifierOutput>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -260,7 +272,7 @@ mod tests {
     use super::{FullReport, PreClassificationSource};
     use crate::api::v1::report::{ReportModel, ReportSize};
     use crate::workflow::job::classify_sources::models::ClassifiedSource;
-    use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
+    // use crate::workflow::job::generate_graphs::models::{GraphFileOutput, TableOutput};
     use crate::workflow::{
         job::{chunk_content::models::Chunk, validation::models::ValidationOutput},
         JobType,
@@ -277,6 +289,7 @@ mod tests {
                 model: ReportModel::Llama,
                 created_at: Utc::now(),
                 updated_at: Utc::now(),
+                generation_results: vec![],
 
                 initial_search_sources: None,
                 validation: None,
@@ -300,13 +313,12 @@ mod tests {
                 sub_section_contents: None,
 
                 report: None,
-                extracted_data: None,
-                visuals: None,
-                charts: None,
-                tables: None,
-                report_text: None,
-                chart_positions: None,
-                table_positions: None,
+                preview: None,
+                // visuals: None,
+                // charts: None,
+                // tables: None,
+                // chart_positions: None,
+                // table_positions: None,
             }
         }
 
@@ -368,32 +380,22 @@ mod tests {
             self
         }
 
-        pub fn with_extracted_data(mut self, extracted_data: Vec<crate::extractors::Data>) -> Self {
-            self.extracted_data = Some(extracted_data);
-            self
-        }
-
-        pub fn with_visuals(
-            mut self,
-            visuals: Vec<crate::workflow::job::generate_visualizations::models::Visualization>,
-        ) -> Self {
-            self.visuals = Some(visuals);
-            self
-        }
-
-        pub fn with_report_text(mut self, report_text: String) -> Self {
-            self.report_text = Some(report_text);
-            self
-        }
-
-        pub fn with_charts(mut self, charts: Vec<GraphFileOutput>) -> Self {
-            self.charts = Some(charts);
-            self
-        }
-
-        pub fn with_tables(mut self, tables: Vec<TableOutput>) -> Self {
-            self.tables = Some(tables);
-            self
-        }
+        // pub fn with_visuals(
+        //     mut self,
+        //     visuals: Vec<crate::workflow::job::generate_visualizations::models::Visualization>,
+        // ) -> Self {
+        //     self.visuals = Some(visuals);
+        //     self
+        // }
+        //
+        // pub fn with_charts(mut self, charts: Vec<GraphFileOutput>) -> Self {
+        //     self.charts = Some(charts);
+        //     self
+        // }
+        //
+        // pub fn with_tables(mut self, tables: Vec<TableOutput>) -> Self {
+        //     self.tables = Some(tables);
+        //     self
+        // }
     }
 }

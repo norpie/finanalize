@@ -1,4 +1,10 @@
-use crate::{llm::API, prelude::*, prompting, tasks::Task, workflow::WorkflowState};
+use crate::{
+    llm::API,
+    prelude::*,
+    prompting,
+    tasks::{Task, TaskResult},
+    workflow::WorkflowState,
+};
 
 use async_trait::async_trait;
 use log::debug;
@@ -51,13 +57,15 @@ impl Job for SubSectionsJob {
         };
         debug!("Serialized input for task: {:#?}", raw_input.input);
         debug!("Running task...");
-        let output: SubSectionsOutput = task
+        let res: TaskResult<SubSectionsOutput> = task
             .run_structured(
                 API.clone(),
                 &raw_input,
                 serde_json::to_string_pretty(&schema_for!(SubSectionsOutput))?,
             )
             .await?;
+        let output = res.output;
+        state.state.generation_results.push(res.info);
         debug!("Task completed");
         state.state.sub_sections = Some(output.sub_sections);
         debug!("Sub-sections: {:#?}", state.state.sub_sections);
