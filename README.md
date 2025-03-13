@@ -17,39 +17,43 @@ Our solution is the development of Finanalyze, an accessible web app that offers
 
 > This section describes the flow of a user's request through the generation process. This section does not discuss UX/UI, API, or other technical details. It is an overview of the LLM/RAG workflow.
 ```mermaid
-%%{init: {'theme': 'neutral', 'themeVariables': { 'primaryColor': '#e6f3ff'}}}%%
 graph TD
-    A[User Input] --> B{Valid Input?}
+    A[START] --> B{Valid Input?}
     B -->|Yes| C[Generate Report Title]
     B -->|No| Z[Error: Invalid Input]
+    
     C --> D[Generate Section Headings]
-    D --> E[[For Each Heading]]
-    E --> F[Generate Paragraph and Bullet Points]
-    F --> G[[For Each Paragraph Bullet Point]]
+    D --> E[Section Processing]
+    E --> F[Generate Subsections & Questions]
+    F --> G[Question Analysis]
     G --> H[Generate Search Queries]
-    H --> I[[For Each Query]]
-    I --> J[Scrape Top 5 Results]
-    J --> K[[Process Results]]
+    H --> I[Data Collection]
+    I --> J[Scrape Top Results]
+    J --> K[Content Analysis]
+    
     K --> L[Extract Structured Data]
     K --> M[Extract Unstructured Content]
-    L --> N[Annotate Data Sources]
-    M --> O[Annotate Content Sources]
-    N --> P[RAG Processing]
+    
+    L --> N[Classify Data]
+    M --> O[Classify Content]
+    
+    N --> P[Chunk Content]
     O --> P
-    P --> Q[Generate Text Chunks]
-    Q --> R[Combine into Coherent Paragraph]
+    P --> Q[Index Chunks for RAG]
+    Q --> R[Answer Questions with RAG]
     R --> S[Assemble Section Content]
-    S --> T[[Add Citations]]
-    T --> U[Identify Visualization Needs]
-    U --> V[Generate/Pull Visualizations]
-    V --> W[Finalize Section]
-    W --> X[[Compile All Sections]]
-    X --> Y[Generate PDF Report]
+    S --> T[Format & Summarize]
+    T --> U[Render LaTeX]
+    U --> V[Generate PDF Report]
+    V --> W[COMPLETE]
 
-    style A fill:#4CAF50,color:white
-    style B fill:#FFC107,color:black
-    style Z fill:#F44336,color:white
-    style Y fill:#2196F3,color:white
-    classDef loop fill:#fff8e1,stroke:#ffb300;
-    class E,G,I,K loop;
+    %% Basic styling that works in GitHub
+    style A fill:#9370DB,stroke:#7B68EE,color:white
+    style W fill:#9370DB,stroke:#7B68EE,color:white
+    style B fill:#333333,stroke:#9370DB,color:white
+    style Z fill:#FF6347,stroke:#FF0000,color:white
+    style E fill:#F5F0FF,stroke:#9370DB
+    style G fill:#F5F0FF,stroke:#9370DB
+    style I fill:#F5F0FF,stroke:#9370DB
+    style K fill:#F5F0FF,stroke:#9370DB
 ```
